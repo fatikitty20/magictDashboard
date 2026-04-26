@@ -1,0 +1,41 @@
+import { ArrowUpRight, TrendingUp } from "lucide-react";
+import type { Metrica } from "../data";
+import { claseTarjeta } from "../estilosDashboard";
+
+export const TarjetaMetrica = ({ etiqueta, valor, ayuda, variante }: Metrica) => {
+  const esInvertida = variante === "invertida";
+
+  return (
+    <div className={claseTarjeta(variante, "relative p-5")}>
+      <div className="mb-6 flex items-start justify-between">
+        <p className={`text-sm font-medium ${esInvertida ? "text-dashboard-inverted-foreground" : "text-foreground"}`}>
+          {etiqueta}
+        </p>
+        <button
+          type="button"
+          aria-label={`Ver ${etiqueta}`}
+          className={`flex h-7 w-7 items-center justify-center rounded-full ${
+            esInvertida ? "bg-success text-success-foreground" : "bg-foreground text-background"
+          }`}
+        >
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <p
+        className={`mb-3 text-3xl font-bold tracking-tight lg:text-4xl ${
+          esInvertida ? "text-dashboard-inverted-foreground" : "text-foreground"
+        }`}
+      >
+        {valor}
+      </p>
+      <div
+        className={`inline-flex items-center gap-1.5 rounded px-2 py-1 text-[11px] ${
+          esInvertida ? "bg-dashboard-inverted-foreground/10 text-dashboard-inverted-foreground/80" : "bg-secondary text-muted-foreground"
+        }`}
+      >
+        <TrendingUp className="h-3 w-3" />
+        {ayuda}
+      </div>
+    </div>
+  );
+};
