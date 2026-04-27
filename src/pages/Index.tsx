@@ -1,8 +1,10 @@
 import { Navigate } from "react-router-dom";
-import { servicioAutenticacion } from "@/features/auth/authService";
+import { useAutenticacion } from "@/features/auth/useAuth";
 
-const Index = () => (
-  <Navigate to={servicioAutenticacion.estaAutenticado() ? "/dashboard" : "/login"} replace />
-);
+const Index = () => {
+  const { estaAutenticado } = useAutenticacion();
+
+  return <Navigate to={estaAutenticado ? "/dashboard" : "/login"} replace />;
+};
 
 export default Index;

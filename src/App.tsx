@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RutaProtegida } from "@/features/auth/ProtectedRoute";
+import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
 import { ProveedorModoTema } from "@/features/theme/ThemeModeProvider";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -23,45 +24,18 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route
-              path="/dashboard"
               element={
                 <RutaProtegida>
-                  <Dashboard />
+                  <DashboardLayout />
                 </RutaProtegida>
               }
-            />
-            <Route
-              path="/payments"
-              element={
-                <RutaProtegida>
-                  <Payments />
-                </RutaProtegida>
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                <RutaProtegida>
-                  <Orders />
-                </RutaProtegida>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <RutaProtegida>
-                  <Reports />
-                </RutaProtegida>
-              }
-            />
-            <Route
-              path="/clients"
-              element={
-                <RutaProtegida>
-                  <Clients />
-                </RutaProtegida>
-              }
-            />
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/payments" element={<Payments />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/clients" element={<Clients />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
