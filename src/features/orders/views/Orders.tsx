@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BarraLateral } from "@/features/dashboard/components/Sidebar";
 import { BarraSuperior } from "@/features/dashboard/components/Topbar";
 import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
+import { OrderDetailsPanel } from "../components/OrderDetailsPanel";
 import { OrdersStats } from "../components/OrdersStats";
 import { OrdersTable } from "../components/OrdersTable";
 import { ordersService } from "../services/ordersService";
@@ -21,6 +22,7 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -47,6 +49,24 @@ const Orders = () => {
   const filteredOrders = useMemo(
     () => orders.filter((order) => (statusFilter === "all" ? true : order.status === statusFilter)),
     [orders, statusFilter],
+  );
+
+  useEffect(() => {
+    if (filteredOrders.length === 0) {
+      setSelectedOrderId(null);
+      return;
+    }
+
+    const hasSelectedOrder = filteredOrders.some((order) => order.id === selectedOrderId);
+
+    if (!hasSelectedOrder) {
+      setSelectedOrderId(filteredOrders[0].id);
+    }
+  }, [filteredOrders, selectedOrderId]);
+
+  const selectedOrder = useMemo(
+    () => filteredOrders.find((order) => order.id === selectedOrderId) ?? null,
+    [filteredOrders, selectedOrderId],
   );
 
   const stats = useMemo(() => {
@@ -119,7 +139,14 @@ const Orders = () => {
               </div>
             </section>
           ) : (
-            <OrdersTable orders={filteredOrders} />
+            <>
+              <OrdersTable
+                orders={filteredOrders}
+                selectedOrderId={selectedOrderId ?? undefined}
+                onSelectOrder={setSelectedOrderId}
+              />
+              <OrderDetailsPanel order={selectedOrder} />
+            </>
           )}
         </main>
       </div>

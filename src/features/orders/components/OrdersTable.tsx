@@ -1,9 +1,11 @@
-import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta } from "../../dashboard/estilosDashboard";
 import type { Order } from "../types/order";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 
 type OrdersTableProps = {
   orders: Order[];
+  selectedOrderId?: string;
+  onSelectOrder: (orderId: string) => void;
 };
 
 const currencyFormatter = new Intl.NumberFormat("es-AR", {
@@ -18,7 +20,7 @@ const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   year: "numeric",
 });
 
-export const OrdersTable = ({ orders }: OrdersTableProps) => (
+export const OrdersTable = ({ orders, selectedOrderId, onSelectOrder }: OrdersTableProps) => (
   <section className={claseTarjeta("base", "overflow-hidden")}>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-border text-sm">
@@ -26,7 +28,7 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
           <tr>
             <th className="px-4 py-3 text-left font-semibold text-foreground">ID de Orden</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Cliente</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Que pidieron</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">Pedido</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Canal de Venta</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Estado del Pedido</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Fecha</th>
@@ -35,7 +37,13 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
         </thead>
         <tbody className="divide-y divide-border">
           {orders.map((order) => (
-            <tr key={order.id} className="transition hover:bg-muted/30">
+            <tr
+              key={order.id}
+              onClick={() => onSelectOrder(order.id)}
+              className={`cursor-pointer transition hover:bg-muted/30 ${
+                selectedOrderId === order.id ? "bg-muted/40" : ""
+              }`}
+            >
               <td className="px-4 py-3 font-medium text-foreground">{order.id}</td>
               <td className="px-4 py-3 text-muted-foreground">{order.customerName}</td>
               <td className="px-4 py-3 text-muted-foreground">
