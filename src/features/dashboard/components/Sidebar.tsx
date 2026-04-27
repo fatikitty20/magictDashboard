@@ -18,8 +18,8 @@ const elementosMenu = [
   { icon: LayoutDashboard, label: "Panel", path: "/dashboard" },
   { icon: CreditCard, label: "Pagos", path: "/payments", badge: "10" },
   { icon: ShoppingBag, label: "Pedidos", path: "/orders", badge: "8" },
-  { icon: BarChart3, label: "Reportes" },
-  { icon: Users, label: "Clientes" },
+  { icon: BarChart3, label: "Reportes", path: "/reports" },
+  { icon: Users, label: "Clientes", path: "/clients" },
 ];
 
 const elementosGenerales = [

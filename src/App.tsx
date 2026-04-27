@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Payments from "./features/payments/views/Payments";
 import Orders from "./features/orders/views/Orders";
+import Reports from "./features/reports/views/Reports";
+import Clients from "./features/clients/views/Clients";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,22 @@ const App = () => (
               element={
                 <RutaProtegida>
                   <Orders />
+                </RutaProtegida>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <RutaProtegida>
+                  <Reports />
+                </RutaProtegida>
+              }
+            />
+            <Route
+              path="/clients"
+              element={
+                <RutaProtegida>
+                  <Clients />
                 </RutaProtegida>
               }
             />
