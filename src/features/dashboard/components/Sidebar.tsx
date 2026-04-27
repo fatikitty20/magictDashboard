@@ -10,14 +10,14 @@ import {
   Store,
   Users,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAutenticacion } from "@/features/auth/useAuth";
 import { claseBotonPrimario, claseTarjetaInvertida } from "../estilosDashboard";
 
 const elementosMenu = [
-  { icon: LayoutDashboard, label: "Panel", active: true },
-  { icon: CreditCard, label: "Pagos", badge: "12" },
-  { icon: ShoppingBag, label: "Pedidos" },
+  { icon: LayoutDashboard, label: "Panel", path: "/dashboard" },
+  { icon: CreditCard, label: "Pagos", path: "/payments", badge: "10" },
+  { icon: ShoppingBag, label: "Pedidos", path: "/orders", badge: "8" },
   { icon: BarChart3, label: "Reportes" },
   { icon: Users, label: "Clientes" },
 ];
@@ -30,10 +30,19 @@ const elementosGenerales = [
 export const BarraLateral = () => {
   const { cerrarSesion } = useAutenticacion();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const manejarCierreSesion = async () => {
     await cerrarSesion();
     navigate("/login", { replace: true });
+  };
+
+  const manejarNavegacion = (path?: string) => {
+    if (!path) {
+      return;
+    }
+
+    navigate(path);
   };
 
   return (
@@ -51,8 +60,9 @@ export const BarraLateral = () => {
           <button
             key={elemento.label}
             type="button"
+            onClick={() => manejarNavegacion(elemento.path)}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-              elemento.active
+              elemento.path && location.pathname.startsWith(elemento.path)
                 ? "border-l-2 border-primary bg-secondary font-medium text-primary"
                 : "text-muted-foreground hover:bg-muted"
             }`}

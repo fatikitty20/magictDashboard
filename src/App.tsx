@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import Payments from "./features/payments/views/Payments";
+import Orders from "./features/orders/views/Orders";
 
 const queryClient = new QueryClient();
 
@@ -21,11 +23,27 @@ const App = () => (
             <Route
               path="/dashboard"
               element={
-              <RutaProtegida>
-                <Dashboard />
-              </RutaProtegida>
-            }
-          />
+                <RutaProtegida>
+                  <Dashboard />
+                </RutaProtegida>
+              }
+            />
+            <Route
+              path="/payments"
+              element={
+                <RutaProtegida>
+                  <Payments />
+                </RutaProtegida>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <RutaProtegida>
+                  <Orders />
+                </RutaProtegida>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
