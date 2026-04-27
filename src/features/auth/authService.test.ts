@@ -1,21 +1,21 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { servicioAutenticacion } from "./authService";
 
 describe("servicioAutenticacion", () => {
   beforeEach(() => {
+    servicioAutenticacion.cerrarSesion();
     window.localStorage.clear();
   });
 
-  it("crea una sesion mock sin guardar la contrasena", async () => {
+  it("crea una sesion mock solo en memoria", async () => {
     const sesion = await servicioAutenticacion.iniciarSesion({
       correo: " Demo@Tiendanube.com ",
       contrasena: " demo1234 ",
     });
-    const sesionGuardada = window.localStorage.getItem("tiendanube.auth.session");
 
     expect(sesion.correo).toBe("demo@tiendanube.com");
     expect(sesion.proveedor).toBe("mock");
-    expect(sesionGuardada).not.toContain("demo1234");
+    expect(window.localStorage.getItem("tiendanube.auth.session")).toBeNull();
     expect(servicioAutenticacion.estaAutenticado()).toBe(true);
   });
 
@@ -25,18 +25,18 @@ describe("servicioAutenticacion", () => {
     );
   });
 
-  it("limpia sesiones vencidas", () => {
-    window.localStorage.setItem(
-      "tiendanube.auth.session",
-      JSON.stringify({
-        correo: "demo@tiendanube.com",
-        emitidaEn: Date.now() - 1000,
-        expiraEn: Date.now() - 1,
-        proveedor: "mock",
-      }),
-    );
+  it("expira la sesion al pasar el tiempo configurado", async () => {
+    const base = Date.now();
+    const mockDateNow = vi.spyOn(Date, "now");
+
+    mockDateNow.mockReturnValue(base);
+    await servicioAutenticacion.iniciarSesion({ correo: "demo@tiendanube.com", contrasena: "demo1234" });
+
+    mockDateNow.mockReturnValue(base + 8 * 60 * 60 * 1000 + 1);
 
     expect(servicioAutenticacion.obtenerSesion()).toBeNull();
-    expect(window.localStorage.getItem("tiendanube.auth.session")).toBeNull();
+    expect(servicioAutenticacion.estaAutenticado()).toBe(false);
+
+    mockDateNow.mockRestore();
   });
 });

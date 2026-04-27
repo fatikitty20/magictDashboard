@@ -16,9 +16,9 @@ export interface AdaptadorAutenticacion {
   obtenerSesion(): SesionAutenticacion | null;
 }
 
-const claveSesion = "tiendanube.auth.session";
 const duracionSesionMs = 8 * 60 * 60 * 1000;
 const patronCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let sesionActual: SesionAutenticacion | null = null;
 
 const esSesionAutenticacion = (valor: unknown): valor is SesionAutenticacion => {
   if (!valor || typeof valor !== "object") {
@@ -41,19 +41,11 @@ const normalizarCredenciales = ({ correo, contrasena }: CredencialesAutenticacio
 });
 
 const limpiarSesionSegura = (): void => {
-  try {
-    window.localStorage.removeItem(claveSesion);
-  } catch {
-    // El login mock sigue funcionando aunque el navegador bloquee storage.
-  }
+  sesionActual = null;
 };
 
 const guardarSesionSegura = (sesion: SesionAutenticacion): void => {
-  try {
-    window.localStorage.setItem(claveSesion, JSON.stringify(sesion));
-  } catch {
-    // El mock no guarda secretos; fallar storage no debe bloquear el flujo.
-  }
+  sesionActual = sesion;
 };
 
 const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
@@ -85,25 +77,12 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
   },
 
   obtenerSesion() {
-    try {
-      const sesionCruda = window.localStorage.getItem(claveSesion);
-
-      if (!sesionCruda) {
-        return null;
-      }
-
-      const sesionParseada: unknown = JSON.parse(sesionCruda);
-
-      if (!esSesionAutenticacion(sesionParseada) || sesionParseada.expiraEn <= Date.now()) {
-        limpiarSesionSegura();
-        return null;
-      }
-
-      return sesionParseada;
-    } catch {
+    if (!sesionActual || !esSesionAutenticacion(sesionActual) || sesionActual.expiraEn <= Date.now()) {
       limpiarSesionSegura();
       return null;
     }
+
+    return sesionActual;
   },
 };
 
