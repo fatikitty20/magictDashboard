@@ -23,7 +23,7 @@ const elementosMenu = [
 ];
 
 const elementosGenerales = [
-  { icon: Settings, label: "Configuracion" },
+  { icon: Settings, label: "Configuración" },
   { icon: HelpCircle, label: "Ayuda" },
 ];
 
@@ -94,14 +94,14 @@ export const BarraLateral = () => {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted"
         >
           <LogOut className="h-4 w-4" />
-          <span>Cerrar sesion</span>
+          <span>Cerrar sesión</span>
         </button>
       </nav>
 
       <div className={claseTarjetaInvertida("relative mt-4 overflow-hidden p-4")}>
         <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-success/20" />
         <Smartphone className="mb-2 h-6 w-6 text-success" />
-        <p className="mb-1 text-sm font-semibold text-dashboard-inverted-foreground">App PSP movil</p>
+        <p className="mb-1 text-sm font-semibold text-dashboard-inverted-foreground">App PSP móvil</p>
         <p className="mb-3 text-[10px] text-dashboard-inverted-foreground/60">Gestiona desde el celular</p>
         <button
           type="button"

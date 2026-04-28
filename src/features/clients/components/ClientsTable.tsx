@@ -38,7 +38,7 @@ export const ClientsTable = ({ clients, selectedClientId, onSelectClient }: Clie
             <th className="px-4 py-3 text-left font-semibold text-foreground">Canal</th>
             <th className="px-4 py-3 text-right font-semibold text-foreground">Ordenes</th>
             <th className="px-4 py-3 text-right font-semibold text-foreground">Valor</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Ultima compra</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">Última compra</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">

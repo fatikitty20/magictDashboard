@@ -27,7 +27,7 @@ const Login = () => {
       await iniciarSesion({ correo, contrasena });
       navigate("/dashboard", { replace: true });
     } catch (errorCapturado) {
-      setError(errorCapturado instanceof Error ? errorCapturado.message : "No pudimos iniciar sesion");
+      setError(errorCapturado instanceof Error ? errorCapturado.message : "No pudimos iniciar sesión");
       setEstaCargando(false);
     }
   };
@@ -40,7 +40,7 @@ const Login = () => {
             <Store className="h-6 w-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">PSP</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Inicia sesion en tu panel</p>
+          <p className="mt-1 text-sm text-muted-foreground">Inicia sesión en tu panel</p>
         </div>
 
         <div className={claseTarjeta("base", "p-8 shadow-sm")}>

@@ -26,7 +26,7 @@ export const PaymentsTable = ({ payments }: PaymentsTableProps) => (
           <tr>
             <th className="px-4 py-3 text-left font-semibold text-foreground">ID de Orden</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Cliente</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Metodo de Pago</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">Método de Pago</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Estado del Pago</th>
             <th className="px-4 py-3 text-left font-semibold text-foreground">Fecha</th>
             <th className="px-4 py-3 text-right font-semibold text-foreground">Total</th>
