@@ -39,7 +39,7 @@ const Login = () => {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary shadow-lg shadow-primary/20">
             <Store className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Tiendanube PSP</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">PSP</h1>
           <p className="mt-1 text-sm text-muted-foreground">Inicia sesion en tu panel</p>
         </div>
 
@@ -101,7 +101,7 @@ const Login = () => {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          2026 Tiendanube PSP. Plataforma de e-commerce.
+          2026 PSP. Proveedor de Servicios de Pago
         </p>
       </div>
     </main>
