@@ -9,13 +9,13 @@ describe("servicioAutenticacion", () => {
 
   it("crea una sesion mock solo en memoria", async () => {
     const sesion = await servicioAutenticacion.iniciarSesion({
-      correo: " Demo@Magictronic.com ",
+      correo: " Demo@Magict.com ",
       contrasena: " demo1234 ",
     });
 
-    expect(sesion.correo).toBe("demo@Magictronic.com");
+    expect(sesion.correo).toBe("demo@magict.com");
     expect(sesion.proveedor).toBe("mock");
-    expect(window.localStorage.getItem("Magictronic.auth.session")).toBeNull();
+    expect(window.localStorage.getItem("magict.auth.session")).toBeNull();
     expect(servicioAutenticacion.estaAutenticado()).toBe(true);
   });
 
