@@ -1,16 +1,6 @@
 import { CalendarDays, RefreshCcw, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
-import { PaymentsStats } from "../components/PaymentsStats";
-import { PaymentsTable } from "../components/PaymentsTable";
-import { paymentsService } from "../services/paymentsService";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import type { Payment, PaymentListResponse, PaymentSortBy, SortOrder } from "../types/payment";
-
-const PAGE_SIZE = 10;
-import { CalendarDays, RefreshCcw, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
+import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
 import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
 import { paymentsService } from "../services/paymentsService";

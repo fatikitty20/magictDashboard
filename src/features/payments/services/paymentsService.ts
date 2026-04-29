@@ -84,7 +84,7 @@ const buildQueryString = (params: PaymentQueryParams) => {
 
 export const paymentsService = {
   async getPayments(params: PaymentQueryParams = {}): Promise<PaymentListResponse> {
-    const endpoint = buildApiUrl("/api/payments", params);
+    const endpoint = buildApiUrl("/payments", params);
     const response = await fetch(endpoint);
 
     if (!response.ok) {

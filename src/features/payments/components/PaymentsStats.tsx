@@ -1,5 +1,5 @@
 import { CircleAlert, CircleCheckBig, CircleDashed, Wallet } from "lucide-react";
-import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta, claseTonoSuave } from "../../dashboard/estilosDashboard";
 
 type PaymentsStatsProps = {
   totalRevenue: number;
