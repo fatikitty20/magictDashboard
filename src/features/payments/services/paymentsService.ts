@@ -38,7 +38,9 @@ const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => 
   return [];
 };
 
-const API_BASE_URL = (((import.meta as any).env?.VITE_API_URL) ?? "").replace(/\/$/, "");
+const isDevelopment = Boolean((import.meta as any).env?.DEV);
+
+const API_BASE_URL = isDevelopment ? "/api/v1" : (((import.meta as any).env?.VITE_API_URL) ?? "").replace(/\/$/, "");
 
 const buildApiUrl = (path: string, params: PaymentQueryParams) => {
   const queryString = buildQueryString(params);
@@ -56,7 +58,10 @@ const buildQueryString = (params: PaymentQueryParams) => {
   }
 
   if (typeof params.limit === "number") {
-    searchParams.set("limit", params.limit.toString());
+    const limitStr = params.limit.toString();
+    searchParams.set("limit", limitStr);
+    searchParams.set("take", limitStr);
+    searchParams.set("pageSize", limitStr);
   }
 
   if (params.search?.trim()) {
@@ -73,19 +78,29 @@ const buildQueryString = (params: PaymentQueryParams) => {
 
   if (params.sortBy) {
     searchParams.set("sortBy", params.sortBy);
+    searchParams.set("sort", params.sortBy);
   }
 
   if (params.order) {
+    const dir = params.order === "asc" ? "ASC" : "DESC";
     searchParams.set("order", params.order);
+    searchParams.set("dir", dir);
   }
 
   return searchParams.toString();
 };
 
+const isEmailFormat = (value: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+};
+
 export const paymentsService = {
   async getPayments(params: PaymentQueryParams = {}): Promise<PaymentListResponse> {
-    const endpoint = buildApiUrl("/payments", params);
+    const endpoint = buildApiUrl("", params);
+    console.log("🔍 [PaymentsService] Fetching with endpoint:", endpoint);
+    console.log("📊 [PaymentsService] Params:", params);
     const response = await fetch(endpoint);
+    console.log("📨 [PaymentsService] Response status:", response.status);
 
     if (!response.ok) {
       throw new Error("No se pudieron cargar los pagos");
@@ -93,14 +108,26 @@ export const paymentsService = {
 
     const payload = (await response.json()) as PaymentsApiResponse;
     const transactions = resolveTransactions(payload);
+    console.log("✅ [PaymentsService] Transactions received:", transactions.length);
+    console.log("📄 [PaymentsService] Total pages from backend:", payload.totalPages);
 
     const payments = mapTransactionsToPayments(transactions);
 
+    // Frontend pagination: slice results to match requested page/limit
+    const limit = params.limit ?? 20;
+    const page = params.page ?? 1;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedPayments = payments.slice(startIndex, endIndex);
+
+    const totalItems = payload.totalItems ?? payload.total ?? transactions.length;
+    const calculatedTotalPages = Math.max(Math.ceil(totalItems / limit), 1);
+
     return {
-      data: payments,
-      totalPages: Math.max(payload.totalPages ?? 1, 1),
-      page: payload.page ?? params.page ?? 1,
-      totalItems: payload.totalItems ?? payload.total ?? transactions.length,
+      data: paginatedPayments,
+      totalPages: payload.totalPages ?? calculatedTotalPages,
+      page: page,
+      totalItems: totalItems,
       stats: payload.stats
         ? {
             totalRevenue: payload.stats.totalRevenue,
@@ -109,6 +136,110 @@ export const paymentsService = {
             rejectedCount: payload.stats.rejectedCount,
           }
         : undefined,
+    };
+  },
+
+  async searchById(id: string): Promise<PaymentListResponse> {
+    if (!id.trim()) {
+      return {
+        data: [],
+        totalPages: 0,
+        page: 1,
+        totalItems: 0,
+      };
+    }
+
+    const searchTerm = id.trim();
+    
+    // Try multiple endpoint variations
+    const endpoints = [
+      `${API_BASE_URL}/transaction/id/${encodeURIComponent(searchTerm)}`,
+      `${API_BASE_URL}/transactions/id/${encodeURIComponent(searchTerm)}`,
+      `${API_BASE_URL}?search=${encodeURIComponent(searchTerm)}`,
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log("🔍 [PaymentsService] Trying endpoint:", endpoint);
+        const response = await fetch(endpoint);
+        
+        if (response.ok) {
+          const payload = (await response.json()) as PaymentsApiResponse;
+          const transactions = resolveTransactions(payload);
+          console.log("✅ [PaymentsService] Found transactions by ID:", transactions.length);
+
+          const payments = mapTransactionsToPayments(transactions);
+
+          return {
+            data: payments,
+            totalPages: 1,
+            page: 1,
+            totalItems: payments.length,
+          };
+        }
+      } catch (error) {
+        console.log("⚠️ [PaymentsService] Endpoint failed, trying next:", error);
+      }
+    }
+
+    console.log("⚠️ [PaymentsService] No results found for ID:", id);
+    return {
+      data: [],
+      totalPages: 0,
+      page: 1,
+      totalItems: 0,
+    };
+  },
+
+  async searchByEmail(email: string): Promise<PaymentListResponse> {
+    if (!email.trim()) {
+      return {
+        data: [],
+        totalPages: 0,
+        page: 1,
+        totalItems: 0,
+      };
+    }
+
+    const searchTerm = email.trim();
+    
+    // Try multiple endpoint variations
+    const endpoints = [
+      `${API_BASE_URL}/transaction/email/${encodeURIComponent(searchTerm)}`,
+      `${API_BASE_URL}/transactions/email/${encodeURIComponent(searchTerm)}`,
+      `${API_BASE_URL}?search=${encodeURIComponent(searchTerm)}`,
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log("🔍 [PaymentsService] Trying email endpoint:", endpoint);
+        const response = await fetch(endpoint);
+        
+        if (response.ok) {
+          const payload = (await response.json()) as PaymentsApiResponse;
+          const transactions = resolveTransactions(payload);
+          console.log("✅ [PaymentsService] Found transactions by email:", transactions.length);
+
+          const payments = mapTransactionsToPayments(transactions);
+
+          return {
+            data: payments,
+            totalPages: 1,
+            page: 1,
+            totalItems: payments.length,
+          };
+        }
+      } catch (error) {
+        console.log("⚠️ [PaymentsService] Email endpoint failed, trying next:", error);
+      }
+    }
+
+    console.log("⚠️ [PaymentsService] No results found for email:", email);
+    return {
+      data: [],
+      totalPages: 0,
+      page: 1,
+      totalItems: 0,
     };
   },
 };

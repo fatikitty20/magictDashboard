@@ -7,7 +7,7 @@ import { paymentsService } from "../services/paymentsService";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import type { Payment, PaymentListResponse, PaymentSortBy, SortOrder } from "../types/payment";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 const DEFAULT_SORT_BY: PaymentSortBy = "createdAt";
 const DEFAULT_SORT_ORDER: SortOrder = "desc";
 
@@ -29,6 +29,10 @@ const Payments = () => {
   const requestIdRef = useRef(0);
   const didMountRef = useRef(false);
 
+  const isEmailFormat = (value: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
+
   const loadPayments = useCallback(
     async (nextPage: number) => {
       const requestId = requestIdRef.current + 1;
@@ -38,15 +42,28 @@ const Payments = () => {
       setError(null);
 
       try {
-        const response: PaymentListResponse = await paymentsService.getPayments({
-          page: nextPage,
-          limit: PAGE_SIZE,
-          search: debouncedSearch,
-          from: fromDate || undefined,
-          to: toDate || undefined,
-          sortBy,
-          order,
-        });
+        let response: PaymentListResponse;
+
+        // If search is provided, use specialized search endpoints
+        if (debouncedSearch?.trim()) {
+          if (isEmailFormat(debouncedSearch)) {
+            console.log("🔍 Searching by email:", debouncedSearch);
+            response = await paymentsService.searchByEmail(debouncedSearch);
+          } else {
+            console.log("🔍 Searching by order ID:", debouncedSearch);
+            response = await paymentsService.searchById(debouncedSearch);
+          }
+        } else {
+          // No search, load all payments with filters
+          response = await paymentsService.getPayments({
+            page: nextPage,
+            limit: PAGE_SIZE,
+            from: fromDate || undefined,
+            to: toDate || undefined,
+            sortBy,
+            order,
+          });
+        }
 
         if (requestId !== requestIdRef.current) return;
 
@@ -86,13 +103,32 @@ const Payments = () => {
   }, [loadPayments, page]);
 
   const displayStats = useMemo(() => {
-    return {
-      paidCount: stats?.paidCount ?? 0,
-      pendingCount: stats?.pendingCount ?? 0,
-      rejectedCount: stats?.rejectedCount ?? 0,
-      totalRevenue: stats?.totalRevenue ?? 0,
-    };
-  }, [stats]);
+    if (stats) {
+      return stats;
+    }
+
+    return payments.reduce(
+      (accumulator, payment) => {
+        accumulator.totalRevenue += payment.total;
+
+        if (payment.status === "paid") {
+          accumulator.paidCount += 1;
+        } else if (payment.status === "pending") {
+          accumulator.pendingCount += 1;
+        } else if (payment.status === "rejected") {
+          accumulator.rejectedCount += 1;
+        }
+
+        return accumulator;
+      },
+      {
+        totalRevenue: 0,
+        paidCount: 0,
+        pendingCount: 0,
+        rejectedCount: 0,
+      },
+    );
+  }, [payments, stats]);
 
   const handleSortChange = (nextSortBy: PaymentSortBy) => {
     if (sortBy === nextSortBy) {
@@ -157,10 +193,10 @@ const Payments = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             type="search"
-            placeholder="order_id o customer_email"
+            placeholder="Ej: ORDER-2024-001 o email@ejemplo.com"
             className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30"
           />
-          <span className="text-xs text-muted-foreground">Filtra por ID de orden o correo del cliente.</span>
+          <span className="text-xs text-muted-foreground">Busca por número de orden o correo del cliente.</span>
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">

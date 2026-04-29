@@ -14,18 +14,30 @@ export type RoxTransaction = {
   created_at: string | null;
 };
 
-const statusMap: Record<"success" | "failed" | "pending", PaymentStatus> = {
+const paymentStatusAliases: Record<string, PaymentStatus> = {
   success: "paid",
+  succeeded: "paid",
+  approved: "paid",
+  paid: "paid",
+  captured: "paid",
+  settled: "paid",
   failed: "rejected",
+  declined: "rejected",
+  rejected: "rejected",
+  cancelled: "rejected",
+  canceled: "rejected",
+  chargeback: "rejected",
+  refunded: "rejected",
   pending: "pending",
+  in_progress: "pending",
+  processing: "pending",
+  review: "pending",
 };
 
 const mapPaymentStatus = (status: RoxTransactionStatus | null): PaymentStatus => {
-  if (status === "success" || status === "failed" || status === "pending") {
-    return statusMap[status];
-  }
+  const normalizedStatus = String(status ?? "pending").trim().toLowerCase();
 
-  return "pending";
+  return paymentStatusAliases[normalizedStatus] ?? "pending";
 };
 
 export const mapTransactionToPayment = (transaction: RoxTransaction): Payment => ({
