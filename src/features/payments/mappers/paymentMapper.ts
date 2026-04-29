@@ -11,6 +11,7 @@ export type RoxTransaction = {
   status: RoxTransactionStatus | null;
   transaction_type?: string | null;
   card_brand: string | null;
+  last_four_digits?: string | number | null;
   created_at: string | null;
 };
 

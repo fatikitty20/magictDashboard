@@ -1,21 +1,11 @@
 import { mapTransactionsToPayments, type RoxTransaction } from "../mappers/paymentMapper";
-import type { PaymentListResponse, PaymentQueryParams } from "../types/payment";
+import type { Payment, PaymentListResponse, PaymentQueryParams, PaymentSortBy, SortOrder } from "../types/payment";
 
 type PaymentsApiResponse = {
   data?: RoxTransaction[];
   items?: RoxTransaction[];
   rows?: RoxTransaction[];
   payments?: RoxTransaction[];
-  totalPages?: number;
-  page?: number;
-  totalItems?: number;
-  total?: number;
-  stats?: {
-    totalRevenue: number;
-    paidCount: number;
-    pendingCount: number;
-    rejectedCount: number;
-  };
 };
 
 const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => {
@@ -38,65 +28,115 @@ const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => 
   return [];
 };
 
-const isDevelopment = Boolean(import.meta.env.DEV);
+const API_BASE_URL = import.meta.env.DEV ? "/api/v1" : (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
-const API_BASE_URL = isDevelopment ? "/api/v1" : (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
-
-const buildApiUrl = (path: string, params: PaymentQueryParams) => {
-  const queryString = buildQueryString(params);
+const buildApiUrl = (path: string) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const endpointPath = queryString.length > 0 ? `${normalizedPath}?${queryString}` : normalizedPath;
-
-  return API_BASE_URL ? `${API_BASE_URL}${endpointPath}` : endpointPath;
+  return API_BASE_URL ? `${API_BASE_URL}${normalizedPath}` : normalizedPath;
 };
 
-const buildQueryString = (params: PaymentQueryParams) => {
-  const searchParams = new URLSearchParams();
+const normalizeText = (value: unknown): string => String(value ?? "").trim().toLowerCase();
 
-  if (typeof params.page === "number") {
-    searchParams.set("page", params.page.toString());
+const isWithinDateRange = (createdAt: string | null, from?: string, to?: string): boolean => {
+  const paymentDate = createdAt?.slice(0, 10);
+
+  if (!paymentDate || paymentDate.length !== 10) {
+    return false;
   }
 
-  if (typeof params.limit === "number") {
-    const limitStr = params.limit.toString();
-    searchParams.set("limit", limitStr);
-    searchParams.set("take", limitStr);
-    searchParams.set("pageSize", limitStr);
+  if (from && paymentDate < from) {
+    return false;
   }
 
-  if (params.search?.trim()) {
-    searchParams.set("search", params.search.trim());
+  if (to && paymentDate > to) {
+    return false;
   }
 
-  if (params.from) {
-    searchParams.set("from", params.from);
-  }
-
-  if (params.to) {
-    searchParams.set("to", params.to);
-  }
-
-  if (params.sortBy) {
-    searchParams.set("sortBy", params.sortBy);
-    searchParams.set("sort", params.sortBy);
-  }
-
-  if (params.order) {
-    const dir = params.order === "asc" ? "ASC" : "DESC";
-    searchParams.set("order", params.order);
-    searchParams.set("dir", dir);
-  }
-
-  return searchParams.toString();
+  return true;
 };
+
+const transactionMatchesSearch = (transaction: RoxTransaction, search?: string): boolean => {
+  const normalizedSearch = normalizeText(search);
+
+  if (!normalizedSearch) {
+    return true;
+  }
+
+  return [
+    transaction.id,
+    transaction.order_id,
+    transaction.customer_email,
+    transaction.card_brand,
+    transaction.last_four_digits,
+  ].some((value) => normalizeText(value).includes(normalizedSearch));
+};
+
+const filterTransactions = (transactions: RoxTransaction[], params: PaymentQueryParams): RoxTransaction[] =>
+  transactions.filter(
+    (transaction) =>
+      transactionMatchesSearch(transaction, params.search) &&
+      isWithinDateRange(transaction.created_at, params.from, params.to),
+  );
+
+const compareValues = (left: string | number, right: string | number, order: SortOrder): number => {
+  if (left < right) {
+    return order === "asc" ? -1 : 1;
+  }
+
+  if (left > right) {
+    return order === "asc" ? 1 : -1;
+  }
+
+  return 0;
+};
+
+const getSortableValue = (payment: Payment, sortBy: PaymentSortBy): string | number => {
+  if (sortBy === "createdAt") {
+    const timestamp = new Date(payment.createdAt).getTime();
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  }
+
+  if (sortBy === "total") {
+    return payment.total;
+  }
+
+  return payment.status;
+};
+
+const sortPayments = (payments: Payment[], sortBy: PaymentSortBy, order: SortOrder): Payment[] =>
+  [...payments].sort((left, right) => compareValues(getSortableValue(left, sortBy), getSortableValue(right, sortBy), order));
+
+const paginatePayments = (payments: Payment[], page: number, limit: number): Payment[] => {
+  const startIndex = (page - 1) * limit;
+  return payments.slice(startIndex, startIndex + limit);
+};
+
+const getStats = (payments: Payment[]): PaymentListResponse["stats"] =>
+  payments.reduce(
+    (stats, payment) => {
+      stats.totalRevenue += payment.total;
+
+      if (payment.status === "paid") {
+        stats.paidCount += 1;
+      } else if (payment.status === "pending") {
+        stats.pendingCount += 1;
+      } else if (payment.status === "rejected") {
+        stats.rejectedCount += 1;
+      }
+
+      return stats;
+    },
+    {
+      totalRevenue: 0,
+      paidCount: 0,
+      pendingCount: 0,
+      rejectedCount: 0,
+    },
+  );
 
 export const paymentsService = {
   async getPayments(params: PaymentQueryParams = {}): Promise<PaymentListResponse> {
-    const endpoint = buildApiUrl("", params);
-    console.log("🔍 [PaymentsService] Fetching with endpoint:", endpoint);
-    console.log("📊 [PaymentsService] Params:", params);
-    const response = await fetch(endpoint);
-    console.log("📨 [PaymentsService] Response status:", response.status);
+    const response = await fetch(buildApiUrl(""));
 
     if (!response.ok) {
       throw new Error("No se pudieron cargar los pagos");
@@ -104,138 +144,24 @@ export const paymentsService = {
 
     const payload = (await response.json()) as PaymentsApiResponse;
     const transactions = resolveTransactions(payload);
-    console.log("✅ [PaymentsService] Transactions received:", transactions.length);
-    console.log("📄 [PaymentsService] Total pages from backend:", payload.totalPages);
+    const filteredTransactions = filterTransactions(transactions, params);
+    const sortedPayments = sortPayments(
+      mapTransactionsToPayments(filteredTransactions),
+      params.sortBy ?? "createdAt",
+      params.order ?? "desc",
+    );
 
-    const payments = mapTransactionsToPayments(transactions);
-
-    // Frontend pagination: slice results to match requested page/limit
-    const limit = params.limit ?? 20;
     const page = params.page ?? 1;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedPayments = payments.slice(startIndex, endIndex);
-
-    const totalItems = payload.totalItems ?? payload.total ?? transactions.length;
-    const calculatedTotalPages = Math.max(Math.ceil(totalItems / limit), 1);
+    const limit = params.limit ?? 20;
+    const totalItems = sortedPayments.length;
+    const totalPages = Math.max(Math.ceil(totalItems / limit), 1);
 
     return {
-      data: paginatedPayments,
-      totalPages: payload.totalPages ?? calculatedTotalPages,
-      page: page,
-      totalItems: totalItems,
-      stats: payload.stats
-        ? {
-            totalRevenue: payload.stats.totalRevenue,
-            paidCount: payload.stats.paidCount,
-            pendingCount: payload.stats.pendingCount,
-            rejectedCount: payload.stats.rejectedCount,
-          }
-        : undefined,
-    };
-  },
-
-  async searchById(id: string): Promise<PaymentListResponse> {
-    if (!id.trim()) {
-      return {
-        data: [],
-        totalPages: 0,
-        page: 1,
-        totalItems: 0,
-      };
-    }
-
-    const searchTerm = id.trim();
-    
-    // Try multiple endpoint variations
-    const endpoints = [
-      `${API_BASE_URL}/transaction/id/${encodeURIComponent(searchTerm)}`,
-      `${API_BASE_URL}/transactions/id/${encodeURIComponent(searchTerm)}`,
-      `${API_BASE_URL}?search=${encodeURIComponent(searchTerm)}`,
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        console.log("🔍 [PaymentsService] Trying endpoint:", endpoint);
-        const response = await fetch(endpoint);
-        
-        if (response.ok) {
-          const payload = (await response.json()) as PaymentsApiResponse;
-          const transactions = resolveTransactions(payload);
-          console.log("✅ [PaymentsService] Found transactions by ID:", transactions.length);
-
-          const payments = mapTransactionsToPayments(transactions);
-
-          return {
-            data: payments,
-            totalPages: 1,
-            page: 1,
-            totalItems: payments.length,
-          };
-        }
-      } catch (error) {
-        console.log("⚠️ [PaymentsService] Endpoint failed, trying next:", error);
-      }
-    }
-
-    console.log("⚠️ [PaymentsService] No results found for ID:", id);
-    return {
-      data: [],
-      totalPages: 0,
-      page: 1,
-      totalItems: 0,
-    };
-  },
-
-  async searchByEmail(email: string): Promise<PaymentListResponse> {
-    if (!email.trim()) {
-      return {
-        data: [],
-        totalPages: 0,
-        page: 1,
-        totalItems: 0,
-      };
-    }
-
-    const searchTerm = email.trim();
-    
-    // Try multiple endpoint variations
-    const endpoints = [
-      `${API_BASE_URL}/transaction/email/${encodeURIComponent(searchTerm)}`,
-      `${API_BASE_URL}/transactions/email/${encodeURIComponent(searchTerm)}`,
-      `${API_BASE_URL}?search=${encodeURIComponent(searchTerm)}`,
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        console.log("🔍 [PaymentsService] Trying email endpoint:", endpoint);
-        const response = await fetch(endpoint);
-        
-        if (response.ok) {
-          const payload = (await response.json()) as PaymentsApiResponse;
-          const transactions = resolveTransactions(payload);
-          console.log("✅ [PaymentsService] Found transactions by email:", transactions.length);
-
-          const payments = mapTransactionsToPayments(transactions);
-
-          return {
-            data: payments,
-            totalPages: 1,
-            page: 1,
-            totalItems: payments.length,
-          };
-        }
-      } catch (error) {
-        console.log("⚠️ [PaymentsService] Email endpoint failed, trying next:", error);
-      }
-    }
-
-    console.log("⚠️ [PaymentsService] No results found for email:", email);
-    return {
-      data: [],
-      totalPages: 0,
-      page: 1,
-      totalItems: 0,
+      data: paginatePayments(sortedPayments, page, limit),
+      totalPages,
+      page,
+      totalItems,
+      stats: getStats(sortedPayments),
     };
   },
 };

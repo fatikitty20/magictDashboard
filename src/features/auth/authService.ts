@@ -42,16 +42,10 @@ const normalizarCredenciales = ({ correo, contrasena }: CredencialesAutenticacio
 
 const limpiarSesionSegura = (): void => {
   sesionActual = null;
-  if (typeof window !== "undefined") {
-    window.localStorage.removeItem("__auth_session");
-  }
 };
 
 const guardarSesionSegura = (sesion: SesionAutenticacion): void => {
   sesionActual = sesion;
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem("__auth_session", JSON.stringify(sesion));
-  }
 };
 
 const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
@@ -83,30 +77,12 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
   },
 
   obtenerSesion() {
-    // Try to restore from memory first
-    if (sesionActual && esSesionAutenticacion(sesionActual) && sesionActual.expiraEn > Date.now()) {
-      return sesionActual;
+    if (!sesionActual || !esSesionAutenticacion(sesionActual) || sesionActual.expiraEn <= Date.now()) {
+      limpiarSesionSegura();
+      return null;
     }
 
-    // Try to restore from localStorage if memory is empty
-    if (!sesionActual && typeof window !== "undefined") {
-      const stored = window.localStorage.getItem("__auth_session");
-      if (stored) {
-        try {
-          const sesion = JSON.parse(stored);
-          if (esSesionAutenticacion(sesion) && sesion.expiraEn > Date.now()) {
-            sesionActual = sesion;
-            return sesion;
-          }
-        } catch {
-          // Invalid stored session, clear it
-          window.localStorage.removeItem("__auth_session");
-        }
-      }
-    }
-
-    limpiarSesionSegura();
-    return null;
+    return sesionActual;
   },
 };
 

@@ -7,7 +7,7 @@ describe("servicioAutenticacion", () => {
     window.localStorage.clear();
   });
 
-  it("crea una sesion mock persistida", async () => {
+  it("crea una sesion mock solo en memoria", async () => {
     const sesion = await servicioAutenticacion.iniciarSesion({
       correo: " Demo@Magictronic.com ",
       contrasena: " demo1234 ",
@@ -15,7 +15,7 @@ describe("servicioAutenticacion", () => {
 
     expect(sesion.correo).toBe("demo@magictronic.com");
     expect(sesion.proveedor).toBe("mock");
-    expect(window.localStorage.getItem("__auth_session")).not.toBeNull();
+    expect(window.localStorage.getItem("__auth_session")).toBeNull();
     expect(servicioAutenticacion.estaAutenticado()).toBe(true);
   });
 
