@@ -1,6 +1,6 @@
 export const usuarioDashboard = {
   nombre: "Marina Silva",
-  email: "marina@magict.com",
+  email: "marina@tiendanube.com",
 };
 
 export type VarianteMetrica = "invertida" | "suave";

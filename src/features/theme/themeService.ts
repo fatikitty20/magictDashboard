@@ -1,6 +1,6 @@
 export type ModoTema = "light" | "dark";
 
-const claveModoTema = "magict.themeMode";
+const claveModoTema = "tiendanube.themeMode";
 
 const esModoTema = (valor: unknown): valor is ModoTema => valor === "light" || valor === "dark";
 
