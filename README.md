@@ -155,7 +155,7 @@ npm run lint
 Puedes iniciar sesion con cualquier correo valido y una contrasena no vacia.
 
 ```text
-demo@tiendanube.com
+demo@magictronic.com
 demo1234
 ```
 

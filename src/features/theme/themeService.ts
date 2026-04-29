@@ -1,6 +1,6 @@
 export type ModoTema = "light" | "dark";
 
-const claveModoTema = "tiendanube.themeMode";
+const claveModoTema = "magictronic.themeMode";
 
 const esModoTema = (valor: unknown): valor is ModoTema => valor === "light" || valor === "dark";
 
