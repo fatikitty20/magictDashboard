@@ -6,15 +6,20 @@ type PaymentsStatsProps = {
   paidCount: number;
   pendingCount: number;
   rejectedCount: number;
+  currency?: string;
+  locale?: string;
 };
 
-const currencyFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  maximumFractionDigits: 0,
-});
+export const PaymentsStats = ({ totalRevenue, paidCount, pendingCount, rejectedCount, currency, locale }: PaymentsStatsProps) => {
+  const usedLocale = locale ?? (typeof navigator !== "undefined" ? navigator.language ?? "es-MX" : "es-MX");
+  const usedCurrency = currency ?? "MXN";
 
-export const PaymentsStats = ({ totalRevenue, paidCount, pendingCount, rejectedCount }: PaymentsStatsProps) => {
+  const currencyFormatter = new Intl.NumberFormat(usedLocale, {
+    style: "currency",
+    currency: usedCurrency,
+    maximumFractionDigits: 0,
+  });
+
   const items = [
     {
       title: "Ingresos Totales",
@@ -50,7 +55,7 @@ export const PaymentsStats = ({ totalRevenue, paidCount, pendingCount, rejectedC
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => (
-        <article key={item.title} className={claseTarjeta("base", "p-5")}> 
+        <article key={item.title} className={claseTarjeta("base", "p-5")}>
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{item.title}</p>
             <span className={item.toneClass}>

@@ -34,6 +34,7 @@ export const mapTransactionToPayment = (transaction: RoxTransaction): Payment =>
   paymentMethod: transaction.card_brand ?? "-",
   status: mapPaymentStatus(transaction.status),
   total: Number(transaction.amount ?? 0),
+  currency: transaction.currency ?? "MXN",
   createdAt: transaction.created_at ?? new Date(0).toISOString(),
 });
 

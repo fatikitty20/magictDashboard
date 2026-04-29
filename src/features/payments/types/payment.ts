@@ -8,6 +8,7 @@ export interface Payment {
   paymentMethod: string;
   status: PaymentStatus;
   total: number;
+  currency?: string;
   createdAt: string;
 }
 
@@ -26,4 +27,10 @@ export interface PaymentListResponse {
   totalPages: number;
   page: number;
   totalItems: number;
+  stats?: {
+    totalRevenue: number;
+    paidCount: number;
+    pendingCount: number;
+    rejectedCount: number;
+  };
 }

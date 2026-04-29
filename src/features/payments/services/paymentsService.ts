@@ -10,6 +10,12 @@ type PaymentsApiResponse = {
   page?: number;
   totalItems?: number;
   total?: number;
+  stats?: {
+    totalRevenue: number;
+    paidCount: number;
+    pendingCount: number;
+    rejectedCount: number;
+  };
 };
 
 const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => {
@@ -32,7 +38,7 @@ const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => 
   return [];
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+const API_BASE_URL = (((import.meta as any).env?.VITE_API_URL) ?? "").replace(/\/$/, "");
 
 const buildApiUrl = (path: string, params: PaymentQueryParams) => {
   const queryString = buildQueryString(params);
@@ -88,11 +94,21 @@ export const paymentsService = {
     const payload = (await response.json()) as PaymentsApiResponse;
     const transactions = resolveTransactions(payload);
 
+    const payments = mapTransactionsToPayments(transactions);
+
     return {
-      data: mapTransactionsToPayments(transactions),
+      data: payments,
       totalPages: Math.max(payload.totalPages ?? 1, 1),
       page: payload.page ?? params.page ?? 1,
       totalItems: payload.totalItems ?? payload.total ?? transactions.length,
+      stats: payload.stats
+        ? {
+            totalRevenue: payload.stats.totalRevenue,
+            paidCount: payload.stats.paidCount,
+            pendingCount: payload.stats.pendingCount,
+            rejectedCount: payload.stats.rejectedCount,
+          }
+        : undefined,
     };
   },
 };

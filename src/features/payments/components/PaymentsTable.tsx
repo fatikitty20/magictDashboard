@@ -9,19 +9,9 @@ type PaymentsTableProps = {
   sortBy: PaymentSortBy;
   order: SortOrder;
   onSortChange: (sortBy: PaymentSortBy) => void;
+  locale?: string;
 };
 
-const currencyFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  maximumFractionDigits: 0,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("es-AR", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
 
 const sortableLabels: Record<PaymentSortBy, string> = {
   createdAt: "Fecha",
@@ -37,9 +27,11 @@ const renderSortIcon = (isActive: boolean, order: SortOrder) => {
   return order === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />;
 };
 
-export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSortChange }: PaymentsTableProps) => {
+export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSortChange, locale }: PaymentsTableProps) => {
   const headerButtonClass =
     "inline-flex items-center gap-1.5 font-semibold text-foreground transition hover:text-foreground/80";
+
+  const usedLocale = locale ?? (typeof navigator !== "undefined" ? navigator.language ?? "es-MX" : "es-MX");
 
   return (
     <section className={claseTarjeta("base", "overflow-hidden")}>
@@ -131,10 +123,18 @@ export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSo
                     <StatusBadge status={payment.status} />
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {dateFormatter.format(new Date(payment.createdAt))}
+                    {new Intl.DateTimeFormat(usedLocale, {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }).format(new Date(payment.createdAt))}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-foreground">
-                    {currencyFormatter.format(payment.total)}
+                    {new Intl.NumberFormat(usedLocale, {
+                      style: "currency",
+                      currency: payment.currency ?? "MXN",
+                      maximumFractionDigits: 0,
+                    }).format(payment.total)}
                   </td>
                 </tr>
               ))
