@@ -9,13 +9,13 @@ describe("servicioAutenticacion", () => {
 
   it("crea una sesion mock solo en memoria", async () => {
     const sesion = await servicioAutenticacion.iniciarSesion({
-      correo: " Demo@Tiendanube.com ",
+      correo: " Demo@Magictronic.com ",
       contrasena: " demo1234 ",
     });
 
-    expect(sesion.correo).toBe("demo@tiendanube.com");
+    expect(sesion.correo).toBe("demo@Magictronic.com");
     expect(sesion.proveedor).toBe("mock");
-    expect(window.localStorage.getItem("tiendanube.auth.session")).toBeNull();
+    expect(window.localStorage.getItem("Magictronic.auth.session")).toBeNull();
     expect(servicioAutenticacion.estaAutenticado()).toBe(true);
   });
 
@@ -30,7 +30,7 @@ describe("servicioAutenticacion", () => {
     const mockDateNow = vi.spyOn(Date, "now");
 
     mockDateNow.mockReturnValue(base);
-    await servicioAutenticacion.iniciarSesion({ correo: "demo@tiendanube.com", contrasena: "demo1234" });
+    await servicioAutenticacion.iniciarSesion({ correo: "demo@Magictronic.com", contrasena: "demo1234" });
 
     mockDateNow.mockReturnValue(base + 8 * 60 * 60 * 1000 + 1);
 
@@ -40,3 +40,4 @@ describe("servicioAutenticacion", () => {
     mockDateNow.mockRestore();
   });
 });
+
