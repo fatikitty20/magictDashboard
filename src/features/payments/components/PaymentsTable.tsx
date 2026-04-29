@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { Payment, PaymentSortBy, SortOrder } from "../types/payment";
-import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta } from "../../dashboard/estilosDashboard";
 import { StatusBadge } from "./StatusBadge";
 
 type PaymentsTableProps = {
@@ -114,8 +114,8 @@ export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSo
                 </td>
               </tr>
             ) : (
-              payments.map((payment) => (
-                <tr key={payment.id} className="transition hover:bg-muted/30">
+              payments.map((payment, index) => (
+                <tr key={`${payment.id}-${payment.createdAt}-${index}`} className="transition hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium text-foreground">{payment.id}</td>
                   <td className="px-4 py-3 text-muted-foreground">{payment.customerName}</td>
                   <td className="px-4 py-3 text-muted-foreground">{payment.paymentMethod}</td>

@@ -27,7 +27,7 @@ const Login = () => {
       await iniciarSesion({ correo, contrasena });
       navigate("/dashboard", { replace: true });
     } catch (errorCapturado) {
-      setError(errorCapturado instanceof Error ? errorCapturado.message : "No pudimos iniciar sesión");
+      setError(errorCapturado instanceof Error ? errorCapturado.message : "No pudimos iniciar sesion");
       setEstaCargando(false);
     }
   };
@@ -39,8 +39,8 @@ const Login = () => {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary shadow-lg shadow-primary/20">
             <Store className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">PSP</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Inicia sesión en tu panel</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">MagicTronic</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Inicia sesion en tu panel</p>
         </div>
 
         <div className={claseTarjeta("base", "p-8 shadow-sm")}>
@@ -57,7 +57,7 @@ const Login = () => {
                   required
                   value={correo}
                   onChange={(event) => setCorreo(event.target.value)}
-                  placeholder="demo@tiendanube.com"
+                  placeholder="demo@magictronic.com"
                   className="h-12 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-foreground transition placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30"
                   autoComplete="email"
                 />
@@ -101,7 +101,7 @@ const Login = () => {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          2026 PSP. Proveedor de Servicios de Pago
+          2026 MagicTronic. Plataforma de e-commerce.
         </p>
       </div>
     </main>

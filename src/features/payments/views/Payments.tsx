@@ -1,23 +1,13 @@
 import { CalendarDays, RefreshCcw, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
+import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
 import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
 import { paymentsService } from "../services/paymentsService";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import type { Payment, PaymentListResponse, PaymentSortBy, SortOrder } from "../types/payment";
 
-const PAGE_SIZE = 10;
-import { CalendarDays, RefreshCcw, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
-import { PaymentsStats } from "../components/PaymentsStats";
-import { PaymentsTable } from "../components/PaymentsTable";
-import { paymentsService } from "../services/paymentsService";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import type { Payment, PaymentListResponse, PaymentSortBy, SortOrder } from "../types/payment";
-
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 const DEFAULT_SORT_BY: PaymentSortBy = "createdAt";
 const DEFAULT_SORT_ORDER: SortOrder = "desc";
 
@@ -37,7 +27,11 @@ const Payments = () => {
   const [stats, setStats] = useState<PaymentListResponse["stats"] | null>(null);
 
   const requestIdRef = useRef(0);
-  const didMountRef = useRef(false);
+  const filterKeyRef = useRef("");
+
+  const isEmailFormat = (value: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
 
   const loadPayments = useCallback(
     async (nextPage: number) => {
@@ -48,15 +42,28 @@ const Payments = () => {
       setError(null);
 
       try {
-        const response: PaymentListResponse = await paymentsService.getPayments({
-          page: nextPage,
-          limit: PAGE_SIZE,
-          search: debouncedSearch,
-          from: fromDate || undefined,
-          to: toDate || undefined,
-          sortBy,
-          order,
-        });
+        let response: PaymentListResponse;
+
+        // If search is provided, use specialized search endpoints
+        if (debouncedSearch?.trim()) {
+          if (isEmailFormat(debouncedSearch)) {
+            console.log("🔍 Searching by email:", debouncedSearch);
+            response = await paymentsService.searchByEmail(debouncedSearch);
+          } else {
+            console.log("🔍 Searching by order ID:", debouncedSearch);
+            response = await paymentsService.searchById(debouncedSearch);
+          }
+        } else {
+          // No search, load all payments with filters
+          response = await paymentsService.getPayments({
+            page: nextPage,
+            limit: PAGE_SIZE,
+            from: fromDate || undefined,
+            to: toDate || undefined,
+            sortBy,
+            order,
+          });
+        }
 
         if (requestId !== requestIdRef.current) return;
 
@@ -77,32 +84,50 @@ const Payments = () => {
     [debouncedSearch, fromDate, order, sortBy, toDate],
   );
 
+  const filterKey = useMemo(
+    () => JSON.stringify({ debouncedSearch, fromDate, order, sortBy, toDate }),
+    [debouncedSearch, fromDate, order, sortBy, toDate],
+  );
+
   useEffect(() => {
-    if (page !== 1) {
+    const filtersChanged = filterKeyRef.current !== filterKey;
+    filterKeyRef.current = filterKey;
+
+    if (filtersChanged && page !== 1) {
       setPage(1);
       return;
     }
 
-    void loadPayments(1);
-  }, [debouncedSearch, fromDate, order, sortBy, toDate, loadPayments]);
-
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-
     void loadPayments(page);
-  }, [loadPayments, page]);
+  }, [filterKey, loadPayments, page]);
 
   const displayStats = useMemo(() => {
-    return {
-      paidCount: stats?.paidCount ?? 0,
-      pendingCount: stats?.pendingCount ?? 0,
-      rejectedCount: stats?.rejectedCount ?? 0,
-      totalRevenue: stats?.totalRevenue ?? 0,
-    };
-  }, [stats]);
+    if (stats) {
+      return stats;
+    }
+
+    return payments.reduce(
+      (accumulator, payment) => {
+        accumulator.totalRevenue += payment.total;
+
+        if (payment.status === "paid") {
+          accumulator.paidCount += 1;
+        } else if (payment.status === "pending") {
+          accumulator.pendingCount += 1;
+        } else if (payment.status === "rejected") {
+          accumulator.rejectedCount += 1;
+        }
+
+        return accumulator;
+      },
+      {
+        totalRevenue: 0,
+        paidCount: 0,
+        pendingCount: 0,
+        rejectedCount: 0,
+      },
+    );
+  }, [payments, stats]);
 
   const handleSortChange = (nextSortBy: PaymentSortBy) => {
     if (sortBy === nextSortBy) {
@@ -167,10 +192,10 @@ const Payments = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             type="search"
-            placeholder="order_id o customer_email"
+            placeholder="Ej: ORDER-2024-001 o email@ejemplo.com"
             className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30"
           />
-          <span className="text-xs text-muted-foreground">Filtra por ID de orden o correo del cliente.</span>
+          <span className="text-xs text-muted-foreground">Busca por número de orden o correo del cliente.</span>
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
