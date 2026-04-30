@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronLeft, ChevronRight, RefreshCcw, Search } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
@@ -6,11 +6,12 @@ import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { paymentsService } from "../services/paymentsService";
-import type { Payment, PaymentListResponse, PaymentSortBy, SortOrder } from "../types/payment";
+import type { Payment, PaymentListResponse, PaymentSortBy, PaymentStatus, SortOrder } from "../types/payment";
 
 const PAGE_SIZE = 20;
 const DEFAULT_SORT_BY: PaymentSortBy = "createdAt";
 const DEFAULT_SORT_ORDER: SortOrder = "desc";
+type StatusFilter = "all" | PaymentStatus;
 
 const Payments = () => {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ const Payments = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [sortBy, setSortBy] = useState<PaymentSortBy>(DEFAULT_SORT_BY);
@@ -29,6 +31,12 @@ const Payments = () => {
   const debouncedSearch = useDebouncedValue(search, 350);
   const requestIdRef = useRef(0);
   const filterKeyRef = useRef("");
+  const statusOptions: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("payments.filters.all") },
+    { value: "paid", label: t("payments.status.paid") },
+    { value: "pending", label: t("payments.status.pending") },
+    { value: "rejected", label: t("payments.status.rejected") },
+  ];
 
   const loadPayments = useCallback(
     async (nextPage: number) => {
@@ -43,6 +51,7 @@ const Payments = () => {
           page: nextPage,
           limit: PAGE_SIZE,
           search: debouncedSearch,
+          status: statusFilter === "all" ? undefined : statusFilter,
           from: fromDate || undefined,
           to: toDate || undefined,
           sortBy,
@@ -71,12 +80,12 @@ const Payments = () => {
         }
       }
     },
-    [debouncedSearch, fromDate, order, sortBy, t, toDate],
+    [debouncedSearch, fromDate, order, sortBy, statusFilter, t, toDate],
   );
 
   const filterKey = useMemo(
-    () => JSON.stringify({ debouncedSearch, fromDate, order, sortBy, toDate }),
-    [debouncedSearch, fromDate, order, sortBy, toDate],
+    () => JSON.stringify({ debouncedSearch, fromDate, order, sortBy, statusFilter, toDate }),
+    [debouncedSearch, fromDate, order, sortBy, statusFilter, toDate],
   );
 
   useEffect(() => {
@@ -118,6 +127,7 @@ const Payments = () => {
 
   const resetFilters = () => {
     setSearch("");
+    setStatusFilter("all");
     setFromDate("");
     setToDate("");
     setSortBy(DEFAULT_SORT_BY);
@@ -152,7 +162,7 @@ const Payments = () => {
         locale={locale}
       />
 
-      <section className="grid gap-4 rounded-lg border border-border bg-card p-4 lg:grid-cols-[minmax(0,1.7fr)_repeat(2,minmax(0,1fr))_auto]">
+      <section className="grid gap-4 rounded-lg border border-border bg-card p-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(11rem,0.7fr)_repeat(2,minmax(0,1fr))_auto]">
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
           <span className="inline-flex items-center gap-2 text-muted-foreground">
             <Search className="h-4 w-4" /> {t("common.actions.search")}
@@ -165,6 +175,23 @@ const Payments = () => {
             className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30"
           />
           <span className="text-xs text-muted-foreground">{t("payments.search.helper")}</span>
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
+          <span className="inline-flex items-center gap-2 text-muted-foreground">
+            <Filter className="h-4 w-4" /> {t("payments.filters.status")}
+          </span>
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+            className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring/30"
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">

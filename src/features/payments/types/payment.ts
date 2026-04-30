@@ -16,6 +16,7 @@ export interface PaymentQueryParams {
   page?: number;
   limit?: number;
   search?: string;
+  status?: PaymentStatus;
   from?: string;
   to?: string;
   sortBy?: PaymentSortBy;

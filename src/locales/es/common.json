@@ -150,6 +150,10 @@
       "placeholder": "Ej: ORDER-2024-001 o email@ejemplo.com",
       "helper": "Busca por ID, número de orden o correo del cliente."
     },
+    "filters": {
+      "status": "Estado",
+      "all": "Todos"
+    },
     "pagination": {
       "page": "Página {{page}} de {{totalPages}}"
     },
