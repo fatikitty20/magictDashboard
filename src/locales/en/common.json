@@ -1,0 +1,335 @@
+{
+  "language": {
+    "label": "Language"
+  },
+  "topbar": {
+    "searchPlaceholder": "Search orders, payments, or clients...",
+    "actions": {
+      "messages": "Messages",
+      "notifications": "Notifications"
+    }
+  },
+  "common": {
+    "actions": {
+      "refresh": "Refresh",
+      "search": "Search",
+      "from": "From",
+      "to": "To",
+      "clear": "Clear",
+      "previous": "Previous",
+      "next": "Next",
+      "all": "All"
+    }
+  },
+  "login": {
+    "subtitle": "Sign in to your dashboard",
+    "fields": {
+      "email": "Email",
+      "password": "Password"
+    },
+    "placeholders": {
+      "email": "demo@magictronic.com",
+      "password": "demo1234"
+    },
+    "actions": {
+      "submit": "Sign in",
+      "loading": "Signing in..."
+    },
+    "errors": {
+      "default": "We could not sign you in"
+    },
+    "footer": "2026 MagicTronic. E-commerce platform."
+  },
+  "dashboard": {
+    "title": "Control panel",
+    "description": "Manage your payments, orders, and store performance.",
+    "actions": {
+      "newCharge": "New charge",
+      "export": "Export"
+    },
+    "analytics": {
+      "title": "Project analytics"
+    },
+    "metrics": {
+      "viewMetric": "View {{label}}",
+      "sales": {
+        "title": "Total sales",
+        "helper": "+18% vs previous month"
+      },
+      "orders": {
+        "title": "Completed orders",
+        "helper": "+12% vs previous month"
+      },
+      "active": {
+        "title": "Orders in progress",
+        "helper": "Processing now"
+      },
+      "pending": {
+        "title": "Pending payments",
+        "helper": "Require attention"
+      }
+    },
+    "projects": {
+      "title": "Projects",
+      "new": "New",
+      "due": "Due: {{date}}",
+      "mercadoPago": "Integrate Mercado Pago",
+      "onboarding": "New vendor onboarding",
+      "checkout": "Optimized mobile checkout",
+      "hotSale": "Hot Sale campaign",
+      "antifraude": "PSP antifraud tests"
+    },
+    "team": {
+      "title": "PSP team",
+      "invite": "Invite",
+      "tasks": {
+        "paymentGateway": "Payment gateway setup",
+        "checkoutPro": "Mercado Pago Checkout Pro integration",
+        "antifraud": "Antifraud rules and 3DS validation",
+        "mobileCheckout": "Mobile-first checkout design"
+      },
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "pending": "Pending"
+      }
+    },
+    "reminder": {
+      "sectionTitle": "Reminders",
+      "title": "Review with payments team",
+      "today": "Today - {{time}}",
+      "action": "Start meeting"
+    },
+    "progress": {
+      "title": "Payments progress",
+      "subtitle": "Processed this month",
+      "legend": {
+        "approved": "Approved",
+        "inProgress": "In progress",
+        "pending": "Pending"
+      }
+    },
+    "timer": {
+      "title": "Session time",
+      "actions": {
+        "pause": "Pause time",
+        "stop": "Stop time"
+      }
+    }
+  },
+  "notFound": {
+    "description": "The route you were looking for does not exist.",
+    "action": "Back to home"
+  },
+  "sidebar": {
+    "menuLabel": "Menu",
+    "generalLabel": "General",
+    "menu": {
+      "dashboard": "Panel",
+      "payments": "Payments",
+      "orders": "Orders",
+      "reports": "Reports",
+      "clients": "Clients"
+    },
+    "general": {
+      "settings": "Settings",
+      "help": "Help"
+    },
+    "logout": "Log out",
+    "mobileCard": {
+      "title": "Mobile PSP app",
+      "description": "Manage from your phone",
+      "download": "Download"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "description": "Track transactions, reconciliation, and charge statuses.",
+    "errors": { "load": "Error loading payments" },
+    "search": {
+      "placeholder": "E.g. ORDER-2024-001 or email@example.com",
+      "helper": "Search by ID, order number, or customer email."
+    },
+    "pagination": {
+      "page": "Page {{page}} of {{totalPages}}"
+    },
+    "stats": {
+      "totalRevenue": { "title": "Total Revenue", "helper": "Gross processed amount" },
+      "paid": { "title": "Paid Payments", "helper": "Approved transactions" },
+      "pending": { "title": "Pending Payments", "helper": "Require reconciliation" },
+      "rejected": { "title": "Rejected Payments", "helper": "Need review" }
+    },
+    "table": {
+      "headers": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "paymentMethod": "Payment Method",
+        "status": "Payment Status",
+        "createdAt": "Date",
+        "total": "Total"
+      },
+      "emptyState": "No payments match the current filters."
+    },
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Explore segments, history, and commercial opportunities for each client.",
+    "actions": { "newClient": "New client" },
+    "search": { "placeholder": "Search by name, email, or city" },
+    "filters": {
+      "label": "Filter by segment",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "risk": "Risk",
+      "gold": "Gold",
+      "silver": "Silver",
+      "new": "New",
+      "segmentPrefix": "Segment: {{segment}}"
+    },
+    "stats": {
+      "total": { "title": "Total clients", "helper": "Commercial base" },
+      "active": { "title": "Active clients", "helper": "With recent purchases" },
+      "risk": { "title": "At-risk clients", "helper": "Need review" },
+      "value": { "title": "Accumulated value", "helper": "Historical revenue" }
+    },
+    "tiers": { "gold": "Gold", "silver": "Silver", "new": "New" },
+    "table": {
+      "headers": {
+        "client": "Client",
+        "segment": "Segment",
+        "status": "Status",
+        "channel": "Channel",
+        "orders": "Orders",
+        "value": "Value",
+        "lastPurchase": "Last purchase"
+      },
+      "emptyState": "No clients match the selected filters."
+    },
+    "details": {
+      "empty": {
+        "title": "Client details",
+        "description": "Select a client to view the full information."
+      },
+      "lastPurchase": "Last purchase: {{date}}",
+      "segment": "Segment {{tier}}",
+      "labels": { "email": "Email", "phone": "Phone", "city": "City" },
+      "metrics": {
+        "value": "Accumulated value",
+        "orders": "Orders",
+        "averageTicket": "Average ticket",
+        "growth": "Growth"
+      },
+      "tags": { "title": "Tags" },
+      "notes": { "title": "Commercial notes" }
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "description": "View the operational status of your orders and their logistics progress.",
+    "filters": {
+      "label": "Filter by status",
+      "all": "All",
+      "completed": "Completed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "stats": {
+      "total": { "title": "Total orders", "helper": "Registered orders" },
+      "completed": { "title": "Completed orders", "helper": "Confirmed deliveries" },
+      "pending": { "title": "Pending orders", "helper": "In logistics process" },
+      "cancelled": { "title": "Cancelled orders", "helper": "Need follow-up" }
+    },
+    "table": {
+      "headers": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "order": "Order",
+        "salesChannel": "Sales Channel",
+        "status": "Order Status",
+        "date": "Date",
+        "total": "Total"
+      },
+      "emptyState": "No orders match the selected filter."
+    },
+    "details": {
+      "empty": {
+        "title": "Order details",
+        "description": "Select an order to view the full information."
+      },
+      "metaLabel": "Administrative details",
+      "title": "Order {{id}}",
+      "createdAt": "Created: {{date}}",
+      "risk": "Risk {{risk}}",
+      "sections": {
+        "customer": "Customer",
+        "payment": "Payment",
+        "shipping": "Shipping address",
+        "items": "Order items",
+        "notes": "Internal notes and audit"
+      },
+      "payment": {
+        "method": "Method: {{method}}",
+        "transaction": "Transaction: {{id}}",
+        "authorization": "Authorization: {{code}}",
+        "installments": "Installments: {{count}}",
+        "card": "Card: **** {{last4}}",
+        "total": "Total: {{total}}"
+      },
+      "shipping": {
+        "zipCode": "ZIP: {{zipCode}}",
+        "phone": "Phone: {{phone}}",
+        "reference": "Reference: {{reference}}",
+        "estimatedDelivery": "Estimated delivery: {{date}}"
+      },
+      "itemMeta": "SKU: {{sku}} | Quantity: {{quantity}}",
+      "riskReason": "Risk reason: {{reason}}"
+    },
+    "risk": { "low": "Low", "medium": "Medium", "high": "High" }
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Analyze sales, channels, and products with dynamic period filters.",
+    "actions": { "export": "Export" },
+    "range": { "label": "Report period", "helper": "Change the range to recalculate the view" },
+    "stats": {
+      "revenue": { "title": "Revenue", "helper": "+{{growth}}% vs previous period" },
+      "orders": { "title": "Orders", "helper": "Captured orders" },
+      "averageTicket": { "title": "Average ticket", "helper": "Average value per order" },
+      "conversion": { "title": "Conversion", "helper": "{{refunds}} refunds recorded" }
+    },
+    "chart": {
+      "title": "Performance",
+      "options": { "revenue": "Revenue", "orders": "Orders", "visitors": "Visitors" },
+      "labels": {
+        "revenue": "Revenue by period",
+        "orders": "Orders by period",
+        "visitors": "Visitors by period"
+      }
+    },
+    "channelBreakdown": {
+      "title": "Channels",
+      "description": "Share by sales origin",
+      "meta": "{{orders}} orders | {{conversionRate}}% conversion",
+      "share": "{{share}}% of total"
+    },
+    "topProducts": {
+      "title": "Top products",
+      "description": "Ranking adjusted by selected channel",
+      "headers": {
+        "sku": "SKU",
+        "product": "Product",
+        "channel": "Channel",
+        "units": "Units",
+        "revenue": "Revenue",
+        "refunds": "Refunds"
+      },
+      "emptyState": "No products match the selected channel."
+    }
+  }
+}

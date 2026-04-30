@@ -9,9 +9,9 @@ export type TonoBarraAnalitica = "rayado" | "success" | "invertida" | "suave";
 
 export interface Metrica {
   id: string;
-  etiqueta: string;
+  etiquetaKey: string;
   valor: string;
-  ayuda: string;
+  ayudaKey: string;
   variante: VarianteMetrica;
 }
 
@@ -24,7 +24,7 @@ export interface BarraAnalitica {
 
 export interface Proyecto {
   id: string;
-  nombre: string;
+  nombreKey: string;
   vencimiento: string;
   tono: TonoSemantico;
 }
@@ -32,16 +32,16 @@ export interface Proyecto {
 export interface MiembroEquipo {
   id: string;
   nombre: string;
-  tarea: string;
-  estado: string;
+  tareaKey: string;
+  estadoKey: string;
   tono: TonoSemantico;
 }
 
 export const metricasProyecto: Metrica[] = [
-  { id: "sales", etiqueta: "Ventas totales", valor: "$248K", ayuda: "+18% vs mes anterior", variante: "invertida" },
-  { id: "orders", etiqueta: "Pedidos completados", valor: "1,284", ayuda: "+12% vs mes anterior", variante: "suave" },
-  { id: "active", etiqueta: "Pedidos en curso", valor: "86", ayuda: "Procesando ahora", variante: "suave" },
-  { id: "pending", etiqueta: "Pagos pendientes", valor: "9", ayuda: "Requieren atencion", variante: "suave" },
+  { id: "sales", etiquetaKey: "dashboard.metrics.sales.title", valor: "$248K", ayudaKey: "dashboard.metrics.sales.helper", variante: "invertida" },
+  { id: "orders", etiquetaKey: "dashboard.metrics.orders.title", valor: "1,284", ayudaKey: "dashboard.metrics.orders.helper", variante: "suave" },
+  { id: "active", etiquetaKey: "dashboard.metrics.active.title", valor: "86", ayudaKey: "dashboard.metrics.active.helper", variante: "suave" },
+  { id: "pending", etiquetaKey: "dashboard.metrics.pending.title", valor: "9", ayudaKey: "dashboard.metrics.pending.helper", variante: "suave" },
 ];
 
 export const barrasAnaliticas: BarraAnalitica[] = [
@@ -55,23 +55,23 @@ export const barrasAnaliticas: BarraAnalitica[] = [
 ];
 
 export const proyectos: Proyecto[] = [
-  { id: "mercado-pago", nombre: "Integrar Mercado Pago", vencimiento: "29 Abr, 2026", tono: "info" },
-  { id: "onboarding", nombre: "Onboarding nuevos vendedores", vencimiento: "2 May, 2026", tono: "success" },
-  { id: "checkout", nombre: "Checkout mobile optimizado", vencimiento: "6 May, 2026", tono: "info" },
-  { id: "hot-sale", nombre: "Campana Hot Sale", vencimiento: "10 May, 2026", tono: "muted" },
-  { id: "antifraude", nombre: "Pruebas antifraude PSP", vencimiento: "14 May, 2026", tono: "destructive" },
+  { id: "mercado-pago", nombreKey: "dashboard.projects.mercadoPago", vencimiento: "2026-04-29", tono: "info" },
+  { id: "onboarding", nombreKey: "dashboard.projects.onboarding", vencimiento: "2026-05-02", tono: "success" },
+  { id: "checkout", nombreKey: "dashboard.projects.checkout", vencimiento: "2026-05-06", tono: "info" },
+  { id: "hot-sale", nombreKey: "dashboard.projects.hotSale", vencimiento: "2026-05-10", tono: "muted" },
+  { id: "antifraude", nombreKey: "dashboard.projects.antifraude", vencimiento: "2026-05-14", tono: "destructive" },
 ];
 
 export const miembrosEquipo: MiembroEquipo[] = [
-  { id: "alexandra", nombre: "Alexandra Deff", tarea: "Configuracion pasarela de pagos", estado: "Completado", tono: "success" },
-  { id: "edwin", nombre: "Edwin Adenike", tarea: "Integracion Mercado Pago Checkout Pro", estado: "En progreso", tono: "info" },
-  { id: "isaac", nombre: "Isaac Oluwatemilorun", tarea: "Reglas antifraude y validacion 3DS", estado: "Pendiente", tono: "destructive" },
-  { id: "david", nombre: "David Oshodi", tarea: "Diseno checkout mobile-first", estado: "En progreso", tono: "info" },
+  { id: "alexandra", nombre: "Alexandra Deff", tareaKey: "dashboard.team.tasks.paymentGateway", estadoKey: "dashboard.team.status.completed", tono: "success" },
+  { id: "edwin", nombre: "Edwin Adenike", tareaKey: "dashboard.team.tasks.checkoutPro", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
+  { id: "isaac", nombre: "Isaac Oluwatemilorun", tareaKey: "dashboard.team.tasks.antifraud", estadoKey: "dashboard.team.status.pending", tono: "destructive" },
+  { id: "david", nombre: "David Oshodi", tareaKey: "dashboard.team.tasks.mobileCheckout", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
 ];
 
 export const recordatorio = {
-  titulo: "Revision con equipo de pagos",
-  horario: "02:00 pm - 04:00 pm",
+  tituloKey: "dashboard.reminder.title",
+  horario: "14:00 - 16:00",
 };
 
 export const progresoPagos = 41;

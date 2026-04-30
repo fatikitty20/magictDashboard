@@ -1,4 +1,5 @@
 import { BarChart3, Percent, ShoppingBag, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
 import type { ReportSummary } from "../types/report";
 
@@ -13,32 +14,33 @@ const currencyFormatter = new Intl.NumberFormat("es-AR", {
 });
 
 export const ReportsStats = ({ summary }: ReportsStatsProps) => {
+  const { t } = useTranslation();
   const items = [
     {
-      title: "Ingresos",
+      title: t("reports.stats.revenue.title"),
       value: currencyFormatter.format(summary.revenue),
-      helper: `+${summary.growth}% vs periodo anterior`,
+      helper: t("reports.stats.revenue.helper", { growth: summary.growth }),
       icon: TrendingUp,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: "Ordenes",
+      title: t("reports.stats.orders.title"),
       value: summary.orders.toLocaleString("es-AR"),
-      helper: "Pedidos capturados",
+      helper: t("reports.stats.orders.helper"),
       icon: ShoppingBag,
       toneClass: claseTonoSuave("info", "h-9 w-9"),
     },
     {
-      title: "Ticket promedio",
+      title: t("reports.stats.averageTicket.title"),
       value: currencyFormatter.format(summary.averageTicket),
-      helper: "Valor medio por orden",
+      helper: t("reports.stats.averageTicket.helper"),
       icon: BarChart3,
       toneClass: claseTonoSuave("muted", "h-9 w-9"),
     },
     {
-      title: "Conversion",
+      title: t("reports.stats.conversion.title"),
       value: `${summary.conversionRate}%`,
-      helper: `${summary.refunds} devoluciones registradas`,
+      helper: t("reports.stats.conversion.helper", { refunds: summary.refunds }),
       icon: Percent,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },

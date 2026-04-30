@@ -10,27 +10,29 @@ import {
   Store,
   Users,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAutenticacion } from "@/features/auth/useAuth";
 import { claseBotonPrimario, claseTarjetaInvertida } from "../estilosDashboard";
-
-const elementosMenu = [
-  { icon: LayoutDashboard, label: "Panel", path: "/dashboard" },
-  { icon: CreditCard, label: "Pagos", path: "/payments", badge: "10" },
-  { icon: ShoppingBag, label: "Pedidos", path: "/orders", badge: "8" },
-  { icon: BarChart3, label: "Reportes", path: "/reports" },
-  { icon: Users, label: "Clientes", path: "/clients" },
-];
-
-const elementosGenerales = [
-  { icon: Settings, label: "Configuración" },
-  { icon: HelpCircle, label: "Ayuda" },
-];
 
 export const BarraLateral = () => {
   const { cerrarSesion } = useAutenticacion();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+
+  const elementosMenu = [
+    { icon: LayoutDashboard, label: t("sidebar.menu.dashboard"), path: "/dashboard" },
+    { icon: CreditCard, label: t("sidebar.menu.payments"), path: "/payments", badge: "10" },
+    { icon: ShoppingBag, label: t("sidebar.menu.orders"), path: "/orders", badge: "8" },
+    { icon: BarChart3, label: t("sidebar.menu.reports"), path: "/reports" },
+    { icon: Users, label: t("sidebar.menu.clients"), path: "/clients" },
+  ];
+
+  const elementosGenerales = [
+    { icon: Settings, label: t("sidebar.general.settings") },
+    { icon: HelpCircle, label: t("sidebar.general.help") },
+  ];
 
   const manejarCierreSesion = async () => {
     await cerrarSesion();
@@ -54,7 +56,7 @@ export const BarraLateral = () => {
         <span className="text-lg font-semibold text-foreground">PSP</span>
       </div>
 
-      <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">Menu</p>
+      <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">{t("sidebar.menuLabel")}</p>
       <nav className="mb-6 space-y-1">
         {elementosMenu.map((elemento) => (
           <button
@@ -76,7 +78,7 @@ export const BarraLateral = () => {
         ))}
       </nav>
 
-      <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">General</p>
+      <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">{t("sidebar.generalLabel")}</p>
       <nav className="flex-1 space-y-1">
         {elementosGenerales.map((elemento) => (
           <button
@@ -94,20 +96,20 @@ export const BarraLateral = () => {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted"
         >
           <LogOut className="h-4 w-4" />
-          <span>Cerrar sesión</span>
+          <span>{t("sidebar.logout")}</span>
         </button>
       </nav>
 
       <div className={claseTarjetaInvertida("relative mt-4 overflow-hidden p-4")}>
         <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-success/20" />
         <Smartphone className="mb-2 h-6 w-6 text-success" />
-        <p className="mb-1 text-sm font-semibold text-dashboard-inverted-foreground">App PSP móvil</p>
-        <p className="mb-3 text-[10px] text-dashboard-inverted-foreground/60">Gestiona desde el celular</p>
+        <p className="mb-1 text-sm font-semibold text-dashboard-inverted-foreground">{t("sidebar.mobileCard.title")}</p>
+        <p className="mb-3 text-[10px] text-dashboard-inverted-foreground/60">{t("sidebar.mobileCard.description")}</p>
         <button
           type="button"
           className={claseBotonPrimario("h-8 w-full rounded-md text-xs hover:brightness-95")}
         >
-          Descargar
+          {t("sidebar.mobileCard.download")}
         </button>
       </div>
     </aside>

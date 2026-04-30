@@ -1,5 +1,6 @@
 import { CalendarDays, ChevronLeft, ChevronRight, RefreshCcw, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
 import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
@@ -12,6 +13,7 @@ const DEFAULT_SORT_BY: PaymentSortBy = "createdAt";
 const DEFAULT_SORT_ORDER: SortOrder = "desc";
 
 const Payments = () => {
+  const { t } = useTranslation();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,14 +64,14 @@ const Payments = () => {
         setPayments([]);
         setTotalPages(1);
         setStats(null);
-        setError((err as Error)?.message ?? "Error al cargar pagos");
+        setError((err as Error)?.message ?? t("payments.errors.load"));
       } finally {
         if (requestId === requestIdRef.current) {
           setIsLoading(false);
         }
       }
     },
-    [debouncedSearch, fromDate, order, sortBy, toDate],
+    [debouncedSearch, fromDate, order, sortBy, t, toDate],
   );
 
   const filterKey = useMemo(
@@ -128,12 +130,12 @@ const Payments = () => {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-3xl font-bold text-foreground">Pagos</h1>
-          <p className="text-sm text-muted-foreground">Monitorea transacciones, conciliacion y estados de cobro.</p>
+          <h1 className="mb-1 text-3xl font-bold text-foreground">{t("payments.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("payments.description")}</p>
         </div>
 
         <button onClick={handleRefresh} className={claseBotonPrimario("h-10 gap-2 px-5 text-sm")}>
-          <RefreshCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} /> Actualizar
+          <RefreshCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} /> {t("common.actions.refresh")}
         </button>
       </div>
 
@@ -153,21 +155,21 @@ const Payments = () => {
       <section className="grid gap-4 rounded-lg border border-border bg-card p-4 lg:grid-cols-[minmax(0,1.7fr)_repeat(2,minmax(0,1fr))_auto]">
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
           <span className="inline-flex items-center gap-2 text-muted-foreground">
-            <Search className="h-4 w-4" /> Buscar
+            <Search className="h-4 w-4" /> {t("common.actions.search")}
           </span>
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             type="search"
-            placeholder="Ej: ORDER-2024-001 o email@ejemplo.com"
+            placeholder={t("payments.search.placeholder")}
             className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30"
           />
-          <span className="text-xs text-muted-foreground">Busca por ID, numero de orden o correo del cliente.</span>
+          <span className="text-xs text-muted-foreground">{t("payments.search.helper")}</span>
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
           <span className="inline-flex items-center gap-2 text-muted-foreground">
-            <CalendarDays className="h-4 w-4" /> Desde
+            <CalendarDays className="h-4 w-4" /> {t("common.actions.from")}
           </span>
           <input
             value={fromDate}
@@ -179,7 +181,7 @@ const Payments = () => {
 
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
           <span className="inline-flex items-center gap-2 text-muted-foreground">
-            <CalendarDays className="h-4 w-4" /> Hasta
+            <CalendarDays className="h-4 w-4" /> {t("common.actions.to")}
           </span>
           <input
             value={toDate}
@@ -195,7 +197,7 @@ const Payments = () => {
             onClick={resetFilters}
             className="flex h-10 items-center justify-center rounded-full border border-border px-4 text-sm font-medium text-foreground transition hover:bg-secondary"
           >
-            Limpiar
+            {t("common.actions.clear")}
           </button>
         </div>
       </section>
@@ -210,9 +212,7 @@ const Payments = () => {
       />
 
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-        <div>
-          Pagina {page} de {totalPages}
-        </div>
+        <div>{t("payments.pagination.page", { page, totalPages })}</div>
 
         <div className="flex items-center gap-2">
           <button
@@ -221,7 +221,7 @@ const Payments = () => {
             disabled={isLoading || page <= 1}
             className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <ChevronLeft className="h-4 w-4" /> Anterior
+            <ChevronLeft className="h-4 w-4" /> {t("common.actions.previous")}
           </button>
           <button
             type="button"
@@ -229,7 +229,7 @@ const Payments = () => {
             disabled={isLoading || page >= totalPages}
             className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Siguiente <ChevronRight className="h-4 w-4" />
+            {t("common.actions.next")} <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </section>

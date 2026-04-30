@@ -1,10 +1,12 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { ArrowRight, Lock, Mail, Store } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAutenticacion } from "@/features/auth/useAuth";
 import { claseBotonPrimario, claseTarjeta } from "@/features/dashboard/estilosDashboard";
 
 const Login = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { iniciarSesion, estaAutenticado } = useAutenticacion();
   const [correo, setCorreo] = useState("");
@@ -27,7 +29,7 @@ const Login = () => {
       await iniciarSesion({ correo, contrasena });
       navigate("/dashboard", { replace: true });
     } catch (errorCapturado) {
-      setError(errorCapturado instanceof Error ? errorCapturado.message : "No pudimos iniciar sesion");
+      setError(errorCapturado instanceof Error ? errorCapturado.message : t("login.errors.default"));
       setEstaCargando(false);
     }
   };
@@ -35,19 +37,19 @@ const Login = () => {
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-background p-6">
       <div className="w-full max-w-md animate-fade-up">
-        <div className="mb-8 flex flex-col items-center">
+        <div className="mb-8 flex flex-col items-center gap-4">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary shadow-lg shadow-primary/20">
             <Store className="h-6 w-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">MagicTronic</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Inicia sesion en tu panel</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("login.subtitle")}</p>
         </div>
 
         <div className={claseTarjeta("base", "p-8 shadow-sm")}>
           <form onSubmit={manejarEnvio} className="space-y-5">
             <div>
               <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
-                Email
+                {t("login.fields.email")}
               </label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -57,7 +59,7 @@ const Login = () => {
                   required
                   value={correo}
                   onChange={(event) => setCorreo(event.target.value)}
-                  placeholder="demo@magictronic.com"
+                  placeholder={t("login.placeholders.email")}
                   className="h-12 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-foreground transition placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30"
                   autoComplete="email"
                 />
@@ -66,7 +68,7 @@ const Login = () => {
 
             <div>
               <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground">
-                Contrasena
+                {t("login.fields.password")}
               </label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -76,7 +78,7 @@ const Login = () => {
                   required
                   value={contrasena}
                   onChange={(event) => setContrasena(event.target.value)}
-                  placeholder="demo1234"
+                  placeholder={t("login.placeholders.password")}
                   className="h-12 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-foreground transition placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30"
                   autoComplete="current-password"
                 />
@@ -94,14 +96,14 @@ const Login = () => {
               disabled={estaCargando}
               className={claseBotonPrimario("group h-12 w-full gap-2 rounded-lg font-semibold shadow-lg shadow-success/20 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60")}
             >
-              {estaCargando ? "Ingresando..." : "Ingresar"}
+              {estaCargando ? t("login.actions.loading") : t("login.actions.submit")}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          2026 MagicTronic. Plataforma de e-commerce.
+          {t("login.footer")}
         </p>
       </div>
     </main>

@@ -1,4 +1,5 @@
 import { claseTarjeta } from "../../dashboard/estilosDashboard";
+import { useTranslation } from "react-i18next";
 import type { Order } from "../types/order";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 
@@ -20,19 +21,22 @@ const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   year: "numeric",
 });
 
-export const OrdersTable = ({ orders, selectedOrderId, onSelectOrder }: OrdersTableProps) => (
+export const OrdersTable = ({ orders, selectedOrderId, onSelectOrder }: OrdersTableProps) => {
+  const { t } = useTranslation();
+
+  return (
   <section className={claseTarjeta("base", "overflow-hidden")}>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-border text-sm">
         <thead className="bg-muted/40">
           <tr>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">ID de Orden</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Cliente</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Pedido</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Canal de Venta</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Estado del Pedido</th>
-            <th className="px-4 py-3 text-left font-semibold text-foreground">Fecha</th>
-            <th className="px-4 py-3 text-right font-semibold text-foreground">Total</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">{t("orders.table.headers.orderId")}</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">{t("orders.table.headers.customer")}</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">{t("orders.table.headers.order")}</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">{t("orders.table.headers.salesChannel")}</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">{t("orders.table.headers.status")}</th>
+            <th className="px-4 py-3 text-left font-semibold text-foreground">{t("orders.table.headers.date")}</th>
+            <th className="px-4 py-3 text-right font-semibold text-foreground">{t("orders.table.headers.total")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -69,8 +73,9 @@ export const OrdersTable = ({ orders, selectedOrderId, onSelectOrder }: OrdersTa
 
     {orders.length === 0 ? (
       <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-        No hay pedidos para el filtro seleccionado.
+        {t("orders.table.emptyState")}
       </div>
     ) : null}
   </section>
-);
+  );
+};

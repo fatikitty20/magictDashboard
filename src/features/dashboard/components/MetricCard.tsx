@@ -1,9 +1,13 @@
 import { ArrowUpRight, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { Metrica } from "../data";
 import { claseTarjeta } from "../estilosDashboard";
 
-export const TarjetaMetrica = ({ etiqueta, valor, ayuda, variante }: Metrica) => {
+export const TarjetaMetrica = ({ etiquetaKey, valor, ayudaKey, variante }: Metrica) => {
+  const { t } = useTranslation();
   const esInvertida = variante === "invertida";
+  const etiqueta = t(etiquetaKey);
+  const ayuda = t(ayudaKey);
 
   return (
     <div className={claseTarjeta(variante, "relative p-5")}>
@@ -13,7 +17,7 @@ export const TarjetaMetrica = ({ etiqueta, valor, ayuda, variante }: Metrica) =>
         </p>
         <button
           type="button"
-          aria-label={`Ver ${etiqueta}`}
+          aria-label={t("dashboard.metrics.viewMetric", { label: etiqueta })}
           className={`flex h-7 w-7 items-center justify-center rounded-full ${
             esInvertida ? "bg-success text-success-foreground" : "bg-foreground text-background"
           }`}

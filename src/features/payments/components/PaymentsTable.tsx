@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { Payment, PaymentSortBy, SortOrder } from "../types/payment";
 import { claseTarjeta } from "../../dashboard/estilosDashboard";
 import { StatusBadge } from "./StatusBadge";
@@ -12,13 +13,6 @@ type PaymentsTableProps = {
   locale?: string;
 };
 
-
-const sortableLabels: Record<PaymentSortBy, string> = {
-  createdAt: "Fecha",
-  total: "Total",
-  status: "Estado del Pago",
-};
-
 const renderSortIcon = (isActive: boolean, order: SortOrder) => {
   if (!isActive) {
     return <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />;
@@ -28,10 +22,16 @@ const renderSortIcon = (isActive: boolean, order: SortOrder) => {
 };
 
 export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSortChange, locale }: PaymentsTableProps) => {
+  const { t } = useTranslation();
   const headerButtonClass =
     "inline-flex items-center gap-1.5 font-semibold text-foreground transition hover:text-foreground/80";
 
   const usedLocale = locale ?? (typeof navigator !== "undefined" ? navigator.language ?? "es-MX" : "es-MX");
+  const sortableLabels: Record<PaymentSortBy, string> = {
+    createdAt: t("payments.table.headers.createdAt"),
+    total: t("payments.table.headers.total"),
+    status: t("payments.table.headers.status"),
+  };
 
   return (
     <section className={claseTarjeta("base", "overflow-hidden")}>
@@ -39,9 +39,9 @@ export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSo
         <table className="min-w-full divide-y divide-border text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="px-4 py-3 text-left font-semibold text-foreground">ID de Orden</th>
-              <th className="px-4 py-3 text-left font-semibold text-foreground">Cliente</th>
-              <th className="px-4 py-3 text-left font-semibold text-foreground">Método de Pago</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">{t("payments.table.headers.orderId")}</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">{t("payments.table.headers.customer")}</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">{t("payments.table.headers.paymentMethod")}</th>
               <th
                 className="px-4 py-3 text-left font-semibold text-foreground"
                 aria-sort={sortBy === "status" ? (order === "asc" ? "ascending" : "descending") : "none"}
@@ -110,7 +110,7 @@ export const PaymentsTable = ({ payments, isLoading = false, sortBy, order, onSo
             ) : payments.length === 0 ? (
               <tr>
                 <td className="px-4 py-10 text-center text-sm text-muted-foreground" colSpan={6}>
-                  No hay pagos para mostrar con los filtros actuales.
+                  {t("payments.table.emptyState")}
                 </td>
               </tr>
             ) : (

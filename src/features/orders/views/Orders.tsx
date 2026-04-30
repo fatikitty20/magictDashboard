@@ -1,5 +1,6 @@
 import { Filter, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
 import { OrderDetailsPanel } from "../components/OrderDetailsPanel";
 import { OrdersStats } from "../components/OrdersStats";
@@ -9,15 +10,16 @@ import type { Order, OrderStatus } from "../types/order";
 
 type StatusFilter = "all" | OrderStatus;
 
-const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "Todos" },
-  { value: "completed", label: "Completado" },
-  { value: "pending", label: "Pendiente" },
-  { value: "cancelled", label: "Cancelado" },
-];
-
 const Orders = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
+    const statusOptions: Array<{ value: StatusFilter; label: string }> = [
+      { value: "all", label: t("orders.filters.all") },
+      { value: "completed", label: t("orders.filters.completed") },
+      { value: "pending", label: t("orders.filters.pending") },
+      { value: "cancelled", label: t("orders.filters.cancelled") },
+    ];
+
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -84,14 +86,12 @@ const Orders = () => {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-3xl font-bold text-foreground">Pedidos</h1>
-          <p className="text-sm text-muted-foreground">
-            Visualiza el estado operativo de tus ordenes y su avance logístico.
-          </p>
+          <h1 className="mb-1 text-3xl font-bold text-foreground">{t("orders.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("orders.description")}</p>
         </div>
 
         <button type="button" className={claseBotonPrimario("h-10 gap-2 px-5 text-sm")}>
-          <RefreshCcw className="h-4 w-4" /> Actualizar
+          <RefreshCcw className="h-4 w-4" /> {t("common.actions.refresh")}
         </button>
       </div>
 
@@ -105,7 +105,7 @@ const Orders = () => {
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Filter className="h-4 w-4" />
-          <span>Filtrar por estado</span>
+          <span>{t("orders.filters.label")}</span>
         </div>
 
         <select

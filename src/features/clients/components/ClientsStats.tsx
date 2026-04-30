@@ -1,4 +1,5 @@
 import { ShieldAlert, Sparkles, UserCheck, Wallet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
 
 type ClientsStatsProps = {
@@ -15,32 +16,33 @@ const currencyFormatter = new Intl.NumberFormat("es-AR", {
 });
 
 export const ClientsStats = ({ totalClients, activeClients, riskClients, lifetimeValue }: ClientsStatsProps) => {
+  const { t } = useTranslation();
   const items = [
     {
-      title: "Clientes totales",
+      title: t("clients.stats.total.title"),
       value: totalClients.toString(),
-      helper: "Base comercial",
+      helper: t("clients.stats.total.helper"),
       icon: Sparkles,
       toneClass: claseTonoSuave("info", "h-9 w-9"),
     },
     {
-      title: "Clientes activos",
+      title: t("clients.stats.active.title"),
       value: activeClients.toString(),
-      helper: "Con compra reciente",
+      helper: t("clients.stats.active.helper"),
       icon: UserCheck,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: "Clientes en riesgo",
+      title: t("clients.stats.risk.title"),
       value: riskClients.toString(),
-      helper: "Requieren revision",
+      helper: t("clients.stats.risk.helper"),
       icon: ShieldAlert,
       toneClass: claseTonoSuave("destructive", "h-9 w-9"),
     },
     {
-      title: "Valor acumulado",
+      title: t("clients.stats.value.title"),
       value: currencyFormatter.format(lifetimeValue),
-      helper: "Ingresos historicos",
+      helper: t("clients.stats.value.helper"),
       icon: Wallet,
       toneClass: claseTonoSuave("muted", "h-9 w-9"),
     },

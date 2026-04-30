@@ -1,5 +1,6 @@
 import { Filter, RefreshCcw, Search, UserPlus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
 import { ClientDetailsPanel } from "../components/ClientDetailsPanel";
 import { ClientsStats } from "../components/ClientsStats";
@@ -10,22 +11,23 @@ import type { Client, ClientStatus, ClientTier } from "../types/client";
 type StatusFilter = "all" | ClientStatus;
 type TierFilter = "all" | ClientTier;
 
-const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "Todos" },
-  { value: "active", label: "Activos" },
-  { value: "inactive", label: "Inactivos" },
-  { value: "risk", label: "Riesgo" },
-];
-
-const tierOptions: Array<{ value: TierFilter; label: string }> = [
-  { value: "all", label: "Todos" },
-  { value: "gold", label: "Oro" },
-  { value: "silver", label: "Plata" },
-  { value: "new", label: "Nuevos" },
-];
-
 const Clients = () => {
+  const { t } = useTranslation();
   const [clients, setClients] = useState<Client[]>([]);
+    const statusOptions: Array<{ value: StatusFilter; label: string }> = [
+      { value: "all", label: t("clients.filters.all") },
+      { value: "active", label: t("clients.filters.active") },
+      { value: "inactive", label: t("clients.filters.inactive") },
+      { value: "risk", label: t("clients.filters.risk") },
+    ];
+
+    const tierOptions: Array<{ value: TierFilter; label: string }> = [
+      { value: "all", label: t("clients.filters.all") },
+      { value: "gold", label: t("clients.filters.gold") },
+      { value: "silver", label: t("clients.filters.silver") },
+      { value: "new", label: t("clients.filters.new") },
+    ];
+
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -94,10 +96,8 @@ const Clients = () => {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-3xl font-bold text-foreground">Clientes</h1>
-          <p className="text-sm text-muted-foreground">
-            Explora segmentos, historial y oportunidades comerciales de cada cliente.
-          </p>
+          <h1 className="mb-1 text-3xl font-bold text-foreground">{t("clients.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("clients.description")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -106,10 +106,10 @@ const Clients = () => {
             onClick={loadClients}
             className="flex h-10 items-center gap-2 rounded-full border border-foreground px-5 text-sm font-medium text-foreground transition hover:bg-foreground hover:text-background"
           >
-            <RefreshCcw className="h-4 w-4" /> Actualizar
+            <RefreshCcw className="h-4 w-4" /> {t("common.actions.refresh")}
           </button>
           <button type="button" className={claseBotonPrimario("h-10 gap-2 px-5 text-sm")}>
-            <UserPlus className="h-4 w-4" /> Nuevo cliente
+            <UserPlus className="h-4 w-4" /> {t("clients.actions.newClient")}
           </button>
         </div>
       </div>
@@ -128,7 +128,7 @@ const Clients = () => {
             type="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Buscar por nombre, email o ciudad"
+            placeholder={t("clients.search.placeholder")}
             className="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30"
           />
         </div>
@@ -154,9 +154,9 @@ const Clients = () => {
           className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring/30"
         >
           {tierOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              Segmento: {option.label}
-            </option>
+              <option key={option.value} value={option.value}>
+                {t("clients.filters.segmentPrefix", { segment: option.label })}
+              </option>
           ))}
         </select>
       </section>

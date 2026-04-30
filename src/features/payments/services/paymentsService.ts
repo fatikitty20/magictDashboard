@@ -139,7 +139,7 @@ export const paymentsService = {
     const response = await fetch(buildApiUrl(""));
 
     if (!response.ok) {
-      throw new Error("No se pudieron cargar los pagos");
+      throw new Error("Could not load payments");
     }
 
     const payload = (await response.json()) as PaymentsApiResponse;

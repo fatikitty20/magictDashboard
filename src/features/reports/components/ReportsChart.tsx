@@ -1,4 +1,5 @@
 import { BarChart3 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
 import type { DailyReportMetric, ReportMetricKey } from "../types/report";
 
@@ -6,18 +7,6 @@ type ReportsChartProps = {
   daily: DailyReportMetric[];
   metric: ReportMetricKey;
   onMetricChange: (metric: ReportMetricKey) => void;
-};
-
-const metricOptions: Array<{ value: ReportMetricKey; label: string }> = [
-  { value: "revenue", label: "Ingresos" },
-  { value: "orders", label: "Ordenes" },
-  { value: "visitors", label: "Visitas" },
-];
-
-const metricLabel: Record<ReportMetricKey, string> = {
-  revenue: "Ingresos por periodo",
-  orders: "Ordenes por periodo",
-  visitors: "Visitas por periodo",
 };
 
 const metricFormatter: Record<ReportMetricKey, (value: number) => string> = {
@@ -33,6 +22,19 @@ const metricFormatter: Record<ReportMetricKey, (value: number) => string> = {
 };
 
 export const ReportsChart = ({ daily, metric, onMetricChange }: ReportsChartProps) => {
+  const { t } = useTranslation();
+  const metricOptions: Array<{ value: ReportMetricKey; label: string }> = [
+    { value: "revenue", label: t("reports.chart.options.revenue") },
+    { value: "orders", label: t("reports.chart.options.orders") },
+    { value: "visitors", label: t("reports.chart.options.visitors") },
+  ];
+
+  const metricLabel: Record<ReportMetricKey, string> = {
+    revenue: t("reports.chart.labels.revenue"),
+    orders: t("reports.chart.labels.orders"),
+    visitors: t("reports.chart.labels.visitors"),
+  };
+
   const maxValue = Math.max(...daily.map((item) => item[metric]), 1);
 
   return (
@@ -43,7 +45,7 @@ export const ReportsChart = ({ daily, metric, onMetricChange }: ReportsChartProp
             <BarChart3 className="h-4 w-4" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Rendimiento</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("reports.chart.title")}</h2>
             <p className="text-xs text-muted-foreground">{metricLabel[metric]}</p>
           </div>
         </div>

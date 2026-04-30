@@ -1,5 +1,6 @@
 import { Download, RefreshCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
 import { ChannelBreakdown } from "../components/ChannelBreakdown";
 import { ReportsChart } from "../components/ReportsChart";
@@ -9,6 +10,7 @@ import { reportsService } from "../services/reportsService";
 import type { ReportDataset, ReportMetricKey, ReportRange } from "../types/report";
 
 const Reports = () => {
+  const { t } = useTranslation();
   const [reports, setReports] = useState<ReportDataset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [range, setRange] = useState<ReportRange>("30d");
@@ -49,10 +51,8 @@ const Reports = () => {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-3xl font-bold text-foreground">Reportes</h1>
-          <p className="text-sm text-muted-foreground">
-            Analiza ventas, canales y productos con filtros dinamicos por periodo.
-          </p>
+          <h1 className="mb-1 text-3xl font-bold text-foreground">{t("reports.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("reports.description")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -61,18 +61,18 @@ const Reports = () => {
             onClick={loadReports}
             className="flex h-10 items-center gap-2 rounded-full border border-foreground px-5 text-sm font-medium text-foreground transition hover:bg-foreground hover:text-background"
           >
-            <RefreshCcw className="h-4 w-4" /> Actualizar
+            <RefreshCcw className="h-4 w-4" /> {t("common.actions.refresh")}
           </button>
           <button type="button" className={claseBotonPrimario("h-10 gap-2 px-5 text-sm")}>
-            <Download className="h-4 w-4" /> Exportar
+            <Download className="h-4 w-4" /> {t("reports.actions.export")}
           </button>
         </div>
       </div>
 
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Periodo del reporte</p>
-          <p className="text-xs text-muted-foreground">Cambia el rango para recalcular la vista</p>
+          <p className="text-sm font-medium text-foreground">{t("reports.range.label")}</p>
+          <p className="text-xs text-muted-foreground">{t("reports.range.helper")}</p>
         </div>
 
         <select

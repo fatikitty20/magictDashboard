@@ -1,4 +1,5 @@
 import { CircleAlert, CircleCheckBig, CircleDashed, Wallet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { claseTarjeta, claseTonoSuave } from "../../dashboard/estilosDashboard";
 
 type PaymentsStatsProps = {
@@ -11,6 +12,7 @@ type PaymentsStatsProps = {
 };
 
 export const PaymentsStats = ({ totalRevenue, paidCount, pendingCount, rejectedCount, currency, locale }: PaymentsStatsProps) => {
+  const { t } = useTranslation();
   const usedLocale = locale ?? (typeof navigator !== "undefined" ? navigator.language ?? "es-MX" : "es-MX");
   const usedCurrency = currency ?? "MXN";
 
@@ -22,31 +24,31 @@ export const PaymentsStats = ({ totalRevenue, paidCount, pendingCount, rejectedC
 
   const items = [
     {
-      title: "Ingresos Totales",
+      title: t("payments.stats.totalRevenue.title"),
       value: currencyFormatter.format(totalRevenue),
-      helper: "Total bruto procesado",
+      helper: t("payments.stats.totalRevenue.helper"),
       icon: Wallet,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: "Pagos Confirmados",
+      title: t("payments.stats.paid.title"),
       value: paidCount.toString(),
-      helper: "Transacciones aprobadas",
+      helper: t("payments.stats.paid.helper"),
       icon: CircleCheckBig,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: "Pagos Pendientes",
+      title: t("payments.stats.pending.title"),
       value: pendingCount.toString(),
-      helper: "Requieren conciliacion",
+      helper: t("payments.stats.pending.helper"),
       icon: CircleDashed,
       toneClass:
         "flex h-9 w-9 items-center justify-center rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300",
     },
     {
-      title: "Pagos Rechazados",
+      title: t("payments.stats.rejected.title"),
       value: rejectedCount.toString(),
-      helper: "Necesitan revision",
+      helper: t("payments.stats.rejected.helper"),
       icon: CircleAlert,
       toneClass: claseTonoSuave("destructive", "h-9 w-9"),
     },

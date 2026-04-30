@@ -1,4 +1,5 @@
 import { CircleAlert, CircleCheckBig, CircleDashed, ShoppingBag } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
 
 type OrdersStatsProps = {
@@ -9,33 +10,34 @@ type OrdersStatsProps = {
 };
 
 export const OrdersStats = ({ totalOrders, completedCount, pendingCount, cancelledCount }: OrdersStatsProps) => {
+  const { t } = useTranslation();
   const items = [
     {
-      title: "Pedidos Totales",
+      title: t("orders.stats.total.title"),
       value: totalOrders.toString(),
-      helper: "Ordenes registradas",
+      helper: t("orders.stats.total.helper"),
       icon: ShoppingBag,
       toneClass: claseTonoSuave("info", "h-9 w-9"),
     },
     {
-      title: "Pedidos Completados",
+      title: t("orders.stats.completed.title"),
       value: completedCount.toString(),
-      helper: "Entregas confirmadas",
+      helper: t("orders.stats.completed.helper"),
       icon: CircleCheckBig,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: "Pedidos Pendientes",
+      title: t("orders.stats.pending.title"),
       value: pendingCount.toString(),
-      helper: "En proceso logistico",
+      helper: t("orders.stats.pending.helper"),
       icon: CircleDashed,
       toneClass:
         "flex h-9 w-9 items-center justify-center rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300",
     },
     {
-      title: "Pedidos Cancelados",
+      title: t("orders.stats.cancelled.title"),
       value: cancelledCount.toString(),
-      helper: "Requieren seguimiento",
+      helper: t("orders.stats.cancelled.helper"),
       icon: CircleAlert,
       toneClass: claseTonoSuave("destructive", "h-9 w-9"),
     },
