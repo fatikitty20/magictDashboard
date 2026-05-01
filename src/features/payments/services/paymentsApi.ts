@@ -19,7 +19,7 @@ export type PaymentsApiResponse = {
 
 type BackendSortBy = "created_at" | "amount" | "status";
 type BackendOrder = "ASC" | "DESC";
-type BackendStatus = "APPROVED" | "PENDING" | "FAILED";
+export type BackendStatus = "APPROVED" | "PENDING" | "DECLINED" | "REFUNDED" | "FAILED" | "CANCELLED";
 
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_LIMIT = 20;
@@ -34,11 +34,14 @@ const sortFieldMap: Record<PaymentSortBy, BackendSortBy> = {
   status: "status",
 };
 
-const statusFieldMap: Record<PaymentStatus, BackendStatus> = {
-  paid: "APPROVED",
-  pending: "PENDING",
-  rejected: "FAILED",
+const statusFieldMap: Record<PaymentStatus, BackendStatus[]> = {
+  paid: ["APPROVED"],
+  pending: ["PENDING"],
+  rejected: ["DECLINED", "REFUNDED", "FAILED", "CANCELLED"],
 };
+
+export const getBackendStatusesForPaymentStatus = (status?: PaymentStatus): BackendStatus[] =>
+  status ? statusFieldMap[status] : [];
 
 export const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => {
   if (Array.isArray(payload.data)) {
@@ -86,7 +89,12 @@ const fetchPaymentsPayload = async (url: string, emptyOnNotFound = false): Promi
   return (await response.json()) as PaymentsApiResponse;
 };
 
-const buildPaginatedParams = (params: PaymentQueryParams, page: number, limit: number): URLSearchParams => {
+const buildPaginatedParams = (
+  params: PaymentQueryParams,
+  page: number,
+  limit: number,
+  backendStatus?: BackendStatus,
+): URLSearchParams => {
   const searchParams = new URLSearchParams();
 
   // Parametros del endpoint paginado de Alejandro: /api/v1?page=&limit=&status=&sortBy=&order=.
@@ -95,8 +103,8 @@ const buildPaginatedParams = (params: PaymentQueryParams, page: number, limit: n
   searchParams.set("sortBy", sortFieldMap[params.sortBy ?? "createdAt"]);
   searchParams.set("order", (params.order ?? "desc").toUpperCase() as BackendOrder);
 
-  if (params.status) {
-    searchParams.set("status", statusFieldMap[params.status]);
+  if (backendStatus) {
+    searchParams.set("status", backendStatus);
   }
 
   return searchParams;
@@ -108,12 +116,24 @@ export const fetchPaginatedTransactions = async (
   params: PaymentQueryParams,
   page: number,
   limit: number,
-): Promise<PaymentsApiResponse> => fetchPaymentsPayload(buildApiUrl("", buildPaginatedParams(params, page, limit)));
+  backendStatus?: BackendStatus,
+): Promise<PaymentsApiResponse> =>
+  fetchPaymentsPayload(buildApiUrl("", buildPaginatedParams(params, page, limit, backendStatus)));
 
 export const fetchSpecificSearchTransactions = async (search: string): Promise<RoxTransaction[]> => {
   const encodedSearch = encodeURIComponent(search.trim());
-  const searchPath = isEmailSearch(search) ? `/transaction/email/${encodedSearch}` : `/transaction/id/${encodedSearch}`;
-  const payload = await fetchPaymentsPayload(buildApiUrl(searchPath), true);
+  const searchPaths = isEmailSearch(search)
+    ? [`/transaction/email/${encodedSearch}`]
+    : [`/transaction/order/${encodedSearch}`, `/transaction/id/${encodedSearch}`];
 
-  return resolveTransactions(payload);
+  for (const searchPath of searchPaths) {
+    const payload = await fetchPaymentsPayload(buildApiUrl(searchPath), true);
+    const transactions = resolveTransactions(payload);
+
+    if (transactions.length > 0) {
+      return transactions;
+    }
+  }
+
+  return [];
 };

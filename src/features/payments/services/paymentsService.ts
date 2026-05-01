@@ -2,17 +2,22 @@ import type { RoxTransaction } from "../mappers/paymentMapper";
 import type { PaymentListResponse, PaymentQueryParams } from "../types/payment";
 import {
   BACKEND_MAX_LIMIT,
+  type BackendStatus,
   DEFAULT_LIMIT,
   DEFAULT_PAGE,
   fetchPaginatedTransactions,
   fetchSpecificSearchTransactions,
+  getBackendStatusesForPaymentStatus,
   MAX_CLIENT_SIDE_PAGES,
   resolveTransactions,
 } from "./paymentsApi";
 import { buildClientSideResponse, buildServerSideResponse, shouldUseFullPaginatedDataset } from "./paymentsFilters";
 
-const fetchAllTransactionsThroughPagination = async (params: PaymentQueryParams): Promise<RoxTransaction[]> => {
-  const firstPayload = await fetchPaginatedTransactions(params, DEFAULT_PAGE, BACKEND_MAX_LIMIT);
+const fetchAllTransactionsThroughPagination = async (
+  params: PaymentQueryParams,
+  backendStatus?: BackendStatus,
+): Promise<RoxTransaction[]> => {
+  const firstPayload = await fetchPaginatedTransactions(params, DEFAULT_PAGE, BACKEND_MAX_LIMIT, backendStatus);
   const firstPageTransactions = resolveTransactions(firstPayload);
   const totalPages = Math.min(firstPayload.pagination?.total_pages ?? DEFAULT_PAGE, MAX_CLIENT_SIDE_PAGES);
 
@@ -20,15 +25,31 @@ const fetchAllTransactionsThroughPagination = async (params: PaymentQueryParams)
     return firstPageTransactions;
   }
 
-  // Mientras backend no filtre por fecha/order_id, recorremos su paginacion y filtramos del lado del frontend.
+  // Para fechas y busqueda parcial seguimos filtrando aqui porque esos query params aun fallan en backend.
   const restPayloads = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, index) => fetchPaginatedTransactions(params, index + 2, BACKEND_MAX_LIMIT)),
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      fetchPaginatedTransactions(params, index + 2, BACKEND_MAX_LIMIT, backendStatus),
+    ),
   );
 
   return restPayloads.reduce(
     (transactions, payload) => transactions.concat(resolveTransactions(payload)),
     firstPageTransactions,
   );
+};
+
+const fetchTransactionsForClientFilters = async (params: PaymentQueryParams): Promise<RoxTransaction[]> => {
+  const backendStatuses = getBackendStatusesForPaymentStatus(params.status);
+
+  if (backendStatuses.length === 0) {
+    return fetchAllTransactionsThroughPagination(params);
+  }
+
+  const transactionsByStatus = await Promise.all(
+    backendStatuses.map((backendStatus) => fetchAllTransactionsThroughPagination(params, backendStatus)),
+  );
+
+  return transactionsByStatus.flat();
 };
 
 const getPaymentsFromSpecificSearchEndpoint = async (params: PaymentQueryParams): Promise<PaymentListResponse | null> => {
@@ -57,7 +78,7 @@ export const paymentsService = {
     }
 
     if (shouldUseFullPaginatedDataset(params)) {
-      const transactions = await fetchAllTransactionsThroughPagination(params);
+      const transactions = await fetchTransactionsForClientFilters(params);
       return buildClientSideResponse(transactions, params);
     }
 

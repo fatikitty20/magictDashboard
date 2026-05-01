@@ -138,11 +138,4 @@ export const buildServerSideResponse = (payload: PaymentsApiResponse, params: Pa
 };
 
 export const shouldUseFullPaginatedDataset = (params: PaymentQueryParams): boolean =>
-  Boolean(
-    params.search ||
-      params.from ||
-      params.to ||
-      params.status ||
-      (params.sortBy ?? "createdAt") !== "createdAt" ||
-      (params.order ?? "desc") !== "desc",
-  );
+  Boolean(params.search || params.from || params.to || params.status);
