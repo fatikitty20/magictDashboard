@@ -1,4 +1,4 @@
-import { claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import { StatusPill } from "@/components/ui/StatusPill";
 import type { OrderStatus } from "../types/order";
 
 type OrderStatusBadgeProps = {
@@ -11,22 +11,12 @@ const statusLabelMap: Record<OrderStatus, string> = {
   cancelled: "Cancelado",
 };
 
+const statusToneMap: Record<OrderStatus, "success" | "warning" | "destructive"> = {
+  completed: "success",
+  pending: "warning",
+  cancelled: "destructive",
+};
+
 export const OrderStatusBadge = ({ status }: OrderStatusBadgeProps) => {
-  if (status === "pending") {
-    return (
-      <span className="inline-flex rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300">
-        {statusLabelMap[status]}
-      </span>
-    );
-  }
-
-  if (status === "cancelled") {
-    return (
-      <span className={claseTonoSuave("destructive", "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold")}>{statusLabelMap[status]}</span>
-    );
-  }
-
-  return (
-    <span className={claseTonoSuave("success", "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold")}>{statusLabelMap[status]}</span>
-  );
+  return <StatusPill tone={statusToneMap[status]}>{statusLabelMap[status]}</StatusPill>;
 };

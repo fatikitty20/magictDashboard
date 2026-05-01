@@ -2,6 +2,7 @@ import type { Payment, PaymentStatus } from "../types/payment";
 
 export type RoxTransactionStatus = "success" | "failed" | "pending" | string;
 
+// Forma cruda de una transaccion tal como llega desde la API de Alejandro.
 export type RoxTransaction = {
   id: string | number;
   order_id: string | number | null;
@@ -15,60 +16,14 @@ export type RoxTransaction = {
   created_at: string | null;
 };
 
-const paymentStatusAliases: Record<string, PaymentStatus> = {
-  success: "paid",
-  succeeded: "paid",
-  approved: "paid",
-  approve: "paid",
-  paid: "paid",
-  captured: "paid",
-  settled: "paid",
-  completed: "paid",
-  complete: "paid",
-  pagado: "paid",
-  pagada: "paid",
-  aprobado: "paid",
-  aprobada: "paid",
-  failed: "rejected",
-  failure: "rejected",
-  error: "rejected",
-  errored: "rejected",
-  declined: "rejected",
-  denied: "rejected",
-  rejected: "rejected",
-  cancelled: "rejected",
-  canceled: "rejected",
-  expired: "rejected",
-  void: "rejected",
-  voided: "rejected",
-  chargeback: "rejected",
-  refunded: "rejected",
-  reversed: "rejected",
-  refund: "rejected",
-  reversal: "rejected",
-  rechazado: "rejected",
-  rechazada: "rejected",
-  fallido: "rejected",
-  fallida: "rejected",
-  denegado: "rejected",
-  denegada: "rejected",
-  reembolsado: "rejected",
-  reembolsada: "rejected",
-  devuelto: "rejected",
-  devuelta: "rejected",
-  cancelado: "rejected",
-  cancelada: "rejected",
-  pending: "pending",
-  in_progress: "pending",
-  processing: "pending",
-  review: "pending",
-  hold: "pending",
-  pendiente: "pending",
-  proceso: "pending",
-  revision: "pending",
+type StatusKeywordRule = {
+  status: PaymentStatus;
+  keywords: string[];
 };
 
-const statusKeywordGroups: Array<{ status: PaymentStatus; keywords: string[] }> = [
+// Traduce estados tecnicos del backend/gateway a los tres estados que ve el usuario.
+// El orden importa: "rejected" va primero para evitar confundir refunds/cancelaciones con pagos.
+const statusKeywordRules: StatusKeywordRule[] = [
   {
     status: "rejected",
     keywords: [
@@ -88,7 +43,6 @@ const statusKeywordGroups: Array<{ status: PaymentStatus; keywords: string[] }> 
       "deneg",
       "reembols",
       "devuelt",
-      "cancelad",
     ],
   },
   {
@@ -97,7 +51,7 @@ const statusKeywordGroups: Array<{ status: PaymentStatus; keywords: string[] }> 
   },
   {
     status: "paid",
-    keywords: ["success", "succeed", "approv", "captur", "settle", "complete", "aprob", "pagad"],
+    keywords: ["success", "succeed", "approv", "captur", "settle", "complete", "paid", "aprob", "pagad"],
   },
 ];
 
@@ -107,22 +61,19 @@ const normalizeStatus = (status: RoxTransactionStatus | null): string =>
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
 
+// Convierte cualquier estado tecnico a un estado visual estable para la interfaz.
 const mapPaymentStatus = (status: RoxTransactionStatus | null): PaymentStatus => {
   const normalizedStatus = normalizeStatus(status);
-  const exactStatus = paymentStatusAliases[normalizedStatus];
-
-  if (exactStatus) {
-    return exactStatus;
-  }
-
-  const keywordStatus = statusKeywordGroups.find((group) =>
-    group.keywords.some((keyword) => normalizedStatus.includes(keyword)),
+  const statusRule = statusKeywordRules.find((rule) =>
+    rule.keywords.some((keyword) => normalizedStatus.includes(keyword)),
   );
 
-  return keywordStatus?.status ?? "pending";
+  return statusRule?.status ?? "pending";
 };
 
+// Adaptador principal: transforma la transaccion del backend al modelo que consume la tabla.
 export const mapTransactionToPayment = (transaction: RoxTransaction): Payment => ({
+  // order_id es el identificador que el usuario reconoce en pantalla; id queda como respaldo.
   id: String(transaction.order_id ?? transaction.id),
   customerName: transaction.customer_email ?? "-",
   paymentMethod: transaction.card_brand ?? "-",

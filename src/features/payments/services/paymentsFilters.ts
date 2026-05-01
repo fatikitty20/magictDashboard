@@ -2,49 +2,7 @@ import { mapTransactionsToPayments, type RoxTransaction } from "../mappers/payme
 import type { Payment, PaymentListResponse, PaymentQueryParams, PaymentSortBy, SortOrder } from "../types/payment";
 import { DEFAULT_LIMIT, DEFAULT_PAGE, type PaymentsApiResponse, resolveTransactions } from "./paymentsApi";
 
-const normalizeText = (value: unknown): string => String(value ?? "").trim().toLowerCase();
-
-const isWithinDateRange = (createdAt: string | null, from?: string, to?: string): boolean => {
-  const paymentDate = createdAt?.slice(0, 10);
-
-  if (!paymentDate || paymentDate.length !== 10) {
-    return false;
-  }
-
-  if (from && paymentDate < from) {
-    return false;
-  }
-
-  if (to && paymentDate > to) {
-    return false;
-  }
-
-  return true;
-};
-
-const transactionMatchesSearch = (transaction: RoxTransaction, search?: string): boolean => {
-  const normalizedSearch = normalizeText(search);
-
-  if (!normalizedSearch) {
-    return true;
-  }
-
-  return [
-    transaction.id,
-    transaction.order_id,
-    transaction.customer_email,
-    transaction.card_brand,
-    transaction.last_four_digits,
-  ].some((value) => normalizeText(value).includes(normalizedSearch));
-};
-
-const filterTransactions = (transactions: RoxTransaction[], params: PaymentQueryParams): RoxTransaction[] =>
-  transactions.filter(
-    (transaction) =>
-      transactionMatchesSearch(transaction, params.search) &&
-      (!params.from && !params.to ? true : isWithinDateRange(transaction.created_at, params.from, params.to)),
-  );
-
+// Comparador generico para ordenar texto o numeros en ascendente/descendente.
 const compareValues = (left: string | number, right: string | number, order: SortOrder): number => {
   if (left < right) {
     return order === "asc" ? -1 : 1;
@@ -57,6 +15,7 @@ const compareValues = (left: string | number, right: string | number, order: Sor
   return 0;
 };
 
+// Extrae el valor real que se usara al ordenar una fila de la tabla.
 const getSortableValue = (payment: Payment, sortBy: PaymentSortBy): string | number => {
   if (sortBy === "createdAt") {
     const timestamp = new Date(payment.createdAt).getTime();
@@ -70,14 +29,17 @@ const getSortableValue = (payment: Payment, sortBy: PaymentSortBy): string | num
   return payment.status;
 };
 
+// Crea una copia ordenada para no mutar el arreglo original.
 const sortPayments = (payments: Payment[], sortBy: PaymentSortBy, order: SortOrder): Payment[] =>
   [...payments].sort((left, right) => compareValues(getSortableValue(left, sortBy), getSortableValue(right, sortBy), order));
 
+// Paginacion local usada solo cuando frontend une varias respuestas del backend.
 const paginatePayments = (payments: Payment[], page: number, limit: number): Payment[] => {
   const startIndex = (page - 1) * limit;
   return payments.slice(startIndex, startIndex + limit);
 };
 
+// Calcula las tarjetas superiores de resumen usando la misma lista que se muestra.
 const getStats = (payments: Payment[]): PaymentListResponse["stats"] =>
   payments.reduce(
     (stats, payment) => {
@@ -101,14 +63,12 @@ const getStats = (payments: Payment[]): PaymentListResponse["stats"] =>
     },
   );
 
+// Se usa cuando frontend une varias respuestas del backend y debe paginar el resultado final.
 export const buildClientSideResponse = (transactions: RoxTransaction[], params: PaymentQueryParams): PaymentListResponse => {
   const page = params.page ?? DEFAULT_PAGE;
   const limit = params.limit ?? DEFAULT_LIMIT;
-  const filteredTransactions = filterTransactions(transactions, params);
-  const filteredPayments = mapTransactionsToPayments(filteredTransactions).filter((payment) =>
-    params.status ? payment.status === params.status : true,
-  );
-  const sortedPayments = sortPayments(filteredPayments, params.sortBy ?? "createdAt", params.order ?? "desc");
+  const payments = mapTransactionsToPayments(transactions);
+  const sortedPayments = sortPayments(payments, params.sortBy ?? "createdAt", params.order ?? "desc");
   const totalItems = sortedPayments.length;
 
   return {
@@ -120,6 +80,7 @@ export const buildClientSideResponse = (transactions: RoxTransaction[], params: 
   };
 };
 
+// Se usa para respuestas que ya vienen paginadas directamente desde el backend.
 export const buildServerSideResponse = (payload: PaymentsApiResponse, params: PaymentQueryParams): PaymentListResponse => {
   const page = payload.pagination?.current_page ?? params.page ?? DEFAULT_PAGE;
   const payments = sortPayments(
@@ -136,6 +97,3 @@ export const buildServerSideResponse = (payload: PaymentsApiResponse, params: Pa
     stats: getStats(payments),
   };
 };
-
-export const shouldUseFullPaginatedDataset = (params: PaymentQueryParams): boolean =>
-  Boolean(params.search || params.from || params.to || params.status);

@@ -1,27 +1,32 @@
-import { claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import { StatusPill } from "@/components/ui/StatusPill";
+import type { TonoSemantico } from "@/features/dashboard/data";
 import type { ClientStatus } from "../types/client";
 
 type ClientStatusBadgeProps = {
   status: ClientStatus;
 };
 
-const statusConfig: Record<ClientStatus, { label: string; className: string }> = {
+const statusConfig: Record<ClientStatus, { label: string; tone: TonoSemantico }> = {
   active: {
     label: "Activo",
-    className: claseTonoSuave("success", "rounded-full px-3 py-1 text-xs font-semibold"),
+    tone: "success",
   },
   inactive: {
     label: "Inactivo",
-    className: claseTonoSuave("muted", "rounded-full px-3 py-1 text-xs font-semibold"),
+    tone: "muted",
   },
   risk: {
     label: "Riesgo",
-    className: claseTonoSuave("destructive", "rounded-full px-3 py-1 text-xs font-semibold"),
+    tone: "destructive",
   },
 };
 
 export const ClientStatusBadge = ({ status }: ClientStatusBadgeProps) => {
   const config = statusConfig[status];
 
-  return <span className={config.className}>{config.label}</span>;
+  return (
+    <StatusPill tone={config.tone} className="px-3">
+      {config.label}
+    </StatusPill>
+  );
 };

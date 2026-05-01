@@ -1,3 +1,4 @@
+import type { TonoSemantico } from "@/features/dashboard/data";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
 import { useTranslation } from "react-i18next";
 import type { Order } from "../types/order";
@@ -21,7 +22,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("es-AR", {
   minute: "2-digit",
 });
 
-const riskToneClass: Record<Order["risk"]["level"], string> = {
+const riskToneClass: Record<Order["risk"]["level"], TonoSemantico> = {
   low: "success",
   medium: "info",
   high: "destructive",

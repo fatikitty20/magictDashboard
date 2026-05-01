@@ -6,45 +6,43 @@ import {
   DEFAULT_LIMIT,
   DEFAULT_PAGE,
   fetchPaginatedTransactions,
-  fetchSpecificSearchTransactions,
   getBackendStatusesForPaymentStatus,
   MAX_CLIENT_SIDE_PAGES,
   resolveTransactions,
 } from "./paymentsApi";
-import { buildClientSideResponse, buildServerSideResponse, shouldUseFullPaginatedDataset } from "./paymentsFilters";
+import { buildClientSideResponse, buildServerSideResponse } from "./paymentsFilters";
 
+// Trae todas las paginas de un status especifico. Se usa solo para unir estados.
 const fetchAllTransactionsThroughPagination = async (
   params: PaymentQueryParams,
   backendStatus?: BackendStatus,
 ): Promise<RoxTransaction[]> => {
   const firstPayload = await fetchPaginatedTransactions(params, DEFAULT_PAGE, BACKEND_MAX_LIMIT, backendStatus);
   const firstPageTransactions = resolveTransactions(firstPayload);
+
+  // Limite de seguridad para no disparar demasiadas peticiones si backend crece mucho.
   const totalPages = Math.min(firstPayload.pagination?.total_pages ?? DEFAULT_PAGE, MAX_CLIENT_SIDE_PAGES);
 
   if (totalPages <= 1) {
     return firstPageTransactions;
   }
 
-  // Para fechas y busqueda parcial seguimos filtrando aqui porque esos query params aun fallan en backend.
+  // Recorremos todas las paginas solo cuando frontend debe unir varios estados de backend.
   const restPayloads = await Promise.all(
     Array.from({ length: totalPages - 1 }, (_, index) =>
       fetchPaginatedTransactions(params, index + 2, BACKEND_MAX_LIMIT, backendStatus),
     ),
   );
 
-  return restPayloads.reduce(
-    (transactions, payload) => transactions.concat(resolveTransactions(payload)),
-    firstPageTransactions,
-  );
+  return [...firstPageTransactions, ...restPayloads.flatMap(resolveTransactions)];
 };
 
-const fetchTransactionsForClientFilters = async (params: PaymentQueryParams): Promise<RoxTransaction[]> => {
-  const backendStatuses = getBackendStatusesForPaymentStatus(params.status);
-
-  if (backendStatuses.length === 0) {
-    return fetchAllTransactionsThroughPagination(params);
-  }
-
+// Junta varias consultas en una sola lista cuando un filtro visual equivale a varios status reales.
+const fetchMergedStatusTransactions = async (
+  params: PaymentQueryParams,
+  backendStatuses: BackendStatus[],
+): Promise<RoxTransaction[]> => {
+  // Backend acepta un solo status por peticion; por eso juntamos varios cuando el usuario elige "Rechazado".
   const transactionsByStatus = await Promise.all(
     backendStatuses.map((backendStatus) => fetchAllTransactionsThroughPagination(params, backendStatus)),
   );
@@ -52,36 +50,17 @@ const fetchTransactionsForClientFilters = async (params: PaymentQueryParams): Pr
   return transactionsByStatus.flat();
 };
 
-const getPaymentsFromSpecificSearchEndpoint = async (params: PaymentQueryParams): Promise<PaymentListResponse | null> => {
-  const search = String(params.search ?? "").trim();
-
-  if (!search) {
-    return null;
-  }
-
-  // Primero se intentan los endpoints separados de Alejandro: email o id real de rox_transactions.
-  const transactions = await fetchSpecificSearchTransactions(search);
-
-  if (transactions.length === 0) {
-    return null;
-  }
-
-  return buildClientSideResponse(transactions, params);
-};
-
 export const paymentsService = {
   async getPayments(params: PaymentQueryParams = {}): Promise<PaymentListResponse> {
-    const specificSearchResponse = await getPaymentsFromSpecificSearchEndpoint(params);
+    const backendStatuses = getBackendStatusesForPaymentStatus(params.status);
 
-    if (specificSearchResponse) {
-      return specificSearchResponse;
-    }
-
-    if (shouldUseFullPaginatedDataset(params)) {
-      const transactions = await fetchTransactionsForClientFilters(params);
+    // "Rechazado" agrupa varios estados reales del backend: DECLINED, REFUNDED, FAILED y CANCELLED.
+    if (backendStatuses.length > 1) {
+      const transactions = await fetchMergedStatusTransactions(params, backendStatuses);
       return buildClientSideResponse(transactions, params);
     }
 
+    // Camino normal: backend ya pagina, busca, filtra por fechas y ordena.
     const payload = await fetchPaginatedTransactions(params, params.page ?? DEFAULT_PAGE, params.limit ?? DEFAULT_LIMIT);
 
     return buildServerSideResponse(payload, params);
