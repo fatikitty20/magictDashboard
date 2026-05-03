@@ -10,15 +10,15 @@ export const TarjetaMetrica = ({ etiquetaKey, valor, ayudaKey, variante }: Metri
   const ayuda = t(ayudaKey);
 
   return (
-    <div className={claseTarjeta(variante, "relative p-5")}>
-      <div className="mb-6 flex items-start justify-between">
-        <p className={`text-sm font-medium ${esInvertida ? "text-dashboard-inverted-foreground" : "text-foreground"}`}>
+    <div className={claseTarjeta(variante, "relative p-5 h-full")}>
+      <div className="mb-6 flex items-center justify-between">
+        <p className={`text-xs sm:text-sm font-medium ${esInvertida ? "text-dashboard-inverted-foreground" : "text-foreground"}`}>
           {etiqueta}
         </p>
         <button
           type="button"
           aria-label={t("dashboard.metrics.viewMetric", { label: etiqueta })}
-          className={`flex h-7 w-7 items-center justify-center rounded-full ${
+          className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full ${
             esInvertida ? "bg-success text-success-foreground" : "bg-foreground text-background"
           }`}
         >
@@ -26,7 +26,7 @@ export const TarjetaMetrica = ({ etiquetaKey, valor, ayudaKey, variante }: Metri
         </button>
       </div>
       <p
-        className={`mb-3 text-3xl font-bold tracking-tight lg:text-4xl ${
+        className={`mb-3 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight ${
           esInvertida ? "text-dashboard-inverted-foreground" : "text-foreground"
         }`}
       >

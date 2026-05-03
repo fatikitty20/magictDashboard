@@ -19,5 +19,22 @@ export const useAutenticacion = () => {
     setSesion(null);
   }, []);
 
-  return { sesion, estaAutenticado: Boolean(sesion), iniciarSesion, cerrarSesion };
+  return {
+    sesion,
+    user: sesion?.usuario ?? null,
+    estaAutenticado: Boolean(sesion),
+    iniciarSesion,
+    cerrarSesion,
+  };
+};
+
+export const useAuth = () => {
+  const { user, estaAutenticado, iniciarSesion, cerrarSesion } = useAutenticacion();
+
+  return {
+    user,
+    isAuthenticated: estaAutenticado,
+    signIn: iniciarSesion,
+    signOut: cerrarSesion,
+  };
 };

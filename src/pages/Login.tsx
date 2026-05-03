@@ -41,7 +41,7 @@ const Login = () => {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary shadow-lg shadow-primary/20">
             <Store className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">MagicTronic</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Magictronic</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("login.subtitle")}</p>
         </div>
 

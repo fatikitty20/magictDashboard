@@ -3,11 +3,19 @@ export interface CredencialesAutenticacion {
   contrasena: string;
 }
 
+export type RolUsuario = "admin" | "client";
+
+export interface UsuarioAutenticado {
+  correo: string;
+  role: RolUsuario;
+}
+
 export interface SesionAutenticacion {
   correo: string;
   emitidaEn: number;
   expiraEn: number;
   proveedor: "mock";
+  usuario: UsuarioAutenticado;
 }
 
 export interface AdaptadorAutenticacion {
@@ -20,6 +28,8 @@ const duracionSesionMs = 8 * 60 * 60 * 1000;
 const patronCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let sesionActual: SesionAutenticacion | null = null;
 
+const resolverRolUsuario = (correo: string): RolUsuario => (correo.includes("admin") ? "admin" : "client");
+
 const esSesionAutenticacion = (valor: unknown): valor is SesionAutenticacion => {
   if (!valor || typeof valor !== "object") {
     return false;
@@ -31,7 +41,11 @@ const esSesionAutenticacion = (valor: unknown): valor is SesionAutenticacion => 
     typeof sesion.correo === "string" &&
     typeof sesion.emitidaEn === "number" &&
     typeof sesion.expiraEn === "number" &&
-    sesion.proveedor === "mock"
+    sesion.proveedor === "mock" &&
+    typeof sesion.usuario === "object" &&
+    sesion.usuario !== null &&
+    typeof (sesion.usuario as UsuarioAutenticado).correo === "string" &&
+    ((sesion.usuario as UsuarioAutenticado).role === "admin" || (sesion.usuario as UsuarioAutenticado).role === "client")
   );
 };
 
@@ -61,11 +75,16 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
     }
 
     const emitidaEn = Date.now();
+    const role = resolverRolUsuario(credencialesNormalizadas.correo);
     const sesion: SesionAutenticacion = {
       correo: credencialesNormalizadas.correo,
       emitidaEn,
       expiraEn: emitidaEn + duracionSesionMs,
       proveedor: "mock",
+      usuario: {
+        correo: credencialesNormalizadas.correo,
+        role,
+      },
     };
 
     guardarSesionSegura(sesion);

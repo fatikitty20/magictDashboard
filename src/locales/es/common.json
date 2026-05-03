@@ -5,8 +5,16 @@
   "topbar": {
     "searchPlaceholder": "Buscar pedidos, pagos o clientes...",
     "actions": {
+      "openSidebar": "Abrir menú de navegación",
+      "closeSidebar": "Cerrar menú de navegación",
       "messages": "Mensajes",
       "notifications": "Notificaciones"
+    },
+    "admin": {
+      "role": "Administrador"
+    },
+    "client": {
+      "role": "Cliente"
     }
   },
   "common": {
@@ -38,11 +46,21 @@
     "errors": {
       "default": "No pudimos iniciar sesión"
     },
-    "footer": "2026 MagicTronic. Plataforma de e-commerce."
+    "footer": "© 2026 Magictronic. Payment Service Platform."
   },
   "dashboard": {
     "title": "Panel de control",
     "description": "Gestiona tus pagos, pedidos y el rendimiento de tu tienda.",
+    "admin": {
+      "title": "Panel de Administración PSP",
+      "description": "Resumen de todas las transacciones, liquidaciones y actividad de comercios."
+    },
+    "client": {
+      "title": "Mi Negocio",
+      "description": "Seguimiento de tus pedidos y pagos.",
+      "myOrders": "Mis Pedidos Recientes",
+      "myPayments": "Mis Pagos Recientes"
+    },
     "actions": {
       "newCharge": "Nuevo cobro",
       "export": "Exportar"
@@ -124,6 +142,9 @@
   "sidebar": {
     "menuLabel": "Menu",
     "generalLabel": "General",
+    "actions": {
+      "close": "Cerrar barra lateral"
+    },
     "menu": {
       "dashboard": "Panel",
       "payments": "Pagos",

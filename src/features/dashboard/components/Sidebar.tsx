@@ -4,39 +4,87 @@ import {
   HelpCircle,
   LayoutDashboard,
   LogOut,
+  type LucideIcon,
   Settings,
   ShoppingBag,
   Smartphone,
   Store,
+  X,
   Users,
 } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAutenticacion } from "@/features/auth/useAuth";
+import { useDashboard, type DashboardMenuItem } from "../hooks/useDashboard";
 import { claseBotonPrimario, claseTarjetaInvertida } from "../estilosDashboard";
 
-export const BarraLateral = () => {
+type MenuItem = {
+  icon?: LucideIcon;
+  key: string;
+  label: string;
+  path?: string;
+  badge?: string;
+};
+
+type BarraLateralProps = {
+  mode: "desktop" | "mobile";
+  isOpen?: boolean;
+  onClose?: () => void;
+  onNavigate?: () => void;
+  menuItems?: MenuItem[];
+  generalItems?: MenuItem[];
+};
+
+const iconByKey: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  payments: CreditCard,
+  orders: ShoppingBag,
+  reports: BarChart3,
+  clients: Users,
+};
+
+export const BarraLateral = ({
+  mode,
+  isOpen = false,
+  onClose,
+  onNavigate,
+  menuItems,
+  generalItems,
+}: BarraLateralProps) => {
   const { cerrarSesion } = useAutenticacion();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const dashboardConfig = useDashboard();
 
-  const elementosMenu = [
-    { icon: LayoutDashboard, label: t("sidebar.menu.dashboard"), path: "/dashboard" },
-    { icon: CreditCard, label: t("sidebar.menu.payments"), path: "/payments", badge: "10" },
-    { icon: ShoppingBag, label: t("sidebar.menu.orders"), path: "/orders", badge: "8" },
-    { icon: BarChart3, label: t("sidebar.menu.reports"), path: "/reports" },
-    { icon: Users, label: t("sidebar.menu.clients"), path: "/clients" },
-  ];
+  const elementosMenu: MenuItem[] = menuItems ?? dashboardConfig.menuItems;
 
-  const elementosGenerales = [
+  const elementosGenerales: MenuItem[] = generalItems ?? [
     { icon: Settings, label: t("sidebar.general.settings") },
     { icon: HelpCircle, label: t("sidebar.general.help") },
   ];
 
+  useEffect(() => {
+    if (mode !== "mobile" || !isOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isOpen, mode, onClose]);
+
   const manejarCierreSesion = async () => {
     await cerrarSesion();
     navigate("/login", { replace: true });
+    onClose?.();
   };
 
   const manejarNavegacion = (path?: string) => {
@@ -45,10 +93,11 @@ export const BarraLateral = () => {
     }
 
     navigate(path);
+    onNavigate?.();
   };
 
-  return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-5 lg:flex">
+  const contenidoSidebar = (
+    <>
       <div className="mb-8 flex items-center gap-2">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
           <Store className="h-5 w-5 text-primary-foreground" />
@@ -60,7 +109,7 @@ export const BarraLateral = () => {
       <nav className="mb-6 space-y-1">
         {elementosMenu.map((elemento) => (
           <button
-            key={elemento.label}
+            key={elemento.key}
             type="button"
             onClick={() => manejarNavegacion(elemento.path)}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
@@ -69,8 +118,15 @@ export const BarraLateral = () => {
                 : "text-muted-foreground hover:bg-muted"
             }`}
           >
-            <elemento.icon className="h-4 w-4" />
-            <span className="flex-1 text-left">{elemento.label}</span>
+            {(elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard) && (
+              <span className="flex h-4 w-4 items-center justify-center">
+                {(() => {
+                  const Icon = elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard;
+                  return <Icon className="h-4 w-4" />;
+                })()}
+              </span>
+            )}
+            <span className="flex-1 text-left">{t(elemento.label)}</span>
             {elemento.badge ? (
               <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] text-info">{elemento.badge}</span>
             ) : null}
@@ -82,11 +138,11 @@ export const BarraLateral = () => {
       <nav className="flex-1 space-y-1">
         {elementosGenerales.map((elemento) => (
           <button
-            key={elemento.label}
+            key={elemento.key}
             type="button"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted"
           >
-            <elemento.icon className="h-4 w-4" />
+            {elemento.icon ? <elemento.icon className="h-4 w-4" /> : null}
             <span>{elemento.label}</span>
           </button>
         ))}
@@ -112,6 +168,54 @@ export const BarraLateral = () => {
           {t("sidebar.mobileCard.download")}
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  if (mode === "desktop") {
+    return (
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-5 lg:flex">
+        {contenidoSidebar}
+      </aside>
+    );
+  }
+
+  return (
+    <div className={`fixed inset-0 z-50 lg:hidden ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!isOpen}>
+      <button
+        type="button"
+        aria-label={t("sidebar.actions.close")}
+        onClick={onClose}
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0"}`}
+      />
+
+      <aside
+        id="dashboard-sidebar-mobile"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("sidebar.menuLabel")}
+        className={`relative flex h-full w-72 max-w-[85vw] flex-col border-r border-sidebar-border bg-sidebar p-5 shadow-2xl transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="mb-8 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
+              <Store className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-semibold text-foreground">PSP</span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("sidebar.actions.close")}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {contenidoSidebar}
+      </aside>
+    </div>
   );
 };
