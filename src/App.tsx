@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { RutaProtegida } from "@/features/auth/ProtectedRoute";
-import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
-import { ProveedorModoTema } from "@/features/theme/ThemeModeProvider";
+import { ProveedorModoTema } from "@/features/theme";
+import { RutaProtegida } from "@/features/auth";
+import { DashboardLayout } from "@/features/dashboard";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -21,8 +21,11 @@ const App = () => (
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
+            {/* Rutas públicas */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+
+            {/* Rutas protegidas */}
             <Route
               element={
                 <RutaProtegida>
@@ -36,6 +39,8 @@ const App = () => (
               <Route path="/reports" element={<Reports />} />
               <Route path="/clients" element={<Clients />} />
             </Route>
+
+            {/* Ruta de error */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

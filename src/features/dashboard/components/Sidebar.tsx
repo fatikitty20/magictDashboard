@@ -15,8 +15,9 @@ import {
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAutenticacion } from "@/features/auth/useAuth";
-import { useDashboard, type DashboardMenuItem } from "../hooks/useDashboard";
+import { useAutenticacion } from "@/features/auth";
+import { useDashboard } from "../hooks/useDashboard";
+import type { DashboardMenuItem } from "../config/dashboardConfig";
 import { claseBotonPrimario, claseTarjetaInvertida } from "../estilosDashboard";
 
 type MenuItem = {

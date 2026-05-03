@@ -1,8 +1,8 @@
 import { Bell, Mail, Menu, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { BotonTema } from "@/features/theme/components/ThemeToggle";
+import { BotonTema } from "@/features/theme";
 import { SelectorIdioma } from "@/features/i18n/components/SelectorIdioma";
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth";
 import { claseBotonIcono } from "../estilosDashboard";
 
 type BarraSuperiorProps = {
