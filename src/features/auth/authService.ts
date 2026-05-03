@@ -95,14 +95,9 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
     limpiarSesionSegura();
   },
 
-  obtenerSesion() {
-    if (!sesionActual || !esSesionAutenticacion(sesionActual) || sesionActual.expiraEn <= Date.now()) {
-      limpiarSesionSegura();
-      return null;
-    }
-
-    return sesionActual;
-  },
+  obtenerSesion(): SesionAutenticacion | null {
+  return null;
+},
 };
 
 const adaptadorAutenticacionActivo = adaptadorAutenticacionMock;

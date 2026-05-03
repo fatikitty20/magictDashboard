@@ -1,40 +1,33 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { useAuthStore } from "./store/authStore";
 import {
   servicioAutenticacion,
   type CredencialesAutenticacion,
-  type SesionAutenticacion,
 } from "./authService";
 
-export const useAutenticacion = () => {
-  const [sesion, setSesion] = useState<SesionAutenticacion | null>(() => servicioAutenticacion.obtenerSesion());
+export const useAuth = () => {
+  const sesion = useAuthStore((s) => s.sesion);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const setSesion = useAuthStore((s) => s.setSesion);
+  const clearSesion = useAuthStore((s) => s.clearSesion);
 
-  const iniciarSesion = useCallback(async (credenciales: CredencialesAutenticacion) => {
-    const siguienteSesion = await servicioAutenticacion.iniciarSesion(credenciales);
-    setSesion(siguienteSesion);
-    return siguienteSesion;
-  }, []);
+  const signIn = useCallback(async (credenciales: CredencialesAutenticacion) => {
+    const nuevaSesion = await servicioAutenticacion.iniciarSesion(credenciales);
+    setSesion(nuevaSesion);
+    return nuevaSesion;
+  }, [setSesion]);
 
-  const cerrarSesion = useCallback(async () => {
+  const signOut = useCallback(async () => {
     await servicioAutenticacion.cerrarSesion();
-    setSesion(null);
-  }, []);
+    clearSesion();
+  }, [clearSesion]);
 
   return {
     sesion,
     user: sesion?.usuario ?? null,
-    estaAutenticado: Boolean(sesion),
-    iniciarSesion,
-    cerrarSesion,
-  };
-};
-
-export const useAuth = () => {
-  const { user, estaAutenticado, iniciarSesion, cerrarSesion } = useAutenticacion();
-
-  return {
-    user,
-    isAuthenticated: estaAutenticado,
-    signIn: iniciarSesion,
-    signOut: cerrarSesion,
+    isAuthenticated: Boolean(sesion),
+    isHydrated,
+    signIn,
+    signOut,
   };
 };

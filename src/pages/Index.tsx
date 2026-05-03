@@ -1,10 +1,14 @@
 import { Navigate } from "react-router-dom";
-import { useAutenticacion } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth";
 
 const Index = () => {
-  const { estaAutenticado } = useAutenticacion();
+  const { isAuthenticated, isHydrated } = useAuth();
 
-  return <Navigate to={estaAutenticado ? "/dashboard" : "/login"} replace />;
+  if (!isHydrated) {
+    return null; // o loader
+  }
+
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 };
 
 export default Index;

@@ -2,23 +2,23 @@ import { type FormEvent, useEffect, useState } from "react";
 import { ArrowRight, Lock, Mail, Store } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { useAutenticacion } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth/useAuth";
 import { claseBotonPrimario, claseTarjeta } from "@/features/dashboard/estilosDashboard";
 
 const Login = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { iniciarSesion, estaAutenticado } = useAutenticacion();
+  const { signIn, isAuthenticated } = useAuth();
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [estaCargando, setEstaCargando] = useState(false);
 
   useEffect(() => {
-    if (estaAutenticado) {
+    if (isAuthenticated) {
       navigate("/dashboard", { replace: true });
     }
-  }, [estaAutenticado, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const manejarEnvio = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,7 +26,7 @@ const Login = () => {
     setError(null);
 
     try {
-      await iniciarSesion({ correo, contrasena });
+      await signIn({ correo, contrasena });
       navigate("/dashboard", { replace: true });
     } catch (errorCapturado) {
       setError(errorCapturado instanceof Error ? errorCapturado.message : t("login.errors.default"));

@@ -12,6 +12,7 @@ import Payments from "./features/payments/views/Payments";
 import Orders from "./features/orders/views/Orders";
 import Reports from "./features/reports/views/Reports";
 import Clients from "./features/clients/views/Clients";
+import { Transactions } from "./features/transactions";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/payments" element={<Payments />} />
+              <Route path="/transactions" element={<Transactions />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/clients" element={<Clients />} />

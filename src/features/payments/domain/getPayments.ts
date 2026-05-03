@@ -9,10 +9,10 @@ import {
   getBackendStatusesForPaymentStatus,
   MAX_CLIENT_SIDE_PAGES,
   resolveTransactions,
-} from "./paymentsApi";
-import { buildClientSideResponse, buildServerSideResponse } from "./paymentsFilters";
+} from "../api/paymentsApi";
+import { buildClientSideResponse, buildServerSideResponse } from "../services/paymentsFilters";
 
-// Trae todas las paginas de un status especifico. Se usa solo para unir estados.
+// 🔹 Trae todas las páginas de un status específico
 const fetchAllTransactionsThroughPagination = async (
   params: PaymentQueryParams,
   backendStatus?: BackendStatus,
@@ -20,14 +20,12 @@ const fetchAllTransactionsThroughPagination = async (
   const firstPayload = await fetchPaginatedTransactions(params, DEFAULT_PAGE, BACKEND_MAX_LIMIT, backendStatus);
   const firstPageTransactions = resolveTransactions(firstPayload);
 
-  // Limite de seguridad para no disparar demasiadas peticiones si backend crece mucho.
   const totalPages = Math.min(firstPayload.pagination?.total_pages ?? DEFAULT_PAGE, MAX_CLIENT_SIDE_PAGES);
 
   if (totalPages <= 1) {
     return firstPageTransactions;
   }
 
-  // Recorremos todas las paginas solo cuando frontend debe unir varios estados de backend.
   const restPayloads = await Promise.all(
     Array.from({ length: totalPages - 1 }, (_, index) =>
       fetchPaginatedTransactions(params, index + 2, BACKEND_MAX_LIMIT, backendStatus),
@@ -37,12 +35,11 @@ const fetchAllTransactionsThroughPagination = async (
   return [...firstPageTransactions, ...restPayloads.flatMap(resolveTransactions)];
 };
 
-// Junta varias consultas en una sola lista cuando un filtro visual equivale a varios status reales.
+// 🔹 Une múltiples estados (ej: rejected)
 const fetchMergedStatusTransactions = async (
   params: PaymentQueryParams,
   backendStatuses: BackendStatus[],
 ): Promise<RoxTransaction[]> => {
-  // Backend acepta un solo status por peticion; por eso juntamos varios cuando el usuario elige "Rechazado".
   const transactionsByStatus = await Promise.all(
     backendStatuses.map((backendStatus) => fetchAllTransactionsThroughPagination(params, backendStatus)),
   );
@@ -50,19 +47,20 @@ const fetchMergedStatusTransactions = async (
   return transactionsByStatus.flat();
 };
 
-export const paymentsService = {
-  async getPayments(params: PaymentQueryParams = {}): Promise<PaymentListResponse> {
-    const backendStatuses = getBackendStatusesForPaymentStatus(params.status);
+// 🔥 FUNCIÓN PRINCIPAL DE DOMINIO
+export const getPayments = async (params: PaymentQueryParams = {}): Promise<PaymentListResponse> => {
+  const backendStatuses = getBackendStatusesForPaymentStatus(params.status);
 
-    // "Rechazado" agrupa varios estados reales del backend: DECLINED, REFUNDED, FAILED y CANCELLED.
-    if (backendStatuses.length > 1) {
-      const transactions = await fetchMergedStatusTransactions(params, backendStatuses);
-      return buildClientSideResponse(transactions, params);
-    }
+  if (backendStatuses.length > 1) {
+    const transactions = await fetchMergedStatusTransactions(params, backendStatuses);
+    return buildClientSideResponse(transactions, params);
+  }
 
-    // Camino normal: backend ya pagina, busca, filtra por fechas y ordena.
-    const payload = await fetchPaginatedTransactions(params, params.page ?? DEFAULT_PAGE, params.limit ?? DEFAULT_LIMIT);
+  const payload = await fetchPaginatedTransactions(
+    params,
+    params.page ?? DEFAULT_PAGE,
+    params.limit ?? DEFAULT_LIMIT,
+  );
 
-    return buildServerSideResponse(payload, params);
-  },
+  return buildServerSideResponse(payload, params);
 };

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import type { RolUsuario } from "./roles";
-import { useAutenticacion } from "./useAuth";
+import { useAuth } from "./useAuth";
 
 interface RutaProtegidaProps {
   children: ReactNode;
@@ -10,9 +10,14 @@ interface RutaProtegidaProps {
 
 export const RutaProtegida = ({ children, allowedRoles }: RutaProtegidaProps) => {
   const ubicacion = useLocation();
-  const { estaAutenticado, user } = useAutenticacion();
+  const { isAuthenticated, user, isHydrated } = useAuth();
 
-  if (!estaAutenticado) {
+  // 🔥 CLAVE: esperar hydration
+  if (!isHydrated) {
+    return null; // o loader
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: ubicacion.pathname }} />;
   }
 

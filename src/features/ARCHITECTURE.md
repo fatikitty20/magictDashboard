@@ -1,4 +1,4 @@
-# 🏗️ Arquitectura Escalable - Magict Dashboard
+# Arquitectura Escalable - Magict Dashboard
 
 ## Visión General
 

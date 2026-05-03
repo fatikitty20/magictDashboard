@@ -1,13 +1,13 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/features/dashboard";
 import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
 import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import { paymentsService } from "../services/paymentsService";
-import type { Payment, PaymentListResponse, PaymentSortBy, PaymentStatus, SortOrder } from "../types/payment";
+import { usePayments } from "../hooks/usePayments";
+import type { PaymentSortBy, PaymentStatus, SortOrder } from "../types/payment";
 
 const PAGE_SIZE = 20;
 const DEFAULT_SORT_BY: PaymentSortBy = "createdAt";
@@ -18,9 +18,7 @@ const Payments = () => {
   const { t } = useTranslation();
   const { role } = useDashboard();
   const isAdmin = role === "admin";
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -28,80 +26,25 @@ const Payments = () => {
   const [toDate, setToDate] = useState("");
   const [sortBy, setSortBy] = useState<PaymentSortBy>(DEFAULT_SORT_BY);
   const [order, setOrder] = useState<SortOrder>(DEFAULT_SORT_ORDER);
-  const [totalPages, setTotalPages] = useState(1);
-  const [stats, setStats] = useState<PaymentListResponse["stats"] | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 350);
-  const requestIdRef = useRef(0);
-  const filterKeyRef = useRef("");
-  const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-    { value: "all", label: t("payments.filters.all") },
-    { value: "paid", label: t("payments.status.paid") },
-    { value: "pending", label: t("payments.status.pending") },
-    { value: "rejected", label: t("payments.status.rejected") },
-  ];
 
-  const loadPayments = useCallback(
-    async (nextPage: number) => {
-      const requestId = requestIdRef.current + 1;
-      requestIdRef.current = requestId;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await paymentsService.getPayments({
-          page: nextPage,
-          limit: PAGE_SIZE,
-          search: debouncedSearch,
-          status: statusFilter === "all" ? undefined : statusFilter,
-          from: fromDate || undefined,
-          to: toDate || undefined,
-          sortBy,
-          order,
-        });
-
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
-
-        setPayments(response.data);
-        setTotalPages(response.totalPages);
-        setStats(response.stats ?? null);
-      } catch (err) {
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
-
-        setPayments([]);
-        setTotalPages(1);
-        setStats(null);
-        setError((err as Error)?.message ?? t("payments.errors.load"));
-      } finally {
-        if (requestId === requestIdRef.current) {
-          setIsLoading(false);
-        }
-      }
+  const { data, isLoading, error, refetch } = usePayments({
+    page,
+    limit: PAGE_SIZE,
+    params: {
+      search: debouncedSearch,
+      status: statusFilter === "all" ? undefined : statusFilter,
+      from: fromDate || undefined,
+      to: toDate || undefined,
+      sortBy,
+      order,
     },
-    [debouncedSearch, fromDate, order, sortBy, statusFilter, t, toDate],
-  );
+  });
 
-  const filterKey = useMemo(
-    () => JSON.stringify({ debouncedSearch, fromDate, order, sortBy, statusFilter, toDate }),
-    [debouncedSearch, fromDate, order, sortBy, statusFilter, toDate],
-  );
-
-  useEffect(() => {
-    const filtersChanged = filterKeyRef.current !== filterKey;
-    filterKeyRef.current = filterKey;
-
-    if (filtersChanged && page !== 1) {
-      setPage(1);
-      return;
-    }
-
-    void loadPayments(page);
-  }, [filterKey, loadPayments, page]);
+  const payments = data?.data ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const stats = data?.stats ?? null;
 
   const displayStats = useMemo(
     () =>
@@ -114,6 +57,13 @@ const Payments = () => {
     [stats],
   );
 
+  const statusOptions: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("payments.filters.all") },
+    { value: "paid", label: t("payments.status.paid") },
+    { value: "pending", label: t("payments.status.pending") },
+    { value: "rejected", label: t("payments.status.rejected") },
+  ];
+
   const handleSortChange = (nextSortBy: PaymentSortBy) => {
     if (sortBy === nextSortBy) {
       setOrder((current) => (current === "asc" ? "desc" : "asc"));
@@ -125,7 +75,7 @@ const Payments = () => {
   };
 
   const handleRefresh = () => {
-    void loadPayments(page);
+    refetch();
   };
 
   const resetFilters = () => {
@@ -135,6 +85,7 @@ const Payments = () => {
     setToDate("");
     setSortBy(DEFAULT_SORT_BY);
     setOrder(DEFAULT_SORT_ORDER);
+    setPage(1);
   };
 
   const locale = typeof navigator !== "undefined" ? navigator.language ?? "es-MX" : "es-MX";
@@ -157,7 +108,9 @@ const Payments = () => {
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+          {(error as Error)?.message ?? t("payments.errors.load")}
+        </div>
       ) : null}
 
       <PaymentsStats
@@ -258,6 +211,7 @@ const Payments = () => {
           >
             <ChevronLeft className="h-4 w-4" /> {t("common.actions.previous")}
           </button>
+
           <button
             type="button"
             onClick={() => setPage((currentPage) => Math.min(currentPage + 1, totalPages))}

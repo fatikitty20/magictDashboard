@@ -1,6 +1,6 @@
 import { mapTransactionsToPayments, type RoxTransaction } from "../mappers/paymentMapper";
 import type { Payment, PaymentListResponse, PaymentQueryParams, PaymentSortBy, SortOrder } from "../types/payment";
-import { DEFAULT_LIMIT, DEFAULT_PAGE, type PaymentsApiResponse, resolveTransactions } from "./paymentsApi";
+import { DEFAULT_LIMIT, DEFAULT_PAGE, type PaymentsApiResponse, resolveTransactions } from "../api/paymentsApi";
 
 // Comparador generico para ordenar texto o numeros en ascendente/descendente.
 const compareValues = (left: string | number, right: string | number, order: SortOrder): number => {

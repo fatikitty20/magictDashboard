@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { ROLES } from "@/features/auth/roles";
 import { RutaProtegida } from "@/features/auth";
 import { DashboardLayout } from "@/features/dashboard";
+import { Transactions } from "@/features/transactions";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -39,32 +40,37 @@ export const publicRoutes: RouteConfig[] = [
 
 /**
  * Rutas protegidas (requieren autenticación)
- * El wrapper RutaProtegida se aplica a todo este árbol
+ * 🔥 IMPORTANTE: sin "/" porque son hijas de "/"
  */
 export const protectedRoutes: RouteConfig[] = [
   {
-    path: "/dashboard",
+    path: "dashboard",
     element: <Dashboard />,
   },
   {
-    path: "/payments",
+    path: "payments",
     element: <Payments />,
     allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
-    path: "/orders",
+    path: "orders",
     element: <Orders />,
     allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
-    path: "/reports",
+    path: "reports",
     element: <Reports />,
     allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
-    path: "/clients",
+    path: "clients",
     element: <Clients />,
     allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
+  },
+  {
+    path: "transactions",
+    element: <Transactions />,
+    allowedRoles: [ROLES.ADMIN],
   },
 ];
 

@@ -5,7 +5,7 @@
 
 export * from "./roles";
 export * from "./permissions";
-export { useAuth, useAutenticacion } from "./useAuth";
+export { useAuth } from "./useAuth";
 export { usePermissions } from "./usePermissions";
 export { RutaProtegida } from "./ProtectedRoute";
 export { servicioAutenticacion } from "./authService";

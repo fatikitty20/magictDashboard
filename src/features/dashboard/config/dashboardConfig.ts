@@ -1,6 +1,6 @@
 /**
  * Configuracion dinamica del dashboard basada en roles.
- * Esta es la fuente unica de verdad para el menu y los widgets del panel.
+ * Fuente unica de verdad para menu y widgets.
  */
 
 import type { RolUsuario } from "@/features/auth/roles";
@@ -20,7 +20,8 @@ export type DashboardMenuLabel =
   | "sidebar.menu.orders"
   | "sidebar.menu.payments"
   | "sidebar.menu.reports"
-  | "sidebar.menu.clients";
+  | "sidebar.menu.clients"
+  | "sidebar.menu.transactions"; // 🔥 NUEVO
 
 export interface DashboardMenuItem {
   key: string;
@@ -35,7 +36,10 @@ export interface DashboardConfig {
   menuItems: DashboardMenuItem[];
 }
 
-const widgetsDashboardAnterior: DashboardWidget[] = [
+/**
+ * Widgets base (pueden evolucionar por rol después)
+ */
+const widgetsBase: DashboardWidget[] = [
   "metrics",
   "analytics",
   "projects",
@@ -45,7 +49,10 @@ const widgetsDashboardAnterior: DashboardWidget[] = [
   "time",
 ];
 
-const menuPrincipal: DashboardMenuItem[] = [
+/**
+ * 🔵 CLIENT → vista "My Business"
+ */
+const menuCliente: DashboardMenuItem[] = [
   { key: "dashboard", label: "sidebar.menu.dashboard", path: "/dashboard" },
   { key: "orders", label: "sidebar.menu.orders", path: "/orders" },
   { key: "payments", label: "sidebar.menu.payments", path: "/payments", badge: "10" },
@@ -54,20 +61,35 @@ const menuPrincipal: DashboardMenuItem[] = [
 ];
 
 /**
- * El panel conserva los componentes originales del dashboard para ambos roles.
- * Si despues se agregan permisos distintos, solo se ajusta menuItems por rol.
+ * 🔴 ADMIN → vista "Platform"
+ */
+const menuAdmin: DashboardMenuItem[] = [
+  { key: "dashboard", label: "sidebar.menu.dashboard", path: "/dashboard" },
+
+  // 🔥 CORE PSP
+  { key: "transactions", label: "sidebar.menu.transactions", path: "/transactions" },
+
+  { key: "payments", label: "sidebar.menu.payments", path: "/payments" },
+  { key: "orders", label: "sidebar.menu.orders", path: "/orders" },
+  { key: "clients", label: "sidebar.menu.clients", path: "/clients" },
+  { key: "reports", label: "sidebar.menu.reports", path: "/reports" },
+];
+
+/**
+ * Configuracion por rol
  */
 const dashboardPorRol: Record<RolUsuario, DashboardConfig> = {
   [ROLES.ADMIN]: {
-    role: "admin",
-    widgets: widgetsDashboardAnterior,
-    menuItems: menuPrincipal,
+    role: ROLES.ADMIN,
+    widgets: widgetsBase,
+    menuItems: menuAdmin,
   },
   [ROLES.CLIENT]: {
-    role: "client",
-    widgets: widgetsDashboardAnterior,
-    menuItems: menuPrincipal,
+    role: ROLES.CLIENT,
+    widgets: widgetsBase,
+    menuItems: menuCliente,
   },
 };
 
-export const obtenerConfigDashboard = (role: RolUsuario): DashboardConfig => dashboardPorRol[role];
+export const obtenerConfigDashboard = (role: RolUsuario): DashboardConfig =>
+  dashboardPorRol[role];
