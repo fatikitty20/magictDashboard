@@ -1,3 +1,6 @@
+import { ROLES, type RolUsuario } from "@/features/auth/roles";
+import type enCommon from "@/locales/en/common.json";
+
 export const usuarioDashboard = {
   nombre: "Marina Silva",
   email: "marina@magictronic.com",
@@ -7,6 +10,14 @@ export type VarianteMetrica = "invertida" | "suave";
 export type TonoSemantico = "info" | "success" | "destructive" | "muted";
 export type TonoBarraAnalitica = "rayado" | "success" | "invertida" | "suave";
 
+type LlavesAnidadas<T> = T extends object
+  ? {
+      [K in keyof T & string]: T[K] extends object ? `${K}.${LlavesAnidadas<T[K]>}` : K;
+    }[keyof T & string]
+  : never;
+
+export type LlaveTraduccion = LlavesAnidadas<typeof enCommon>;
+
 export interface BarraAnalitica {
   dia: string;
   valor: number;
@@ -14,16 +25,61 @@ export interface BarraAnalitica {
   activa: boolean;
 }
 
-export const metricasProyecto = [
-  { id: "sales", etiquetaKey: "dashboard.metrics.sales.title", valor: "$248K", ayudaKey: "dashboard.metrics.sales.helper", variante: "invertida" },
-  { id: "orders", etiquetaKey: "dashboard.metrics.orders.title", valor: "1,284", ayudaKey: "dashboard.metrics.orders.helper", variante: "suave" },
-  { id: "active", etiquetaKey: "dashboard.metrics.active.title", valor: "86", ayudaKey: "dashboard.metrics.active.helper", variante: "suave" },
-  { id: "pending", etiquetaKey: "dashboard.metrics.pending.title", valor: "9", ayudaKey: "dashboard.metrics.pending.helper", variante: "suave" },
-] as const;
+export interface Metrica {
+  id: string;
+  etiquetaKey: LlaveTraduccion;
+  valor: string;
+  ayudaKey: LlaveTraduccion;
+  variante: VarianteMetrica;
+}
 
-export type Metrica = (typeof metricasProyecto)[number];
+export interface ProyectoDashboard {
+  id: string;
+  nombreKey: LlaveTraduccion;
+  vencimiento: string;
+  tono: TonoSemantico;
+}
 
-export const barrasAnaliticas: BarraAnalitica[] = [
+export interface MiembroEquipoDashboard {
+  id: string;
+  nombre: string;
+  tareaKey: LlaveTraduccion;
+  estadoKey: LlaveTraduccion;
+  tono: TonoSemantico;
+}
+
+export interface RecordatorioDashboard {
+  tituloKey: LlaveTraduccion;
+  horario: string;
+}
+
+export interface TextosDashboardRol {
+  primaryActionKey: LlaveTraduccion;
+  secondaryActionKey: LlaveTraduccion;
+  analyticsTitleKey: LlaveTraduccion;
+  projectsTitleKey: LlaveTraduccion;
+  projectsNewKey: LlaveTraduccion;
+  teamTitleKey: LlaveTraduccion;
+  teamInviteKey: LlaveTraduccion;
+  reminderSectionTitleKey: LlaveTraduccion;
+  reminderActionKey: LlaveTraduccion;
+  progressTitleKey: LlaveTraduccion;
+  progressSubtitleKey: LlaveTraduccion;
+  timerTitleKey: LlaveTraduccion;
+}
+
+export interface DatosDashboardRol {
+  metricas: Metrica[];
+  barrasAnaliticas: BarraAnalitica[];
+  proyectos: ProyectoDashboard[];
+  miembrosEquipo: MiembroEquipoDashboard[];
+  recordatorio: RecordatorioDashboard;
+  progresoPagos: number;
+  tiempoSesion: string;
+  textos: TextosDashboardRol;
+}
+
+const barrasAdmin: BarraAnalitica[] = [
   { dia: "L", valor: 56, tono: "rayado", activa: false },
   { dia: "M", valor: 74, tono: "success", activa: false },
   { dia: "X", valor: 88, tono: "success", activa: true },
@@ -33,25 +89,159 @@ export const barrasAnaliticas: BarraAnalitica[] = [
   { dia: "D", valor: 66, tono: "rayado", activa: false },
 ];
 
-export const proyectos = [
-  { id: "mercado-pago", nombreKey: "dashboard.projects.mercadoPago", vencimiento: "2026-04-29", tono: "info" },
-  { id: "onboarding", nombreKey: "dashboard.projects.onboarding", vencimiento: "2026-05-02", tono: "success" },
-  { id: "checkout", nombreKey: "dashboard.projects.checkout", vencimiento: "2026-05-06", tono: "info" },
-  { id: "hot-sale", nombreKey: "dashboard.projects.hotSale", vencimiento: "2026-05-10", tono: "muted" },
-  { id: "antifraude", nombreKey: "dashboard.projects.antifraude", vencimiento: "2026-05-14", tono: "destructive" },
-] as const;
+const barrasCliente: BarraAnalitica[] = [
+  { dia: "L", valor: 42, tono: "rayado", activa: false },
+  { dia: "M", valor: 61, tono: "success", activa: false },
+  { dia: "X", valor: 58, tono: "success", activa: false },
+  { dia: "J", valor: 76, tono: "invertida", activa: true },
+  { dia: "V", valor: 63, tono: "rayado", activa: false },
+  { dia: "S", valor: 47, tono: "rayado", activa: false },
+  { dia: "D", valor: 54, tono: "rayado", activa: false },
+];
 
-export const miembrosEquipo = [
-  { id: "alexandra", nombre: "Alexandra Deff", tareaKey: "dashboard.team.tasks.paymentGateway", estadoKey: "dashboard.team.status.completed", tono: "success" },
-  { id: "edwin", nombre: "Edwin Adenike", tareaKey: "dashboard.team.tasks.checkoutPro", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
-  { id: "isaac", nombre: "Isaac Oluwatemilorun", tareaKey: "dashboard.team.tasks.antifraud", estadoKey: "dashboard.team.status.pending", tono: "destructive" },
-  { id: "david", nombre: "David Oshodi", tareaKey: "dashboard.team.tasks.mobileCheckout", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
-] as const;
+/**
+ * Cada rol usa los mismos componentes visuales, pero con informacion distinta.
+ * Admin ve datos globales del PSP; cliente ve datos de su propio comercio.
+ */
+export const datosDashboardPorRol: Record<RolUsuario, DatosDashboardRol> = {
+  [ROLES.ADMIN]: {
+    metricas: [
+      {
+        id: "admin-volume",
+        etiquetaKey: "dashboard.roleContent.admin.metrics.volume.title",
+        valor: "MXN 248K",
+        ayudaKey: "dashboard.roleContent.admin.metrics.volume.helper",
+        variante: "invertida",
+      },
+      {
+        id: "admin-transactions",
+        etiquetaKey: "dashboard.roleContent.admin.metrics.transactions.title",
+        valor: "1,284",
+        ayudaKey: "dashboard.roleContent.admin.metrics.transactions.helper",
+        variante: "suave",
+      },
+      {
+        id: "admin-merchants",
+        etiquetaKey: "dashboard.roleContent.admin.metrics.merchants.title",
+        valor: "86",
+        ayudaKey: "dashboard.roleContent.admin.metrics.merchants.helper",
+        variante: "suave",
+      },
+      {
+        id: "admin-alerts",
+        etiquetaKey: "dashboard.roleContent.admin.metrics.alerts.title",
+        valor: "9",
+        ayudaKey: "dashboard.roleContent.admin.metrics.alerts.helper",
+        variante: "suave",
+      },
+    ],
+    barrasAnaliticas: barrasAdmin,
+    proyectos: [
+      { id: "admin-settlements", nombreKey: "dashboard.roleContent.admin.projects.settlements", vencimiento: "2026-05-05", tono: "info" },
+      { id: "admin-onboarding", nombreKey: "dashboard.roleContent.admin.projects.onboarding", vencimiento: "2026-05-08", tono: "success" },
+      { id: "admin-risk", nombreKey: "dashboard.roleContent.admin.projects.risk", vencimiento: "2026-05-12", tono: "destructive" },
+      { id: "admin-reports", nombreKey: "dashboard.roleContent.admin.projects.reports", vencimiento: "2026-05-15", tono: "muted" },
+    ],
+    miembrosEquipo: [
+      { id: "admin-ops", nombre: "Operaciones PSP", tareaKey: "dashboard.roleContent.admin.team.tasks.operations", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
+      { id: "admin-risk", nombre: "Riesgo y fraude", tareaKey: "dashboard.roleContent.admin.team.tasks.risk", estadoKey: "dashboard.team.status.pending", tono: "destructive" },
+      { id: "admin-support", nombre: "Soporte comercios", tareaKey: "dashboard.roleContent.admin.team.tasks.support", estadoKey: "dashboard.team.status.completed", tono: "success" },
+      { id: "admin-finance", nombre: "Conciliacion", tareaKey: "dashboard.roleContent.admin.team.tasks.finance", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
+    ],
+    recordatorio: {
+      tituloKey: "dashboard.roleContent.admin.reminder.title",
+      horario: "14:00 - 16:00",
+    },
+    progresoPagos: 73,
+    tiempoSesion: "01:24:08",
+    textos: {
+      primaryActionKey: "dashboard.roleContent.admin.actions.primary",
+      secondaryActionKey: "dashboard.roleContent.admin.actions.secondary",
+      analyticsTitleKey: "dashboard.roleContent.admin.analytics.title",
+      projectsTitleKey: "dashboard.roleContent.admin.projects.title",
+      projectsNewKey: "dashboard.roleContent.admin.projects.new",
+      teamTitleKey: "dashboard.roleContent.admin.team.title",
+      teamInviteKey: "dashboard.roleContent.admin.team.invite",
+      reminderSectionTitleKey: "dashboard.roleContent.admin.reminder.sectionTitle",
+      reminderActionKey: "dashboard.roleContent.admin.reminder.action",
+      progressTitleKey: "dashboard.roleContent.admin.progress.title",
+      progressSubtitleKey: "dashboard.roleContent.admin.progress.subtitle",
+      timerTitleKey: "dashboard.roleContent.admin.timer.title",
+    },
+  },
+  [ROLES.CLIENT]: {
+    metricas: [
+      {
+        id: "client-sales",
+        etiquetaKey: "dashboard.roleContent.client.metrics.sales.title",
+        valor: "MXN 38.4K",
+        ayudaKey: "dashboard.roleContent.client.metrics.sales.helper",
+        variante: "invertida",
+      },
+      {
+        id: "client-orders",
+        etiquetaKey: "dashboard.roleContent.client.metrics.orders.title",
+        valor: "126",
+        ayudaKey: "dashboard.roleContent.client.metrics.orders.helper",
+        variante: "suave",
+      },
+      {
+        id: "client-approved",
+        etiquetaKey: "dashboard.roleContent.client.metrics.approved.title",
+        valor: "118",
+        ayudaKey: "dashboard.roleContent.client.metrics.approved.helper",
+        variante: "suave",
+      },
+      {
+        id: "client-pending",
+        etiquetaKey: "dashboard.roleContent.client.metrics.pending.title",
+        valor: "4",
+        ayudaKey: "dashboard.roleContent.client.metrics.pending.helper",
+        variante: "suave",
+      },
+    ],
+    barrasAnaliticas: barrasCliente,
+    proyectos: [
+      { id: "client-open-orders", nombreKey: "dashboard.roleContent.client.projects.openOrders", vencimiento: "2026-05-04", tono: "info" },
+      { id: "client-pending-payments", nombreKey: "dashboard.roleContent.client.projects.pendingPayments", vencimiento: "2026-05-06", tono: "destructive" },
+      { id: "client-sales-report", nombreKey: "dashboard.roleContent.client.projects.salesReport", vencimiento: "2026-05-09", tono: "success" },
+      { id: "client-customers", nombreKey: "dashboard.roleContent.client.projects.customers", vencimiento: "2026-05-13", tono: "muted" },
+    ],
+    miembrosEquipo: [
+      { id: "client-store", nombre: "Tienda", tareaKey: "dashboard.roleContent.client.team.tasks.store", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
+      { id: "client-cashier", nombre: "Caja", tareaKey: "dashboard.roleContent.client.team.tasks.cashier", estadoKey: "dashboard.team.status.completed", tono: "success" },
+      { id: "client-support", nombre: "Atencion al cliente", tareaKey: "dashboard.roleContent.client.team.tasks.support", estadoKey: "dashboard.team.status.pending", tono: "destructive" },
+      { id: "client-shipping", nombre: "Entregas", tareaKey: "dashboard.roleContent.client.team.tasks.shipping", estadoKey: "dashboard.team.status.inProgress", tono: "info" },
+    ],
+    recordatorio: {
+      tituloKey: "dashboard.roleContent.client.reminder.title",
+      horario: "11:30 - 12:00",
+    },
+    progresoPagos: 82,
+    tiempoSesion: "00:42:15",
+    textos: {
+      primaryActionKey: "dashboard.roleContent.client.actions.primary",
+      secondaryActionKey: "dashboard.roleContent.client.actions.secondary",
+      analyticsTitleKey: "dashboard.roleContent.client.analytics.title",
+      projectsTitleKey: "dashboard.roleContent.client.projects.title",
+      projectsNewKey: "dashboard.roleContent.client.projects.new",
+      teamTitleKey: "dashboard.roleContent.client.team.title",
+      teamInviteKey: "dashboard.roleContent.client.team.invite",
+      reminderSectionTitleKey: "dashboard.roleContent.client.reminder.sectionTitle",
+      reminderActionKey: "dashboard.roleContent.client.reminder.action",
+      progressTitleKey: "dashboard.roleContent.client.progress.title",
+      progressSubtitleKey: "dashboard.roleContent.client.progress.subtitle",
+      timerTitleKey: "dashboard.roleContent.client.timer.title",
+    },
+  },
+};
 
-export const recordatorio = {
-  tituloKey: "dashboard.reminder.title",
-  horario: "14:00 - 16:00",
-} as const;
+export const obtenerDatosDashboard = (role: RolUsuario): DatosDashboardRol => datosDashboardPorRol[role];
 
-export const progresoPagos = 41;
-export const tiempoSesion = "01:24:08";
+export const metricasProyecto = datosDashboardPorRol[ROLES.ADMIN].metricas;
+export const barrasAnaliticas = datosDashboardPorRol[ROLES.ADMIN].barrasAnaliticas;
+export const proyectos = datosDashboardPorRol[ROLES.ADMIN].proyectos;
+export const miembrosEquipo = datosDashboardPorRol[ROLES.ADMIN].miembrosEquipo;
+export const recordatorio = datosDashboardPorRol[ROLES.ADMIN].recordatorio;
+export const progresoPagos = datosDashboardPorRol[ROLES.ADMIN].progresoPagos;
+export const tiempoSesion = datosDashboardPorRol[ROLES.ADMIN].tiempoSesion;

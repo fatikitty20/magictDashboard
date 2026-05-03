@@ -1,18 +1,24 @@
 import { Pause, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tiempoSesion } from "../data";
+import type { LlaveTraduccion } from "../data";
 import { claseBotonIcono, claseTarjetaInvertida } from "../estilosDashboard";
 
-export const ControlTiempo = () => {
+interface ControlTiempoProps {
+  tiempo?: string;
+  titleKey?: LlaveTraduccion;
+}
+
+export const ControlTiempo = ({ tiempo = tiempoSesion, titleKey = "dashboard.timer.title" }: ControlTiempoProps) => {
   const { t } = useTranslation();
 
   return (
     <div className={claseTarjetaInvertida("relative flex flex-col overflow-hidden p-6") }>
       <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full border border-dashboard-inverted-foreground/10" />
       <div className="absolute bottom-4 right-4 h-24 w-24 rounded-full border border-dashboard-inverted-foreground/10" />
-      <p className="mb-2 text-sm text-dashboard-inverted-foreground/70">{t("dashboard.timer.title")}</p>
+      <p className="mb-2 text-sm text-dashboard-inverted-foreground/70">{t(titleKey)}</p>
       <p className="mb-5 font-mono text-4xl font-bold tabular-nums tracking-tight text-dashboard-inverted-foreground">
-        {tiempoSesion}
+        {tiempo}
       </p>
       <div className="mt-auto flex gap-3">
         <button

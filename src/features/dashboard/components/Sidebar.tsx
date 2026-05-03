@@ -20,12 +20,14 @@ import { useDashboard } from "../hooks/useDashboard";
 import type { DashboardMenuItem } from "../config/dashboardConfig";
 import { claseBotonPrimario, claseTarjetaInvertida } from "../estilosDashboard";
 
-type MenuItem = {
+type MenuItem = DashboardMenuItem & {
   icon?: LucideIcon;
+};
+
+type GeneralItem = {
+  icon: LucideIcon;
   key: string;
   label: string;
-  path?: string;
-  badge?: string;
 };
 
 type BarraLateralProps = {
@@ -34,7 +36,7 @@ type BarraLateralProps = {
   onClose?: () => void;
   onNavigate?: () => void;
   menuItems?: MenuItem[];
-  generalItems?: MenuItem[];
+  generalItems?: GeneralItem[];
 };
 
 const iconByKey: Record<string, LucideIcon> = {
@@ -61,9 +63,9 @@ export const BarraLateral = ({
 
   const elementosMenu: MenuItem[] = menuItems ?? dashboardConfig.menuItems;
 
-  const elementosGenerales: MenuItem[] = generalItems ?? [
-    { icon: Settings, label: t("sidebar.general.settings") },
-    { icon: HelpCircle, label: t("sidebar.general.help") },
+  const elementosGenerales: GeneralItem[] = generalItems ?? [
+    { key: "settings", icon: Settings, label: t("sidebar.general.settings") },
+    { key: "help", icon: HelpCircle, label: t("sidebar.general.help") },
   ];
 
   useEffect(() => {
@@ -99,12 +101,14 @@ export const BarraLateral = ({
 
   const contenidoSidebar = (
     <>
-      <div className="mb-8 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
-          <Store className="h-5 w-5 text-primary-foreground" />
+      {mode === "desktop" ? (
+        <div className="mb-8 flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
+            <Store className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-semibold text-foreground">PSP</span>
         </div>
-        <span className="text-lg font-semibold text-foreground">PSP</span>
-      </div>
+      ) : null}
 
       <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">{t("sidebar.menuLabel")}</p>
       <nav className="mb-6 space-y-1">
@@ -119,14 +123,12 @@ export const BarraLateral = ({
                 : "text-muted-foreground hover:bg-muted"
             }`}
           >
-            {(elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard) && (
-              <span className="flex h-4 w-4 items-center justify-center">
-                {(() => {
-                  const Icon = elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard;
-                  return <Icon className="h-4 w-4" />;
-                })()}
-              </span>
-            )}
+            <span className="flex h-4 w-4 items-center justify-center">
+              {(() => {
+                const Icon = elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard;
+                return <Icon className="h-4 w-4" />;
+              })()}
+            </span>
             <span className="flex-1 text-left">{t(elemento.label)}</span>
             {elemento.badge ? (
               <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] text-info">{elemento.badge}</span>

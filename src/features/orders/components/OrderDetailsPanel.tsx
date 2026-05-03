@@ -1,11 +1,13 @@
 import type { TonoSemantico } from "@/features/dashboard/data";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import type { RolUsuario } from "@/features/auth/roles";
 import { useTranslation } from "react-i18next";
 import type { Order } from "../types/order";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 
 type OrderDetailsPanelProps = {
   order: Order | null;
+  role: RolUsuario;
 };
 
 const currencyFormatter = new Intl.NumberFormat("es-AR", {
@@ -28,8 +30,9 @@ const riskToneClass: Record<Order["risk"]["level"], TonoSemantico> = {
   high: "destructive",
 };
 
-export const OrderDetailsPanel = ({ order }: OrderDetailsPanelProps) => {
+export const OrderDetailsPanel = ({ order, role }: OrderDetailsPanelProps) => {
   const { t } = useTranslation();
+  const isAdmin = role === "admin";
 
   if (!order) {
     return (
@@ -50,15 +53,19 @@ export const OrderDetailsPanel = ({ order }: OrderDetailsPanelProps) => {
     <section className={claseTarjeta("base", "space-y-5 p-6")}>
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("orders.details.metaLabel")}</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
+            {t(isAdmin ? "orders.roleContent.admin.details.metaLabel" : "orders.roleContent.client.details.metaLabel")}
+          </p>
           <h2 className="text-xl font-bold text-foreground">{t("orders.details.title", { id: order.id })}</h2>
           <p className="text-sm text-muted-foreground">{t("orders.details.createdAt", { date: dateTimeFormatter.format(new Date(order.createdAt)) })}</p>
         </div>
         <div className="flex items-center gap-2">
           <OrderStatusBadge status={order.status} />
-          <span className={claseTonoSuave(riskToneClass[order.risk.level], "rounded-full px-3 py-1 text-xs font-semibold")}>
-            {t("orders.details.risk", { risk: riskLabel[order.risk.level] })}
-          </span>
+          {isAdmin ? (
+            <span className={claseTonoSuave(riskToneClass[order.risk.level], "rounded-full px-3 py-1 text-xs font-semibold")}>
+              {t("orders.details.risk", { risk: riskLabel[order.risk.level] })}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -107,9 +114,13 @@ export const OrderDetailsPanel = ({ order }: OrderDetailsPanelProps) => {
       </article>
 
       <article className="rounded-lg border border-border p-4">
-        <h3 className="mb-2 text-sm font-semibold text-foreground">{t("orders.details.sections.notes")}</h3>
+        <h3 className="mb-2 text-sm font-semibold text-foreground">
+          {t(isAdmin ? "orders.roleContent.admin.details.notesTitle" : "orders.roleContent.client.details.notesTitle")}
+        </h3>
         <p className="text-sm text-muted-foreground">{order.internalNote}</p>
-        <p className="mt-2 text-sm text-muted-foreground">{t("orders.details.riskReason", { reason: order.risk.reason })}</p>
+        {isAdmin ? (
+          <p className="mt-2 text-sm text-muted-foreground">{t("orders.details.riskReason", { reason: order.risk.reason })}</p>
+        ) : null}
       </article>
     </section>
   );

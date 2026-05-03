@@ -133,6 +133,122 @@
         "pause": "Pausar tiempo",
         "stop": "Detener tiempo"
       }
+    },
+    "roleContent": {
+      "admin": {
+        "actions": {
+          "primary": "Nuevo cobro",
+          "secondary": "Exportar reporte"
+        },
+        "analytics": {
+          "title": "Rendimiento global PSP"
+        },
+        "metrics": {
+          "volume": {
+            "title": "Volumen procesado",
+            "helper": "+18% en toda la plataforma"
+          },
+          "transactions": {
+            "title": "Transacciones totales",
+            "helper": "Operaciones registradas"
+          },
+          "merchants": {
+            "title": "Comercios activos",
+            "helper": "Procesando ahora"
+          },
+          "alerts": {
+            "title": "Alertas pendientes",
+            "helper": "Requieren revision"
+          }
+        },
+        "projects": {
+          "title": "Operaciones PSP",
+          "new": "Nuevo",
+          "settlements": "Conciliacion de comercios",
+          "onboarding": "Alta de nuevos comercios",
+          "risk": "Revision antifraude",
+          "reports": "Reporte diario de plataforma"
+        },
+        "team": {
+          "title": "Equipo operativo",
+          "invite": "Asignar",
+          "tasks": {
+            "operations": "Monitoreo de transacciones",
+            "risk": "Validacion de alertas de riesgo",
+            "support": "Seguimiento a comercios",
+            "finance": "Revision de liquidaciones"
+          }
+        },
+        "reminder": {
+          "sectionTitle": "Recordatorio PSP",
+          "title": "Revision de conciliacion diaria",
+          "action": "Abrir reunion"
+        },
+        "progress": {
+          "title": "Procesamiento PSP",
+          "subtitle": "Liquidaciones revisadas"
+        },
+        "timer": {
+          "title": "Sesion administrativa"
+        }
+      },
+      "client": {
+        "actions": {
+          "primary": "Crear cobro",
+          "secondary": "Exportar mis pagos"
+        },
+        "analytics": {
+          "title": "Rendimiento de mi negocio"
+        },
+        "metrics": {
+          "sales": {
+            "title": "Mis ventas",
+            "helper": "+8% vs mes anterior"
+          },
+          "orders": {
+            "title": "Mis pedidos",
+            "helper": "Completados este mes"
+          },
+          "approved": {
+            "title": "Cobros aprobados",
+            "helper": "Pagados correctamente"
+          },
+          "pending": {
+            "title": "Cobros pendientes",
+            "helper": "Por confirmar"
+          }
+        },
+        "projects": {
+          "title": "Pendientes de mi negocio",
+          "new": "Agregar",
+          "openOrders": "Revisar pedidos abiertos",
+          "pendingPayments": "Confirmar pagos pendientes",
+          "salesReport": "Preparar reporte de ventas",
+          "customers": "Seguimiento a clientes frecuentes"
+        },
+        "team": {
+          "title": "Mi operacion",
+          "invite": "Agregar",
+          "tasks": {
+            "store": "Revision de pedidos del dia",
+            "cashier": "Cobros registrados en caja",
+            "support": "Clientes esperando respuesta",
+            "shipping": "Entregas por confirmar"
+          }
+        },
+        "reminder": {
+          "sectionTitle": "Recordatorio",
+          "title": "Revisar cobros pendientes antes del cierre",
+          "action": "Ver pendientes"
+        },
+        "progress": {
+          "title": "Progreso de mis pagos",
+          "subtitle": "Cobros conciliados"
+        },
+        "timer": {
+          "title": "Tiempo en mi panel"
+        }
+      }
     }
   },
   "notFound": {
@@ -199,6 +315,28 @@
       "paid": "Pagado",
       "pending": "Pendiente",
       "rejected": "Rechazado"
+    },
+    "roleContent": {
+      "admin": {
+        "title": "Pagos de la plataforma",
+        "description": "Monitorea cobros, conciliacion y rechazos de todos los comercios.",
+        "stats": {
+          "totalRevenue": { "title": "Volumen procesado", "helper": "Total bruto de la plataforma" },
+          "paid": { "title": "Cobros aprobados", "helper": "Transacciones confirmadas" },
+          "pending": { "title": "Cobros por conciliar", "helper": "Requieren revision operativa" },
+          "rejected": { "title": "Cobros rechazados", "helper": "Alertas para soporte o fraude" }
+        }
+      },
+      "client": {
+        "title": "Mis pagos",
+        "description": "Consulta los cobros de tu negocio, su estado y fechas de conciliacion.",
+        "stats": {
+          "totalRevenue": { "title": "Mis ingresos", "helper": "Total recibido en mis cobros" },
+          "paid": { "title": "Mis pagos confirmados", "helper": "Cobros aprobados" },
+          "pending": { "title": "Mis pagos pendientes", "helper": "Aun por confirmar" },
+          "rejected": { "title": "Mis pagos rechazados", "helper": "Necesitan seguimiento" }
+        }
+      }
     }
   },
   "clients": {
@@ -260,6 +398,30 @@
       },
       "tags": { "title": "Etiquetas" },
       "notes": { "title": "Notas comerciales" }
+    },
+    "roleContent": {
+      "admin": {
+        "title": "Clientes de la plataforma",
+        "description": "Explora la base comercial, segmentos y riesgo de los clientes registrados.",
+        "action": "Nuevo cliente",
+        "stats": {
+          "total": { "title": "Clientes totales", "helper": "Base comercial completa" },
+          "active": { "title": "Clientes activos", "helper": "Con actividad reciente" },
+          "risk": { "title": "Clientes en riesgo", "helper": "Requieren revision" },
+          "value": { "title": "Valor acumulado", "helper": "Ingresos historicos" }
+        }
+      },
+      "client": {
+        "title": "Mis clientes",
+        "description": "Da seguimiento a los clientes que compran en tu negocio.",
+        "action": "Registrar cliente",
+        "stats": {
+          "total": { "title": "Mis clientes", "helper": "Contactos de mi negocio" },
+          "active": { "title": "Clientes activos", "helper": "Compraron recientemente" },
+          "risk": { "title": "Clientes por atender", "helper": "Necesitan seguimiento" },
+          "value": { "title": "Valor de mis ventas", "helper": "Ingresos historicos del negocio" }
+        }
+      }
     }
   },
   "orders": {
@@ -324,6 +486,37 @@
       "riskReason": "Motivo de riesgo: {{reason}}"
     },
     "risk": { "low": "Bajo", "medium": "Medio", "high": "Alto" }
+    ,
+    "roleContent": {
+      "admin": {
+        "title": "Pedidos de comercios",
+        "description": "Supervisa pedidos, pagos, riesgo y logistica de la plataforma.",
+        "stats": {
+          "total": { "title": "Pedidos totales", "helper": "Ordenes de todos los comercios" },
+          "completed": { "title": "Pedidos completados", "helper": "Entregas confirmadas" },
+          "pending": { "title": "Pedidos pendientes", "helper": "En proceso operativo" },
+          "cancelled": { "title": "Pedidos cancelados", "helper": "Requieren seguimiento" }
+        },
+        "details": {
+          "metaLabel": "Detalle administrativo",
+          "notesTitle": "Notas internas y auditoria"
+        }
+      },
+      "client": {
+        "title": "Mis pedidos",
+        "description": "Revisa los pedidos de tu negocio y el estado de cada entrega.",
+        "stats": {
+          "total": { "title": "Mis pedidos", "helper": "Ordenes de mi negocio" },
+          "completed": { "title": "Entregados", "helper": "Pedidos completados" },
+          "pending": { "title": "En proceso", "helper": "Pendientes de entrega" },
+          "cancelled": { "title": "Cancelados", "helper": "Pedidos por revisar" }
+        },
+        "details": {
+          "metaLabel": "Detalle del pedido",
+          "notesTitle": "Seguimiento del pedido"
+        }
+      }
+    }
   },
   "reports": {
     "title": "Reportes",
@@ -363,6 +556,46 @@
         "refunds": "Devoluciones"
       },
       "emptyState": "No hay productos para el canal seleccionado."
+    },
+    "roleContent": {
+      "admin": {
+        "title": "Reportes de plataforma",
+        "description": "Analiza rendimiento, canales y productos de todos los comercios.",
+        "stats": {
+          "revenue": { "title": "Ingresos globales", "helper": "+{{growth}}% vs periodo anterior" },
+          "orders": { "title": "Ordenes totales", "helper": "Pedidos capturados por comercios" },
+          "averageTicket": { "title": "Ticket promedio PSP", "helper": "Valor medio de la plataforma" },
+          "conversion": { "title": "Conversion global", "helper": "{{refunds}} devoluciones registradas" }
+        },
+        "chart": { "title": "Rendimiento de plataforma" },
+        "channels": {
+          "title": "Canales de venta",
+          "description": "Participacion por origen en toda la plataforma"
+        },
+        "topProducts": {
+          "title": "Productos destacados",
+          "description": "Ranking global ajustado por canal seleccionado"
+        }
+      },
+      "client": {
+        "title": "Mis reportes",
+        "description": "Analiza ventas, canales y productos de tu propio negocio.",
+        "stats": {
+          "revenue": { "title": "Mis ingresos", "helper": "+{{growth}}% vs periodo anterior" },
+          "orders": { "title": "Mis ordenes", "helper": "Pedidos de mi negocio" },
+          "averageTicket": { "title": "Mi ticket promedio", "helper": "Valor medio por pedido" },
+          "conversion": { "title": "Mi conversion", "helper": "{{refunds}} devoluciones registradas" }
+        },
+        "chart": { "title": "Rendimiento de mi negocio" },
+        "channels": {
+          "title": "Mis canales",
+          "description": "Origen de las ventas de mi negocio"
+        },
+        "topProducts": {
+          "title": "Mis productos destacados",
+          "description": "Ranking de productos de mi negocio"
+        }
+      }
     }
   }
 }

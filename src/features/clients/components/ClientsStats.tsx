@@ -1,8 +1,10 @@
 import { ShieldAlert, Sparkles, UserCheck, Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { RolUsuario } from "@/features/auth/roles";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
 
 type ClientsStatsProps = {
+  role: RolUsuario;
   totalClients: number;
   activeClients: number;
   riskClients: number;
@@ -15,34 +17,35 @@ const currencyFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0,
 });
 
-export const ClientsStats = ({ totalClients, activeClients, riskClients, lifetimeValue }: ClientsStatsProps) => {
+export const ClientsStats = ({ role, totalClients, activeClients, riskClients, lifetimeValue }: ClientsStatsProps) => {
   const { t } = useTranslation();
+  const isAdmin = role === "admin";
   const items = [
     {
-      title: t("clients.stats.total.title"),
+      title: t(isAdmin ? "clients.roleContent.admin.stats.total.title" : "clients.roleContent.client.stats.total.title"),
       value: totalClients.toString(),
-      helper: t("clients.stats.total.helper"),
+      helper: t(isAdmin ? "clients.roleContent.admin.stats.total.helper" : "clients.roleContent.client.stats.total.helper"),
       icon: Sparkles,
       toneClass: claseTonoSuave("info", "h-9 w-9"),
     },
     {
-      title: t("clients.stats.active.title"),
+      title: t(isAdmin ? "clients.roleContent.admin.stats.active.title" : "clients.roleContent.client.stats.active.title"),
       value: activeClients.toString(),
-      helper: t("clients.stats.active.helper"),
+      helper: t(isAdmin ? "clients.roleContent.admin.stats.active.helper" : "clients.roleContent.client.stats.active.helper"),
       icon: UserCheck,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: t("clients.stats.risk.title"),
+      title: t(isAdmin ? "clients.roleContent.admin.stats.risk.title" : "clients.roleContent.client.stats.risk.title"),
       value: riskClients.toString(),
-      helper: t("clients.stats.risk.helper"),
+      helper: t(isAdmin ? "clients.roleContent.admin.stats.risk.helper" : "clients.roleContent.client.stats.risk.helper"),
       icon: ShieldAlert,
       toneClass: claseTonoSuave("destructive", "h-9 w-9"),
     },
     {
-      title: t("clients.stats.value.title"),
+      title: t(isAdmin ? "clients.roleContent.admin.stats.value.title" : "clients.roleContent.client.stats.value.title"),
       value: currencyFormatter.format(lifetimeValue),
-      helper: t("clients.stats.value.helper"),
+      helper: t(isAdmin ? "clients.roleContent.admin.stats.value.helper" : "clients.roleContent.client.stats.value.helper"),
       icon: Wallet,
       toneClass: claseTonoSuave("muted", "h-9 w-9"),
     },

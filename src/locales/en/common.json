@@ -133,6 +133,122 @@
         "pause": "Pause time",
         "stop": "Stop time"
       }
+    },
+    "roleContent": {
+      "admin": {
+        "actions": {
+          "primary": "New charge",
+          "secondary": "Export report"
+        },
+        "analytics": {
+          "title": "Global PSP performance"
+        },
+        "metrics": {
+          "volume": {
+            "title": "Processed volume",
+            "helper": "+18% across the platform"
+          },
+          "transactions": {
+            "title": "Total transactions",
+            "helper": "Registered operations"
+          },
+          "merchants": {
+            "title": "Active merchants",
+            "helper": "Processing now"
+          },
+          "alerts": {
+            "title": "Pending alerts",
+            "helper": "Need review"
+          }
+        },
+        "projects": {
+          "title": "PSP operations",
+          "new": "New",
+          "settlements": "Merchant settlements",
+          "onboarding": "New merchant onboarding",
+          "risk": "Antifraud review",
+          "reports": "Daily platform report"
+        },
+        "team": {
+          "title": "Operations team",
+          "invite": "Assign",
+          "tasks": {
+            "operations": "Transaction monitoring",
+            "risk": "Risk alert validation",
+            "support": "Merchant follow-up",
+            "finance": "Settlement review"
+          }
+        },
+        "reminder": {
+          "sectionTitle": "PSP reminder",
+          "title": "Daily settlement review",
+          "action": "Open meeting"
+        },
+        "progress": {
+          "title": "PSP processing",
+          "subtitle": "Settlements reviewed"
+        },
+        "timer": {
+          "title": "Admin session"
+        }
+      },
+      "client": {
+        "actions": {
+          "primary": "Create charge",
+          "secondary": "Export my payments"
+        },
+        "analytics": {
+          "title": "My business performance"
+        },
+        "metrics": {
+          "sales": {
+            "title": "My sales",
+            "helper": "+8% vs previous month"
+          },
+          "orders": {
+            "title": "My orders",
+            "helper": "Completed this month"
+          },
+          "approved": {
+            "title": "Approved charges",
+            "helper": "Paid correctly"
+          },
+          "pending": {
+            "title": "Pending charges",
+            "helper": "Waiting confirmation"
+          }
+        },
+        "projects": {
+          "title": "My business tasks",
+          "new": "Add",
+          "openOrders": "Review open orders",
+          "pendingPayments": "Confirm pending payments",
+          "salesReport": "Prepare sales report",
+          "customers": "Follow up frequent customers"
+        },
+        "team": {
+          "title": "My operation",
+          "invite": "Add",
+          "tasks": {
+            "store": "Review today's orders",
+            "cashier": "Charges registered at checkout",
+            "support": "Customers waiting for reply",
+            "shipping": "Deliveries to confirm"
+          }
+        },
+        "reminder": {
+          "sectionTitle": "Reminder",
+          "title": "Review pending charges before closing",
+          "action": "View pending"
+        },
+        "progress": {
+          "title": "My payments progress",
+          "subtitle": "Charges reconciled"
+        },
+        "timer": {
+          "title": "Time in my panel"
+        }
+      }
     }
   },
   "notFound": {
@@ -199,6 +315,28 @@
       "paid": "Paid",
       "pending": "Pending",
       "rejected": "Rejected"
+    },
+    "roleContent": {
+      "admin": {
+        "title": "Platform payments",
+        "description": "Monitor charges, reconciliation, and rejected payments across all merchants.",
+        "stats": {
+          "totalRevenue": { "title": "Processed volume", "helper": "Gross platform total" },
+          "paid": { "title": "Approved charges", "helper": "Confirmed transactions" },
+          "pending": { "title": "Charges to reconcile", "helper": "Need operations review" },
+          "rejected": { "title": "Rejected charges", "helper": "Support or fraud alerts" }
+        }
+      },
+      "client": {
+        "title": "My payments",
+        "description": "Review your business charges, their status, and reconciliation dates.",
+        "stats": {
+          "totalRevenue": { "title": "My revenue", "helper": "Total received from my charges" },
+          "paid": { "title": "My confirmed payments", "helper": "Approved charges" },
+          "pending": { "title": "My pending payments", "helper": "Waiting confirmation" },
+          "rejected": { "title": "My rejected payments", "helper": "Need follow-up" }
+        }
+      }
     }
   },
   "clients": {
@@ -252,6 +390,30 @@
       },
       "tags": { "title": "Tags" },
       "notes": { "title": "Commercial notes" }
+    },
+    "roleContent": {
+      "admin": {
+        "title": "Platform clients",
+        "description": "Explore the commercial base, segments, and risk of registered clients.",
+        "action": "New client",
+        "stats": {
+          "total": { "title": "Total clients", "helper": "Full commercial base" },
+          "active": { "title": "Active clients", "helper": "With recent activity" },
+          "risk": { "title": "At-risk clients", "helper": "Need review" },
+          "value": { "title": "Accumulated value", "helper": "Historical revenue" }
+        }
+      },
+      "client": {
+        "title": "My clients",
+        "description": "Follow up with the customers who buy from your business.",
+        "action": "Register client",
+        "stats": {
+          "total": { "title": "My clients", "helper": "My business contacts" },
+          "active": { "title": "Active clients", "helper": "Bought recently" },
+          "risk": { "title": "Clients to contact", "helper": "Need follow-up" },
+          "value": { "title": "My sales value", "helper": "Historical business revenue" }
+        }
+      }
     }
   },
   "orders": {
@@ -315,7 +477,37 @@
       "itemMeta": "SKU: {{sku}} | Quantity: {{quantity}}",
       "riskReason": "Risk reason: {{reason}}"
     },
-    "risk": { "low": "Low", "medium": "Medium", "high": "High" }
+    "risk": { "low": "Low", "medium": "Medium", "high": "High" },
+    "roleContent": {
+      "admin": {
+        "title": "Merchant orders",
+        "description": "Supervise orders, payments, risk, and logistics across the platform.",
+        "stats": {
+          "total": { "title": "Total orders", "helper": "Orders from all merchants" },
+          "completed": { "title": "Completed orders", "helper": "Confirmed deliveries" },
+          "pending": { "title": "Pending orders", "helper": "In operations process" },
+          "cancelled": { "title": "Cancelled orders", "helper": "Need follow-up" }
+        },
+        "details": {
+          "metaLabel": "Administrative details",
+          "notesTitle": "Internal notes and audit"
+        }
+      },
+      "client": {
+        "title": "My orders",
+        "description": "Review your business orders and each delivery status.",
+        "stats": {
+          "total": { "title": "My orders", "helper": "Orders from my business" },
+          "completed": { "title": "Delivered", "helper": "Completed orders" },
+          "pending": { "title": "In progress", "helper": "Waiting delivery" },
+          "cancelled": { "title": "Cancelled", "helper": "Orders to review" }
+        },
+        "details": {
+          "metaLabel": "Order details",
+          "notesTitle": "Order follow-up"
+        }
+      }
+    }
   },
   "reports": {
     "title": "Reports",
@@ -355,6 +547,46 @@
         "refunds": "Refunds"
       },
       "emptyState": "No products match the selected channel."
+    },
+    "roleContent": {
+      "admin": {
+        "title": "Platform reports",
+        "description": "Analyze performance, channels, and products across all merchants.",
+        "stats": {
+          "revenue": { "title": "Global revenue", "helper": "+{{growth}}% vs previous period" },
+          "orders": { "title": "Total orders", "helper": "Orders captured by merchants" },
+          "averageTicket": { "title": "PSP average ticket", "helper": "Platform average value" },
+          "conversion": { "title": "Global conversion", "helper": "{{refunds}} refunds recorded" }
+        },
+        "chart": { "title": "Platform performance" },
+        "channels": {
+          "title": "Sales channels",
+          "description": "Share by source across the platform"
+        },
+        "topProducts": {
+          "title": "Top products",
+          "description": "Global ranking adjusted by selected channel"
+        }
+      },
+      "client": {
+        "title": "My reports",
+        "description": "Analyze sales, channels, and products from your own business.",
+        "stats": {
+          "revenue": { "title": "My revenue", "helper": "+{{growth}}% vs previous period" },
+          "orders": { "title": "My orders", "helper": "Orders from my business" },
+          "averageTicket": { "title": "My average ticket", "helper": "Average value per order" },
+          "conversion": { "title": "My conversion", "helper": "{{refunds}} refunds recorded" }
+        },
+        "chart": { "title": "My business performance" },
+        "channels": {
+          "title": "My channels",
+          "description": "Sales origin for my business"
+        },
+        "topProducts": {
+          "title": "My top products",
+          "description": "Product ranking for my business"
+        }
+      }
     }
   }
 }

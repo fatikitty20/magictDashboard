@@ -1,6 +1,7 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDashboard } from "@/features/dashboard";
 import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
 import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
@@ -15,6 +16,8 @@ type StatusFilter = "all" | PaymentStatus;
 
 const Payments = () => {
   const { t } = useTranslation();
+  const { role } = useDashboard();
+  const isAdmin = role === "admin";
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -140,8 +143,12 @@ const Payments = () => {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-3xl font-bold text-foreground">{t("payments.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("payments.description")}</p>
+          <h1 className="mb-1 text-3xl font-bold text-foreground">
+            {t(isAdmin ? "payments.roleContent.admin.title" : "payments.roleContent.client.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t(isAdmin ? "payments.roleContent.admin.description" : "payments.roleContent.client.description")}
+          </p>
         </div>
 
         <button onClick={handleRefresh} className={claseBotonPrimario("h-10 gap-2 px-5 text-sm")}>
@@ -154,6 +161,7 @@ const Payments = () => {
       ) : null}
 
       <PaymentsStats
+        role={role}
         totalRevenue={displayStats.totalRevenue}
         paidCount={displayStats.paidCount}
         pendingCount={displayStats.pendingCount}

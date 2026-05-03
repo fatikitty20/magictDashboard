@@ -1,43 +1,46 @@
 import { CircleAlert, CircleCheckBig, CircleDashed, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { RolUsuario } from "@/features/auth/roles";
 import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
 
 type OrdersStatsProps = {
+  role: RolUsuario;
   totalOrders: number;
   completedCount: number;
   pendingCount: number;
   cancelledCount: number;
 };
 
-export const OrdersStats = ({ totalOrders, completedCount, pendingCount, cancelledCount }: OrdersStatsProps) => {
+export const OrdersStats = ({ role, totalOrders, completedCount, pendingCount, cancelledCount }: OrdersStatsProps) => {
   const { t } = useTranslation();
+  const isAdmin = role === "admin";
   const items = [
     {
-      title: t("orders.stats.total.title"),
+      title: t(isAdmin ? "orders.roleContent.admin.stats.total.title" : "orders.roleContent.client.stats.total.title"),
       value: totalOrders.toString(),
-      helper: t("orders.stats.total.helper"),
+      helper: t(isAdmin ? "orders.roleContent.admin.stats.total.helper" : "orders.roleContent.client.stats.total.helper"),
       icon: ShoppingBag,
       toneClass: claseTonoSuave("info", "h-9 w-9"),
     },
     {
-      title: t("orders.stats.completed.title"),
+      title: t(isAdmin ? "orders.roleContent.admin.stats.completed.title" : "orders.roleContent.client.stats.completed.title"),
       value: completedCount.toString(),
-      helper: t("orders.stats.completed.helper"),
+      helper: t(isAdmin ? "orders.roleContent.admin.stats.completed.helper" : "orders.roleContent.client.stats.completed.helper"),
       icon: CircleCheckBig,
       toneClass: claseTonoSuave("success", "h-9 w-9"),
     },
     {
-      title: t("orders.stats.pending.title"),
+      title: t(isAdmin ? "orders.roleContent.admin.stats.pending.title" : "orders.roleContent.client.stats.pending.title"),
       value: pendingCount.toString(),
-      helper: t("orders.stats.pending.helper"),
+      helper: t(isAdmin ? "orders.roleContent.admin.stats.pending.helper" : "orders.roleContent.client.stats.pending.helper"),
       icon: CircleDashed,
       toneClass:
         "flex h-9 w-9 items-center justify-center rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300",
     },
     {
-      title: t("orders.stats.cancelled.title"),
+      title: t(isAdmin ? "orders.roleContent.admin.stats.cancelled.title" : "orders.roleContent.client.stats.cancelled.title"),
       value: cancelledCount.toString(),
-      helper: t("orders.stats.cancelled.helper"),
+      helper: t(isAdmin ? "orders.roleContent.admin.stats.cancelled.helper" : "orders.roleContent.client.stats.cancelled.helper"),
       icon: CircleAlert,
       toneClass: claseTonoSuave("destructive", "h-9 w-9"),
     },

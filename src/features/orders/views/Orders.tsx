@@ -1,6 +1,7 @@
 import { Filter, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDashboard } from "@/features/dashboard";
 import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
 import { OrderDetailsPanel } from "../components/OrderDetailsPanel";
 import { OrdersStats } from "../components/OrdersStats";
@@ -9,16 +10,20 @@ import { ordersService } from "../services/ordersService";
 import type { Order, OrderStatus } from "../types/order";
 
 type StatusFilter = "all" | OrderStatus;
+// Simula el alcance del cliente: admin ve todo, cliente solo sus pedidos.
+const CLIENT_VISIBLE_ORDER_IDS = new Set(["ORD-101", "ORD-102", "ORD-104", "ORD-106"]);
 
 const Orders = () => {
   const { t } = useTranslation();
+  const { role } = useDashboard();
+  const isAdmin = role === "admin";
   const [orders, setOrders] = useState<Order[]>([]);
-    const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-      { value: "all", label: t("orders.filters.all") },
-      { value: "completed", label: t("orders.filters.completed") },
-      { value: "pending", label: t("orders.filters.pending") },
-      { value: "cancelled", label: t("orders.filters.cancelled") },
-    ];
+  const statusOptions: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("orders.filters.all") },
+    { value: "completed", label: t("orders.filters.completed") },
+    { value: "pending", label: t("orders.filters.pending") },
+    { value: "cancelled", label: t("orders.filters.cancelled") },
+  ];
 
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -46,9 +51,14 @@ const Orders = () => {
     };
   }, []);
 
+  const roleOrders = useMemo(
+    () => (isAdmin ? orders : orders.filter((order) => CLIENT_VISIBLE_ORDER_IDS.has(order.id))),
+    [isAdmin, orders],
+  );
+
   const filteredOrders = useMemo(
-    () => orders.filter((order) => (statusFilter === "all" ? true : order.status === statusFilter)),
-    [orders, statusFilter],
+    () => roleOrders.filter((order) => (statusFilter === "all" ? true : order.status === statusFilter)),
+    [roleOrders, statusFilter],
   );
 
   useEffect(() => {
@@ -70,24 +80,28 @@ const Orders = () => {
   );
 
   const stats = useMemo(() => {
-    const completedCount = orders.filter((order) => order.status === "completed").length;
-    const pendingCount = orders.filter((order) => order.status === "pending").length;
-    const cancelledCount = orders.filter((order) => order.status === "cancelled").length;
+    const completedCount = roleOrders.filter((order) => order.status === "completed").length;
+    const pendingCount = roleOrders.filter((order) => order.status === "pending").length;
+    const cancelledCount = roleOrders.filter((order) => order.status === "cancelled").length;
 
     return {
-      totalOrders: orders.length,
+      totalOrders: roleOrders.length,
       completedCount,
       pendingCount,
       cancelledCount,
     };
-  }, [orders]);
+  }, [roleOrders]);
 
   return (
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-3xl font-bold text-foreground">{t("orders.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("orders.description")}</p>
+          <h1 className="mb-1 text-3xl font-bold text-foreground">
+            {t(isAdmin ? "orders.roleContent.admin.title" : "orders.roleContent.client.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t(isAdmin ? "orders.roleContent.admin.description" : "orders.roleContent.client.description")}
+          </p>
         </div>
 
         <button type="button" className={claseBotonPrimario("h-10 gap-2 px-5 text-sm")}>
@@ -96,6 +110,7 @@ const Orders = () => {
       </div>
 
       <OrdersStats
+        role={role}
         totalOrders={stats.totalOrders}
         completedCount={stats.completedCount}
         pendingCount={stats.pendingCount}
@@ -137,7 +152,7 @@ const Orders = () => {
             selectedOrderId={selectedOrderId ?? undefined}
             onSelectOrder={setSelectedOrderId}
           />
-          <OrderDetailsPanel order={selectedOrder} />
+          <OrderDetailsPanel order={selectedOrder} role={role} />
         </>
       )}
     </>
