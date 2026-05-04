@@ -1,6 +1,6 @@
 # Architecture - Magict Dashboard
 
-Este archivo resume la estructura real del proyecto, que hace cada carpeta/archivo principal y como se conecta la integracion de API del modulo de Payments.
+Este archivo resume la estructura real del proyecto, que hace cada carpeta/archivo principal y como se conecta la integracion de API del modulo de Payments. Tambien explica por que Payments esta mas avanzado que Clientes, Pedidos, Reportes y Transacciones.
 
 ## Resumen General
 
@@ -12,6 +12,25 @@ Magict Dashboard esta organizado con una arquitectura basada en features. La ide
 - Estado de autenticacion y permisos
 
 La app usa React + TypeScript + Vite, con React Router, TanStack Query, Zustand, Tailwind y i18n.
+
+## Arquitectura General Usada
+
+El proyecto usa una **arquitectura basada en features** con separacion por capas. Cada area del negocio vive dentro de su propia carpeta y cada carpeta puede crecer sin revolver codigo de otras pantallas.
+
+Patron ideal por feature:
+
+```text
+views/       -> pantalla completa
+components/  -> piezas visuales de esa pantalla
+hooks/       -> conexion entre React y datos
+domain/      -> reglas de negocio
+api/         -> endpoints reales
+services/    -> mocks o acceso temporal a datos
+mappers/     -> traduccion backend -> UI
+types/       -> contratos TypeScript
+```
+
+Payments ya usa casi todo el patron porque consume backend. Orders, Clients, Reports y Transactions ya tienen las carpetas preparadas, pero por ahora siguen usando `services/` con mock.
 
 ## Stack De Consumo De APIs
 
@@ -30,6 +49,46 @@ Esto significa que:
 - la logica de red se divide en:
   - `shared/api/` → cliente HTTP reutilizable (apiClient)
   - `features/*/api/` → endpoints específicos del dominio
+
+## Diferencia Entre Payments y los Demas Features
+
+Payments es diferente porque ya esta conectado al backend de Alejandro. Por eso tiene una arquitectura mas completa:
+
+```text
+Payments.tsx
+  -> usePayments()
+    -> getPayments()
+      -> paymentsApi.ts
+        -> apiClient.ts
+          -> backend
+```
+
+Clientes, Pedidos, Reportes y Transacciones todavia funcionan asi:
+
+```text
+Clients.tsx / Orders.tsx / Reports.tsx / Transactions.tsx
+  -> service mock
+    -> data local o mock en memoria
+```
+
+La meta es que despues migren a este flujo:
+
+```text
+View.tsx
+  -> useFeatureApi()
+    -> domain
+      -> featureApi.ts
+        -> apiClient.ts
+          -> backend
+```
+
+| Feature | API real | Mock actual | Capas preparadas | Que falta |
+| --- | --- | --- | --- | --- |
+| `payments` | Si | No como fuente principal | Si | Reforzar validacion backend por usuario/empresa. |
+| `orders` | No | Si | Si | Implementar `ordersApi`, hook y mapper real. |
+| `clients` | No | Si | Si | Implementar `clientsApi`, hook y mapper real. |
+| `reports` | No | Si | Si | Implementar endpoints reales de reportes. |
+| `transactions` | No | Si | Si | Conectar endpoint admin real y mejorar vista. |
 
 ## Arbol de Carpetas
 
@@ -82,21 +141,43 @@ src/
       index.ts                # Export publico del feature
 
     orders/                   # Modulo de pedidos
+      api/ordersApi.ts         # Capa futura de endpoints de pedidos
+      domain/ordersDomain.ts   # Capa futura de reglas de negocio
+      hooks/useOrdersApi.ts    # Hook futuro para TanStack Query
+      mappers/orderMapper.ts   # Mapper futuro backend -> UI
+      services/ordersService.ts # Mock actual
+      data/ordersData.ts       # Datos mock
       components/
       types/
       views/Orders.tsx
 
     clients/                  # Modulo de clientes
+      api/clientsApi.ts        # Capa futura de endpoints de clientes
+      domain/clientsDomain.ts  # Capa futura de reglas de negocio
+      hooks/useClientsApi.ts   # Hook futuro para TanStack Query
+      mappers/clientMapper.ts  # Mapper futuro backend -> UI
+      services/clientsService.ts # Mock actual
+      data/clientsData.ts      # Datos mock
       components/
       types/
       views/Clients.tsx
 
     reports/                  # Modulo de reportes
+      api/reportsApi.ts        # Capa futura de endpoints de reportes
+      domain/reportsDomain.ts  # Capa futura de reglas de negocio
+      hooks/useReportsApi.ts   # Hook futuro para TanStack Query
+      mappers/reportMapper.ts  # Mapper futuro backend -> UI
+      services/reportsService.ts # Mock actual
+      data/reportsData.ts      # Datos mock
       components/
       types/
       views/Reports.tsx
 
     transactions/             # Vista de transacciones admin
+      api/transactionsApi.ts   # Capa futura de endpoints admin
+      domain/transactionsDomain.ts # Capa futura de reglas admin
+      hooks/useTransactionsApi.ts # Hook futuro para TanStack Query
+      mappers/transactionMapper.ts # Mapper futuro backend -> UI
       services/
       types/
       views/Transactions.tsx
@@ -139,13 +220,13 @@ src/
 ## Que Hace Cada Capa
 
 ### `src/App.tsx`
-Orquesta la aplicacion completa. Define providers globales, router, layout protegido y rutas publicas/protegidas.
+Orquesta la aplicacion completa. Define providers globales y renderiza el router leyendo `appRoutes` desde `src/config/routes.tsx`.
 
 ### `src/main.tsx`
 Arranca React en el DOM. Aqui se montan los providers globales de alto nivel.
 
 ### `src/config/routes.tsx`
-Es la fuente central de rutas. Facilita auditar que ruta existe, que pagina la renderiza y que roles la pueden usar.
+Es la fuente central de rutas. Facilita auditar que ruta existe, que pagina la renderiza y que roles la pueden usar. Tambien declara si una ruta requiere autenticacion (`requiresAuth`) o roles especificos (`allowedRoles`).
 
 ### `src/components/ui/`
 Componentes globales reutilizables por cualquier feature. No deben contener logica de negocio de un dominio especifico.
@@ -160,7 +241,7 @@ Define la experiencia principal del panel. `useDashboard()` elige que widgets y 
 Contiene toda la logica de pagos/transacciones: fetch, mapeo, filtros, hook, componentes y vista.
 
 ### `src/features/orders/`, `clients/`, `reports/`, `transactions/`
-Cada feature agrupa su propio dominio. La idea es evitar logica duplicada y mantener el codigo aislado por area funcional.
+Cada feature agrupa su propio dominio. Ya tienen carpetas `api`, `domain`, `hooks` y `mappers` preparadas para crecer igual que Payments. Por ahora siguen usando `services/` y `data/` porque sus datos son mock.
 
 ### `src/shared/layouts/`
 Contiene piezas de layout reutilizables que no pertenecen a un feature de negocio concreto, como sidebar y topbar.
@@ -173,7 +254,9 @@ Funciones base compartidas. Aqui van utilidades puras, no logica de features.
 
 ## Integracion De API En Payments
 
-El flujo de Payments esta separado en varias capas para no mezclar UI con acceso a datos:
+El flujo de Payments usa una arquitectura por capas cercana a Clean Architecture aplicada al frontend. No es Clean Architecture pura, pero toma la idea principal: separar UI, reglas de negocio, traduccion de datos y acceso a infraestructura.
+
+El flujo esta separado en varias capas para no mezclar UI con acceso a datos:
 
 1. `src/shared/api/apiClient.ts`
    - Cliente HTTP comun.
@@ -225,6 +308,20 @@ La logica de orquestacion esta en:
 - `src/features/payments/domain/getPayments.ts`
 
 La UI nunca llama `fetch` directamente. Solo consume el hook `usePayments()`.
+
+## Como Migrar los Otros Features a API Real
+
+Cuando backend tenga endpoints para Pedidos, Clientes, Reportes o Transacciones, el cambio recomendado es:
+
+1. Crear tipos de respuesta backend en `types/`.
+2. Implementar llamada HTTP en `api/<feature>Api.ts`.
+3. Crear mapper en `mappers/` para traducir backend -> UI.
+4. Mover reglas de filtros, sort o calculos a `domain/`.
+5. Crear hook `hooks/use<Feature>Api.ts` con TanStack Query.
+6. Cambiar la vista para usar el hook en lugar del service mock.
+7. Mantener `services/` solo como fallback temporal o eliminarlo cuando ya no se use.
+
+La regla de oro: la vista no debe saber como se arma un endpoint. La vista solo debe pedir datos mediante un hook.
 
 ## Convenciones Importantes
 

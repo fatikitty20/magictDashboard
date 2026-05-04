@@ -99,11 +99,11 @@ En frontend se puede filtrar informacion para mostrar menos datos, pero un usuar
 | --- | --- | --- | --- |
 | `auth` | Si | Si | Mock activo; no es auth productiva. |
 | `dashboard` | Si | Si | Correcto para vista, depende de sesion mock. |
-| `payments` | Si | Parcial | Usa backend, pero no se ve alcance por empresa/rol desde frontend. |
-| `orders` | Si | Si | Filtrado mock en frontend; backend pendiente. |
-| `clients` | Si | Si | Filtrado mock en frontend; backend pendiente. |
-| `reports` | Si | Si | Escala datos para cliente; es demo, no seguridad real. |
-| `transactions` | Si | Si, por ruta admin | La vista depende solo del guard de ruta. |
+| `payments` | Si | Parcial | Usa backend y arquitectura por capas, pero el alcance por empresa/rol debe validarlo backend. |
+| `orders` | Si | Si | Tiene capas API preparadas, pero sigue con filtrado mock en frontend. |
+| `clients` | Si | Si | Tiene capas API preparadas, pero sigue con filtrado mock en frontend. |
+| `reports` | Si | Si | Tiene capas API preparadas, pero escala datos demo; no es seguridad real. |
+| `transactions` | Si | Si, por ruta admin | Tiene capas API preparadas, pero la vista aun usa mock. |
 | `theme` | No aplica | No | Guarda tema, no informacion sensible. |
 | `i18n` | No aplica | No | Guarda idioma, no informacion sensible. |
 
@@ -126,6 +126,17 @@ En frontend se puede filtrar informacion para mostrar menos datos, pero un usuar
 4. Usar `usePermissions()` dentro de componentes sensibles como botones de exportar, crear o administrar.
 5. Completar manejo de `401` en `apiClient.ts` para cerrar sesion y redirigir a `/login`.
 6. Corregir comentarios con codificacion rota en algunos archivos para que toda la documentacion interna se lea limpio.
+
+## Nota sobre las nuevas capas preparadas
+
+Agregar carpetas `api`, `domain`, `hooks` y `mappers` en un feature no significa que ya exista seguridad backend. Esas carpetas ordenan donde ira el codigo cuando se conecten endpoints reales.
+
+La seguridad de verdad se completa cuando:
+
+- el endpoint valida sesion;
+- el endpoint valida rol;
+- el endpoint filtra por empresa/cliente;
+- el frontend solo muestra lo que backend ya autorizo.
 
 ## Conclusion
 

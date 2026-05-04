@@ -8,6 +8,7 @@ Estado general: bueno, con base solida para escalar.
 
 - Arquitectura actual: feature-based, con separacion razonable por capas.
 - Payments: es el modulo mas cercano a Clean Architecture (api + domain + mapper + hook + view).
+- Orders, Clients, Reports y Transactions: ya tienen carpetas preparadas `api`, `domain`, `hooks` y `mappers`, pero siguen consumiendo mock por medio de `services`.
 - Seguridad: sin CVEs en dependencias npm (`npm audit` reporta 0), pero hay riesgos de aplicacion por ser frontend con auth mock y RBAC cliente.
 - Consumo de APIs: mejor que un frontend promedio (wrapper `apiClient` + React Query), pero aun faltan controles para produccion (validacion de respuesta, estrategia 401, CSRF/refresh policy y estandar de errores).
 
@@ -30,6 +31,7 @@ Diagnostico rapido:
 - Guard de rutas: `src/features/auth/ProtectedRoute.tsx`
 - Flujo Payments: `src/features/payments/api/paymentsApi.ts`, `src/features/payments/domain/getPayments.ts`, `src/features/payments/hooks/usePayments.ts`
 - Modulos con mock: `src/features/orders/services/ordersService.ts`, `src/features/clients/services/clientsService.ts`, `src/features/reports/services/reportsService.ts`, `src/features/transactions/services/transactionsService.ts`
+- Capas preparadas para migrar mocks a backend: `src/features/orders/api`, `src/features/clients/api`, `src/features/reports/api`, `src/features/transactions/api` y sus carpetas `domain`, `hooks`, `mappers`.
 - i18n config: `src/i18n.ts`
 - Build config/proxy: `vite.config.ts`
 

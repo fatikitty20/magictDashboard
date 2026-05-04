@@ -16,17 +16,17 @@ export interface SesionAutenticacion {
   correo: string;
   emitidaEn: number;
   expiraEn: number;
-  proveedor: "mock" | "api"; // 🔥 ahora soporta backend real
+  proveedor: "mock" | "api"; //  soporta backend real
   usuario: UsuarioAutenticado;
 }
 
 export interface AdaptadorAutenticacion {
   iniciarSesion(credenciales: CredencialesAutenticacion): Promise<SesionAutenticacion>;
   cerrarSesion(): Promise<void>;
-  obtenerSesion(): Promise<SesionAutenticacion | null>; // 🔥 async para backend
+  obtenerSesion(): Promise<SesionAutenticacion | null>; // async para backend
 }
 
-const USE_REAL_API = false; // 🔥 CAMBIAR A true cuando conectes backend
+const USE_REAL_API = false; // CAMBIAR A true cuando conectes backend
 
 const duracionSesionMs = 8 * 60 * 60 * 1000;
 const patronCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -117,7 +117,7 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
       body: JSON.stringify(credenciales),
     });
 
-    // 🔥 backend guarda cookie httpOnly
+    //  backend guarda cookie httpOnly
     return this.obtenerSesion() as Promise<SesionAutenticacion>;
   },
 

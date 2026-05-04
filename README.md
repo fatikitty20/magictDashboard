@@ -116,6 +116,8 @@ src/
   pages/
 ```
 
+Nota: `payments` ya usa capas completas `api`, `domain`, `hooks` y `mappers` porque consume backend. `orders`, `clients`, `reports` y `transactions` ya tienen esas carpetas preparadas, pero por ahora siguen usando datos mock desde `services/` y `data/`.
+
 ---
 
 ## Documentacion tecnica

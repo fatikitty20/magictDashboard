@@ -14,10 +14,14 @@ Este proyecto utiliza una **arquitectura basada en features** con **separación 
 src/features/<feature>/
 ├── types/
 │   └── <feature>.ts              # Modelos TypeScript SOLO
+├── api/
+│   └── <feature>Api.ts           # Endpoints reales SOLO
 ├── services/
-│   └── <feature>Service.ts       # API calls y acceso a datos SOLO
+│   └── <feature>Service.ts       # Mock o acceso temporal a datos SOLO
 ├── hooks/
 │   └── use<Feature>.ts           # Lógica de negocio reutilizable SOLO
+├── domain/
+│   └── <feature>Domain.ts        # Reglas de negocio SOLO
 ├── components/
 │   ├── <Feature>Stats.tsx        # Componentes específicos del feature
 │   └── <Feature>Table.tsx        # Componentes específicos del feature
@@ -25,9 +29,27 @@ src/features/<feature>/
 │   └── <Feature>View.tsx         # Página completa (composición)
 ├── data/ (opcional)
 │   └── <feature>Data.ts          # Datos mock (temporal)
-├── mappers/ (opcional)
+├── mappers/
 │   └── <feature>Mapper.ts        # Transformación de datos
 └── index.ts                      # 🌟 Exports públicos (API limpia)
+```
+
+### Estado real de esa estructura
+
+Payments ya implementa la estructura completa porque consume API real. Orders, Clients, Reports y Transactions ya tienen carpetas `api`, `domain`, `hooks` y `mappers` preparadas con comentarios, pero siguen usando `services/` como mock temporal.
+
+```mermaid
+flowchart TD
+  P["Payments"] --> P1["api real"]
+  P --> P2["domain implementado"]
+  P --> P3["hook con TanStack Query"]
+  P --> P4["mapper backend -> UI"]
+
+  O["Orders / Clients / Reports / Transactions"] --> O1["services mock actual"]
+  O --> O2["api preparada"]
+  O --> O3["domain preparada"]
+  O --> O4["hooks preparados"]
+  O --> O5["mappers preparados"]
 ```
 
 ### Estructura Global del Proyecto
@@ -112,9 +134,14 @@ export type PaymentStatus = Payment["status"];
 
 ---
 
-### 🔌 `services/` - Acceso a Datos
+### 🔌 `api/` y `services/` - Acceso a Datos
 
-**Responsabilidad**: Llamadas a APIs y lógica de datos
+**Responsabilidad**:
+
+- `api/`: llamadas a endpoints reales usando `apiClient`.
+- `services/`: datos mock o adaptadores temporales mientras no existe backend real.
+
+Payments ya usa `api/paymentsApi.ts`. Orders, Clients, Reports y Transactions tienen `api/` preparado, pero la vista aun usa `services/` con mock.
 
 ```typescript
 // src/features/payments/services/paymentsService.ts
@@ -360,11 +387,22 @@ export const publicRoutes: RouteConfig[] = [
 ];
 
 export const protectedRoutes: RouteConfig[] = [
-  { path: "/dashboard", element: <Dashboard /> },
-  { path: "/payments", element: <Payments />, allowedRoles: ["client", "admin"] },
-  { path: "/orders", element: <Orders /> },
-  { path: "/reports", element: <Reports /> },
-  { path: "/clients", element: <Clients /> },
+  { path: "dashboard", element: <Dashboard />, requiresAuth: true },
+  { path: "payments", element: <Payments />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "orders", element: <Orders />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "reports", element: <Reports />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "clients", element: <Clients />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "transactions", element: <Transactions />, requiresAuth: true, allowedRoles: [ROLES.ADMIN] },
+];
+
+export const appRoutes: RouteConfig[] = [
+  ...publicRoutes,
+  {
+    path: "/",
+    element: <DashboardLayout />,
+    requiresAuth: true,
+    children: protectedRoutes,
+  },
 ];
 ```
 
@@ -393,6 +431,10 @@ export const RutaProtegida = ({ children, allowedRoles }: RutaProtegidaProps) =>
   return <>{children}</>;
 };
 ```
+
+### Renderizado En App
+
+`src/App.tsx` recorre `appRoutes` y envuelve cada ruta protegida con `RutaProtegida` de forma dinámica. Eso deja la definición de acceso junto a la ruta y evita duplicar JSX del router en el entrypoint.
 
 ---
 

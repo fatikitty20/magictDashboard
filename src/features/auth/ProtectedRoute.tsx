@@ -15,7 +15,7 @@ export const RutaProtegida = ({
   const ubicacion = useLocation();
   const { isAuthenticated, user, isHydrated, isCheckingAuth } = useAuth();
 
-  // 🔥 1. Esperar estado global + validación backend
+  //  1. Esperar estado global + validación backend
   if (!isHydrated || isCheckingAuth) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
@@ -24,7 +24,7 @@ export const RutaProtegida = ({
     );
   }
 
-  // 🔐 2. No autenticado
+  //  2. No autenticado
   if (!isAuthenticated) {
     return (
       <Navigate
@@ -35,7 +35,7 @@ export const RutaProtegida = ({
     );
   }
 
-  // 🔒 3. Sin permisos
+  //  3. Sin permisos
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }

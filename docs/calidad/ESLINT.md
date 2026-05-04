@@ -21,6 +21,9 @@ Una analogia sencilla: TypeScript revisa que las piezas encajen, Vitest prueba q
 | `src/i18next.d.ts` | Se uso `import type`. | Separa tipos de codigo ejecutable. |
 | Componentes de dashboard | Se limpiaron imports duplicados. | Evita deuda tecnica y warnings repetidos. |
 | `src/shared/layouts/Sidebar.tsx` | Se corrigio import de iconos y estructura de callbacks. | Evita errores visuales y de lint. |
+| `tsconfig.json` | Se convirtio en archivo indice con referencias. | VS Code deja de leer la app sin configuracion JSX. |
+| `tsconfig.app.json` | Se dejo la configuracion real de React/Vite y se quito `baseUrl`. | Evita el error rojo de JSX y el aviso de deprecacion de TypeScript. |
+| `src/features/*/api|domain|hooks|mappers` | Se agregaron archivos preparados en features con mock. | Documentan donde entrara la API sin romper la funcionalidad actual. |
 
 ## Reglas importantes
 
@@ -60,6 +63,30 @@ npm run check
 
 Ejecuta la revision completa: lint, typecheck, tests y build.
 
+```bash
+npx tsc -p tsconfig.json --noEmit
+```
+
+Valida que el `tsconfig.json` raiz que lee VS Code no provoque errores falsos de TypeScript.
+
+## Errores rojos de VS Code
+
+Si VS Code marca muchos errores como:
+
+```text
+Cannot use JSX unless the '--jsx' flag is provided
+```
+
+no significa necesariamente que el codigo este mal. Ese error aparece cuando el editor lee una configuracion de TypeScript sin `jsx`.
+
+Para evitarlo se dejo esta estructura:
+
+- `tsconfig.json`: indice principal que apunta a los configs reales.
+- `tsconfig.app.json`: configuracion de la app React con `jsx: "react-jsx"`.
+- `tsconfig.node.json`: configuracion para archivos de Node/Vite.
+
+Si el editor sigue mostrando errores despues del arreglo, cerrar y abrir VS Code normalmente refresca el servidor de TypeScript.
+
 ## Como leer un error de ESLint
 
 Un error normalmente dice:
@@ -95,3 +122,9 @@ Si despues de `lint:fix` sigue fallando, entonces el problema necesita una corre
 ## Limite de ESLint
 
 ESLint ayuda mucho, pero no reemplaza seguridad real. Puede detectar malas practicas en frontend, pero no puede garantizar que un usuario no vea datos ajenos si el backend no valida permisos, roles y alcance de datos.
+
+## Archivos preparados con solo comentarios
+
+Algunos archivos nuevos dentro de `clients`, `orders`, `reports` y `transactions` existen para explicar arquitectura futura. Tienen comentarios y `export {}` para que TypeScript los trate como modulos validos.
+
+Esto es intencional: permite que el equipo vea donde implementar API, dominio, hooks y mappers despues, sin conectar codigo incompleto ni romper las vistas que actualmente usan mock.

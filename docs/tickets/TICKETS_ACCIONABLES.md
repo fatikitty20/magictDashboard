@@ -8,6 +8,17 @@ Formato: Markdown (compatible con GitHub Issues / Jira import)
 
 ## FASE 1: ALTO IMPACTO, BAJO RIESGO (1-2 semanas)
 
+### Nota de arquitectura actualizada
+
+Se agregaron carpetas preparadas `api`, `domain`, `hooks` y `mappers` para `orders`, `clients`, `reports` y `transactions`. Payments ya implementa ese patron con backend real; los demas features aun usan `services/` y `data/` como mock temporal.
+
+Cuando se trabaje un ticket de conexion backend, no se debe llamar `fetch` desde una vista. El flujo recomendado es:
+
+```text
+View -> hook -> domain -> api -> apiClient -> backend
+```
+
+***ATENDIDO**
 ### P0-001 | Unificar Rutas - Usar src/config/routes.tsx como Fuente Única
 - **Prioridad**: P0 (crítica)
 - **Esfuerzo**: L (Large - 1 día)

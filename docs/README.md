@@ -22,3 +22,7 @@ Esta carpeta concentra los documentos tecnicos del proyecto. El `README.md` prin
 - Documentos de analisis: `docs/analisis/`
 - Documentos por feature: `docs/features/`
 - Tickets y backlog: `docs/tickets/`
+
+## Nota actual de arquitectura
+
+`payments` es el feature modelo porque ya usa API real con `api`, `domain`, `hooks` y `mappers`. `orders`, `clients`, `reports` y `transactions` ya tienen esas carpetas preparadas, pero aun usan mocks mientras no exista backend real para esas vistas.

@@ -47,7 +47,7 @@ const fetchMergedStatusTransactions = async (
   return transactionsByStatus.flat();
 };
 
-// 🔥 FUNCIÓN PRINCIPAL DE DOMINIO
+// FUNCIÓN PRINCIPAL DE DOMINIO
 export const getPayments = async (params: PaymentQueryParams = {}): Promise<PaymentListResponse> => {
   const backendStatuses = getBackendStatusesForPaymentStatus(params.status);
 
