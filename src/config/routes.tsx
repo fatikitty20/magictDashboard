@@ -4,18 +4,18 @@
  */
 
 import type { ReactNode } from "react";
-import { ROLES } from "@/features/auth/roles";
-import { RutaProtegida } from "@/features/auth";
-import { DashboardLayout } from "@/features/dashboard";
-import { Transactions } from "@/features/transactions";
-import Index from "@/pages/Index";
-import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import NotFound from "@/pages/NotFound";
-import Payments from "@/features/payments/views/Payments";
-import Orders from "@/features/orders/views/Orders";
-import Reports from "@/features/reports/views/Reports";
-import Clients from "@/features/clients/views/Clients";
+import { ROLES } from "../features/auth/roles";
+import { RutaProtegida } from "../features/auth";
+import { DashboardLayout } from "../shared/layouts/DashboardLayout";
+import { Transactions } from "../features/transactions";
+import Index from "../pages/Index";
+import Login from "../pages/Login";
+import Dashboard from "../pages/Dashboard";
+import NotFound from "../pages/NotFound";
+import Payments from "../features/payments/views/Payments";
+import Orders from "../features/orders/views/Orders";
+import Reports from "../features/reports/views/Reports";
+import Clients from "../features/clients/views/Clients";
 
 export interface RouteConfig {
   path: string;
@@ -39,38 +39,56 @@ export const publicRoutes: RouteConfig[] = [
 ];
 
 /**
- * Rutas protegidas (requieren autenticación)
- * 🔥 IMPORTANTE: sin "/" porque son hijas de "/"
+ * Rutas protegidas (requieren autenticación + roles)
  */
 export const protectedRoutes: RouteConfig[] = [
   {
     path: "dashboard",
-    element: <Dashboard />,
+    element: (
+      <RutaProtegida>
+        <Dashboard />
+      </RutaProtegida>
+    ),
   },
   {
     path: "payments",
-    element: <Payments />,
-    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
+    element: (
+      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
+        <Payments />
+      </RutaProtegida>
+    ),
   },
   {
     path: "orders",
-    element: <Orders />,
-    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
+    element: (
+      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
+        <Orders />
+      </RutaProtegida>
+    ),
   },
   {
     path: "reports",
-    element: <Reports />,
-    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
+    element: (
+      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
+        <Reports />
+      </RutaProtegida>
+    ),
   },
   {
     path: "clients",
-    element: <Clients />,
-    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
+    element: (
+      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
+        <Clients />
+      </RutaProtegida>
+    ),
   },
   {
     path: "transactions",
-    element: <Transactions />,
-    allowedRoles: [ROLES.ADMIN],
+    element: (
+      <RutaProtegida allowedRoles={[ROLES.ADMIN]}>
+        <Transactions />
+      </RutaProtegida>
+    ),
   },
 ];
 
@@ -87,7 +105,7 @@ export const errorRoutes: RouteConfig[] = [
 /**
  * Configuración completa de rutas
  */
-export const appRoutes = [
+export const appRoutes: RouteConfig[] = [
   ...publicRoutes,
   {
     path: "/",

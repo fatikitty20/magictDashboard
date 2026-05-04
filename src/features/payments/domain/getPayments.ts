@@ -10,7 +10,7 @@ import {
   MAX_CLIENT_SIDE_PAGES,
   resolveTransactions,
 } from "../api/paymentsApi";
-import { buildClientSideResponse, buildServerSideResponse } from "../services/paymentsFilters";
+import { buildClientSideResponse, buildServerSideResponse } from "./paymentsFilters";
 
 // 🔹 Trae todas las páginas de un status específico
 const fetchAllTransactionsThroughPagination = async (

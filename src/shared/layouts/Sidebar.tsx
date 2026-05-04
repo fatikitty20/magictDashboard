@@ -16,9 +16,9 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth";
-import { useDashboard } from "../hooks/useDashboard";
-import type { DashboardMenuItem } from "../config/dashboardConfig";
-import { claseBotonPrimario, claseTarjetaInvertida } from "../estilosDashboard";
+import { useDashboard } from "../../features/dashboard/hooks/useDashboard";
+import type { DashboardMenuItem } from "../../features/dashboard/config/dashboardConfig";
+import { claseBotonPrimario, claseTarjetaInvertida } from "@/shared/ui/estilosDashboard";
 
 type MenuItem = DashboardMenuItem & {
   icon?: LucideIcon;
@@ -94,14 +94,24 @@ export const BarraLateral = ({
 
   const contenidoSidebar = (
     <>
-      {mode === "desktop" && (
-        <div className="mb-8 flex items-center gap-2">
+      <div className="mb-8 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
             <Store className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="text-lg font-semibold text-foreground">PSP</span>
         </div>
-      )}
+        {mode === "mobile" && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("sidebar.actions.close")}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">
         {t("sidebar.menuLabel")}

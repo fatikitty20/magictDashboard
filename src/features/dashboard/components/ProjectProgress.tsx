@@ -1,6 +1,6 @@
 import { progresoPagos } from "../data";
 import type { LlaveTraduccion } from "../data";
-import { claseTarjeta } from "../estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import { useTranslation } from "react-i18next";
 
 interface ProgresoPagosProps {

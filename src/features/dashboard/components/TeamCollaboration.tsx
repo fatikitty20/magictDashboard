@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { miembrosEquipo } from "../data";
 import type { LlaveTraduccion, MiembroEquipoDashboard } from "../data";
-import { claseAvatarTono, claseTarjeta, claseTonoSuave } from "../estilosDashboard";
+import { claseAvatarTono, claseTarjeta, claseTonoSuave } from "@/shared/ui/estilosDashboard";
 
 interface ColaboracionEquipoProps {
   miembros?: MiembroEquipoDashboard[];

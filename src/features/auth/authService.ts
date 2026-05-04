@@ -1,3 +1,5 @@
+import { apiClient } from "@/shared/api/apiClient";
+
 export interface CredencialesAutenticacion {
   correo: string;
   contrasena: string;
@@ -14,42 +16,29 @@ export interface SesionAutenticacion {
   correo: string;
   emitidaEn: number;
   expiraEn: number;
-  proveedor: "mock";
+  proveedor: "mock" | "api"; // 🔥 ahora soporta backend real
   usuario: UsuarioAutenticado;
 }
 
 export interface AdaptadorAutenticacion {
   iniciarSesion(credenciales: CredencialesAutenticacion): Promise<SesionAutenticacion>;
   cerrarSesion(): Promise<void>;
-  obtenerSesion(): SesionAutenticacion | null;
+  obtenerSesion(): Promise<SesionAutenticacion | null>; // 🔥 async para backend
 }
+
+const USE_REAL_API = false; // 🔥 CAMBIAR A true cuando conectes backend
 
 const duracionSesionMs = 8 * 60 * 60 * 1000;
 const patronCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let sesionActual: SesionAutenticacion | null = null;
 
-const resolverRolUsuario = (correo: string): RolUsuario => (correo.includes("admin") ? "admin" : "client");
+const resolverRolUsuario = (correo: string): RolUsuario =>
+  correo.includes("admin") ? "admin" : "client";
 
-const esSesionAutenticacion = (valor: unknown): valor is SesionAutenticacion => {
-  if (!valor || typeof valor !== "object") {
-    return false;
-  }
-
-  const sesion = valor as Partial<SesionAutenticacion>;
-
-  return (
-    typeof sesion.correo === "string" &&
-    typeof sesion.emitidaEn === "number" &&
-    typeof sesion.expiraEn === "number" &&
-    sesion.proveedor === "mock" &&
-    typeof sesion.usuario === "object" &&
-    sesion.usuario !== null &&
-    typeof (sesion.usuario as UsuarioAutenticado).correo === "string" &&
-    ((sesion.usuario as UsuarioAutenticado).role === "admin" || (sesion.usuario as UsuarioAutenticado).role === "client")
-  );
-};
-
-const normalizarCredenciales = ({ correo, contrasena }: CredencialesAutenticacion): CredencialesAutenticacion => ({
+const normalizarCredenciales = ({
+  correo,
+  contrasena,
+}: CredencialesAutenticacion): CredencialesAutenticacion => ({
   correo: correo.trim().toLowerCase(),
   contrasena: contrasena.trim(),
 });
@@ -61,6 +50,10 @@ const limpiarSesionSegura = (): void => {
 const guardarSesionSegura = (sesion: SesionAutenticacion): void => {
   sesionActual = sesion;
 };
+
+
+
+// ================= MOCK =================
 
 const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
   async iniciarSesion(credenciales) {
@@ -76,6 +69,7 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
 
     const emitidaEn = Date.now();
     const role = resolverRolUsuario(credencialesNormalizadas.correo);
+
     const sesion: SesionAutenticacion = {
       correo: credencialesNormalizadas.correo,
       emitidaEn,
@@ -95,27 +89,67 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
     limpiarSesionSegura();
   },
 
-  obtenerSesion(): SesionAutenticacion | null {
-  return null;
-},
+  async obtenerSesion() {
+    return sesionActual;
+  },
 };
 
-const adaptadorAutenticacionActivo = adaptadorAutenticacionMock;
+
+
+// ================= API REAL (PREPARADO) =================
+
+const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
+  async iniciarSesion(credenciales) {
+    await apiClient("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credenciales),
+    });
+
+    // 🔥 backend guarda cookie httpOnly
+    return this.obtenerSesion() as Promise<SesionAutenticacion>;
+  },
+
+  async cerrarSesion() {
+    await apiClient("/auth/logout", {
+      method: "POST",
+    });
+  },
+
+  async obtenerSesion() {
+    try {
+      return await apiClient<SesionAutenticacion>("/auth/me");
+    } catch {
+      return null;
+    }
+  },
+};
+
+
+
+// ================= SELECTOR =================
+
+const adaptadorAutenticacionActivo: AdaptadorAutenticacion =
+  USE_REAL_API ? adaptadorAutenticacionApi : adaptadorAutenticacionMock;
+
+
+
+// ================= API PUBLICA =================
 
 export const servicioAutenticacion = {
-  iniciarSesion(credenciales: CredencialesAutenticacion): Promise<SesionAutenticacion> {
+  iniciarSesion(credenciales: CredencialesAutenticacion) {
     return adaptadorAutenticacionActivo.iniciarSesion(credenciales);
   },
 
-  cerrarSesion(): Promise<void> {
+  cerrarSesion() {
     return adaptadorAutenticacionActivo.cerrarSesion();
   },
 
-  obtenerSesion(): SesionAutenticacion | null {
+  obtenerSesion() {
     return adaptadorAutenticacionActivo.obtenerSesion();
   },
 
-  estaAutenticado(): boolean {
-    return adaptadorAutenticacionActivo.obtenerSesion() !== null;
+  async estaAutenticado() {
+    const sesion = await adaptadorAutenticacionActivo.obtenerSesion();
+    return sesion !== null;
   },
 };

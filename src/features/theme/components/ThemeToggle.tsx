@@ -1,11 +1,15 @@
 import { Moon, Sun } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { claseBotonIcono } from "@/features/dashboard/estilosDashboard";
+import { claseBotonIcono } from "@/shared/ui/estilosDashboard";
 import { useModoTema } from "../useThemeMode";
 
 export const BotonTema = () => {
+  const { t } = useTranslation();
   const { esModoOscuro, alternarModoTema } = useModoTema();
-  const etiqueta = esModoOscuro ? "Cambiar a modo dia" : "Cambiar a modo noche";
+  const etiqueta = esModoOscuro
+    ? t("topbar.actions.switchToLight")
+    : t("topbar.actions.switchToDark");
   const Icono = esModoOscuro ? Sun : Moon;
 
   return (

@@ -8,7 +8,9 @@
       "openSidebar": "Open navigation menu",
       "closeSidebar": "Close navigation menu",
       "messages": "Messages",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "switchToLight": "Switch to light mode",
+      "switchToDark": "Switch to dark mode"
     },
     "admin": {
       "role": "Administrator"

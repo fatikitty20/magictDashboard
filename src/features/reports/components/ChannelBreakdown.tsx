@@ -1,7 +1,7 @@
 import { RadioTower } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { RolUsuario } from "@/features/auth/roles";
-import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import type { ChannelReport } from "../types/report";
 
 type ChannelBreakdownProps = {

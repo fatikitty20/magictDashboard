@@ -1,7 +1,7 @@
 import { CircleAlert, CircleCheckBig, CircleDashed, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { RolUsuario } from "@/features/auth/roles";
-import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta, claseTonoSuave } from "@/shared/ui/estilosDashboard";
 
 type OrdersStatsProps = {
   role: RolUsuario;

@@ -2,7 +2,7 @@ import { Filter, RefreshCcw, Search, UserPlus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/features/dashboard";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
+import { claseBotonPrimario } from "@/shared/ui/estilosDashboard";
 import { ClientDetailsPanel } from "../components/ClientDetailsPanel";
 import { ClientsStats } from "../components/ClientsStats";
 import { ClientsTable } from "../components/ClientsTable";

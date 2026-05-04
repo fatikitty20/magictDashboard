@@ -1,6 +1,6 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta, claseTonoSuave } from "@/shared/ui/estilosDashboard";
 import type { Client } from "../types/client";
 import { ClientStatusBadge } from "./ClientStatusBadge";
 

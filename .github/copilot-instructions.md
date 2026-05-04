@@ -2,7 +2,7 @@
 
 ## Descripción General del Proyecto
 
-**Magict Dashboard** es un panel administrativo web diseñado para gestionar una tienda online conectada a un flujo de Payment Service Provider (PSP). El propósito principal es centralizar la información clave del negocio, como métricas de ventas, pedidos, pagos, reportes y clientes, en una interfaz moderna, responsiva y fácil de usar.
+**Magict Dashboard** es un panel administrativo web diseñado para gestionar una tienda online conectada a un flujo de Payment Service Provider (PSP). El propósito principal es centralizar la información clave del negocio, como métricas de ventas, pedidos, pagos, transacciones, reportes y clientes, en una interfaz moderna, responsiva y fácil de usar.
 
 ### Tecnologías Principales
 - **Frontend Framework**: React 18 con TypeScript para desarrollo tipado y robusto.
@@ -10,6 +10,8 @@
 - **Styling**: Tailwind CSS con un sistema de diseño personalizado basado en variables CSS para modo claro y oscuro.
 - **Routing**: React Router DOM para navegación del lado cliente.
 - **State Management**: TanStack Query (React Query) para manejo de estado de servidor y caché de datos.
+- **State Management Local**: Zustand para sesión/autenticación persistente.
+- **API / Data Fetching**: `fetch` nativo encapsulado en `shared/api/apiClient.ts` + TanStack Query para cache, loading y refetch.
 - **UI Components**: Radix UI para componentes accesibles y Lucide React para iconos.
 - **Testing**: Vitest con Testing Library para pruebas unitarias.
 - **Linting**: ESLint con reglas específicas para React y TypeScript.
@@ -22,27 +24,35 @@ El proyecto está estructurado como una Single Page Application (SPA) con autent
 La estructura del proyecto sigue una organización modular y escalable, separando concerns por features y tipos de archivos:
 
 - **`src/`**: Código fuente principal de la aplicación.
-  - **`components/ui/`**: Componentes reutilizables de UI (ej. tooltip.tsx).
+  - **`components/ui/`**: Componentes reutilizables de UI (ej. `tooltip.tsx`, `StatusPill.tsx`).
+  - **`shared/`**: Utilidades compartidas de la aplicación.
+    - **`api/`**: Cliente HTTP base (`apiClient.ts`).
+    - **`layouts/`**: Layouts globales (`DashboardLayout`, `Sidebar`, `Topbar`).
+    - **`ui/`**: Helpers visuales compartidos (`estilosDashboard.ts`).
   - **`features/`**: Módulos principales organizados por dominio.
-    - **`auth/`**: Autenticación (servicios, hooks, rutas protegidas).
-    - **`clients/`**: Gestión de clientes (componentes, datos, servicios, tipos, vistas).
-    - **`dashboard/`**: Componentes del dashboard principal (layout, métricas, gráficos).
-    - **`orders/`**: Gestión de pedidos (similar a clients).
-    - **`payments/`**: Gestión de pagos.
+    - **`auth/`**: Autenticación, roles, permisos, Zustand store y rutas protegidas.
+    - **`dashboard/`**: Configuración dinámica por rol, data mock, widgets y vista principal.
+    - **`payments/`**: Capa API, dominio, mappers, hooks React Query, componentes y vista.
+    - **`orders/`**: Gestión de pedidos.
+    - **`clients/`**: Gestión de clientes.
     - **`reports/`**: Reportes y análisis.
+    - **`transactions/`**: Vista de transacciones para admin.
     - **`theme/`**: Gestión de modo claro/oscuro.
+    - **`i18n/`**: Selector de idioma y utilidades de traducción.
   - **`lib/`**: Utilidades compartidas (ej. utils.ts).
   - **`pages/`**: Páginas principales de la aplicación (Dashboard, Login, etc.).
   - **`App.tsx`**: Componente raíz con proveedores y rutas.
   - **`main.tsx`**: Punto de entrada que renderiza la app.
   - **`index.css`**: Estilos globales con variables CSS.
   - **`vite-env.d.ts`**: Tipos para Vite.
+  - **`ARCHITECTURE.md`**: Documento con el árbol técnico y el flujo de API.
 
 - **`public/`**: Archivos estáticos (robots.txt).
 
 - **Archivos de Configuración**:
   - **`package.json`**: Dependencias y scripts.
-  - **`vite.config.ts`**: Configuración de Vite (servidor, alias @ para src).
+  - **`vite.config.ts`**: Configuración de Vite (servidor, proxy `/api`, alias `@` para `src`).
+  - **`tsconfig.json`**: Configuración raíz para resolución de rutas y referencias.
   - **`tailwind.config.ts`**: Configuración de Tailwind con colores personalizados.
   - **`tsconfig.*.json`**: Configuración de TypeScript.
   - **`eslint.config.js`**: Reglas de linting.
@@ -97,15 +107,19 @@ Variables específicas del dashboard: `--dashboard-soft`, `--dashboard-inverted`
 ### Configuraciones
 - **Vite Config**: Servidor en puerto 8081, alias `@` para `src/`, deduplicación de React.
 - **Tailwind Config**: Colores personalizados, modo oscuro por clase.
-- **Query Client**: Instancia global de TanStack Query para caché de datos.
+- **Query Client**: Instancia global de TanStack Query en `main.tsx` para caché de datos y estado remoto.
+- **API Client**: `src/shared/api/apiClient.ts` encapsula `fetch` y centraliza errores/headers.
 
 ### Variables Globales
 - **Theme Context**: `ThemeModeProvider` en `features/theme/` para modo claro/oscuro.
-- **Auth Context**: `useAuth` hook para estado de autenticación.
+- **Auth Store/Context**: Zustand (`store/authStore.ts`) + `useAuth` para sesión y autenticación.
+- **Dashboard Config**: `useDashboard()` para decidir widgets y menu según rol.
 
 ### Funciones Importantes
 - **Auth Service** (`features/auth/authService.ts`): Funciones para login/logout mock.
-- **Services por Feature**: Cada módulo (clients, orders, etc.) tiene un service para lógica de negocio y llamadas a API mock.
+- **Payments API** (`features/payments/api/paymentsApi.ts`): Construye URLs, normaliza respuesta y llama a `apiClient`.
+- **Payments Domain** (`features/payments/domain/getPayments.ts`): Orquesta mapeo, filtros, paginación y estadisticas.
+- **Services por Feature**: Cada módulo mantiene su lógica de negocio separada en `api/`, `domain/`, `mappers/` o `services/` según corresponda.
 - **Utils** (`lib/utils.ts`): Funciones auxiliares como `cn` para combinar clases Tailwind.
 
 ## Buenas Prácticas para Proyectos con Vite/React
@@ -117,7 +131,8 @@ Variables específicas del dashboard: `--dashboard-soft`, `--dashboard-inverted`
 
 ### Routing
 - Usar React Router con rutas protegidas (`ProtectedRoute`).
-- Layouts anidados para secciones autenticadas.
+- Las rutas se centralizan en `src/config/routes.tsx`.
+- Layouts anidados para secciones autenticadas con `DashboardLayout` en `shared/layouts/`.
 
 ### Componentes
 - **Functional Components**: Preferir hooks sobre class components.
@@ -125,8 +140,9 @@ Variables específicas del dashboard: `--dashboard-soft`, `--dashboard-inverted`
 - **Props Typing**: Usar interfaces de TypeScript para props.
 
 ### Estado y Datos
-- **TanStack Query**: Para fetching, caching y sincronización de datos del servidor.
-- **Context API**: Para estado global como tema y auth.
+- **TanStack Query**: Para fetching, caching, sincronización y refetch de datos del servidor.
+- **Zustand**: Para sesión persistente y estado local de autenticación.
+- **Context API**: Para estado global como tema e i18n.
 
 ### Estilos
 - **Tailwind Utility-First**: Clases en línea, usar `clsx` o `cn` para condicionales.
@@ -142,11 +158,12 @@ Variables específicas del dashboard: `--dashboard-soft`, `--dashboard-inverted`
 
 ## Otros Detalles Relevantes
 
-- **Autenticación**: Mock con localStorage; rutas protegidas redirigen a /login.
+- **Autenticación**: Mock con persistencia en Zustand; rutas protegidas redirigen a `/login`.
 - **Internacionalización**: El proyecto está en español; mantener consistencia en textos.
 - **Responsividad**: Diseño mobile-first con Tailwind.
 - **Accesibilidad**: Usar Radix UI para componentes accesibles.
 - **Escalabilidad**: Estructura preparada para conectar APIs reales en lugar de datos mock.
+- **API**: No llamar `fetch` directo desde UI; usar `shared/api/apiClient.ts` + hooks de React Query.
 - **Commits y Branches**: Seguir convenciones de Git (ej. conventional commits).
 
 Esta documentación ayuda a Copilot a generar código consistente con el estilo y arquitectura del proyecto.

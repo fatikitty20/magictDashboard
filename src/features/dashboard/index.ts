@@ -3,7 +3,7 @@
  * Esta es la interfaz para consumidores externos
  */
 
-export { DashboardLayout } from "./components/DashboardLayout";
+export { DashboardLayout } from "../../shared/layouts/DashboardLayout";
 export { useDashboard } from "./hooks/useDashboard";
 export { obtenerConfigDashboard } from "./config/dashboardConfig";
 export * from "./config/dashboardConfig";

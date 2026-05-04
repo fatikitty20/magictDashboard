@@ -8,7 +8,9 @@
       "openSidebar": "Abrir menú de navegación",
       "closeSidebar": "Cerrar menú de navegación",
       "messages": "Mensajes",
-      "notifications": "Notificaciones"
+      "notifications": "Notificaciones",
+      "switchToLight": "Cambiar a modo día",
+      "switchToDark": "Cambiar a modo noche"
     },
     "admin": {
       "role": "Administrador"

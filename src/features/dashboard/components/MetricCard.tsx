@@ -1,7 +1,7 @@
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Metrica } from "../data";
-import { claseTarjeta } from "../estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 
 export const TarjetaMetrica = ({ etiquetaKey, valor, ayudaKey, variante }: Metrica) => {
   const { t } = useTranslation();

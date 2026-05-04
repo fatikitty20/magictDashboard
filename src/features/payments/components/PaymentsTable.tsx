@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Payment, PaymentSortBy, SortOrder } from "../types/payment";
-import { claseTarjeta } from "../../dashboard/estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import { StatusBadge } from "./StatusBadge";
 
 type PaymentsTableProps = {

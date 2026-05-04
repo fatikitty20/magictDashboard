@@ -1,5 +1,5 @@
 import type { TonoSemantico } from "@/features/dashboard/data";
-import { claseTarjeta, claseTonoSuave } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta, claseTonoSuave } from "@/shared/ui/estilosDashboard";
 import type { RolUsuario } from "@/features/auth/roles";
 import { useTranslation } from "react-i18next";
 import type { Order } from "../types/order";

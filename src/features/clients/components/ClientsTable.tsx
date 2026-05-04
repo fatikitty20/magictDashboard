@@ -1,4 +1,4 @@
-import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import { useTranslation } from "react-i18next";
 import type { Client } from "../types/client";
 import { ClientStatusBadge } from "./ClientStatusBadge";

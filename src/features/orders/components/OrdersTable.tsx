@@ -1,4 +1,4 @@
-import { claseTarjeta } from "../../dashboard/estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import { useTranslation } from "react-i18next";
 import type { Order } from "../types/order";
 import { OrderStatusBadge } from "./OrderStatusBadge";

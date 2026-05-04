@@ -2,7 +2,7 @@ import { Filter, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/features/dashboard";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
+import { claseBotonPrimario } from "@/shared/ui/estilosDashboard";
 import { OrderDetailsPanel } from "../components/OrderDetailsPanel";
 import { OrdersStats } from "../components/OrdersStats";
 import { OrdersTable } from "../components/OrdersTable";

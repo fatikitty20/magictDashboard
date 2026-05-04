@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "./store/authStore";
 import {
   servicioAutenticacion,
@@ -11,11 +11,45 @@ export const useAuth = () => {
   const setSesion = useAuthStore((s) => s.setSesion);
   const clearSesion = useAuthStore((s) => s.clearSesion);
 
-  const signIn = useCallback(async (credenciales: CredencialesAutenticacion) => {
-    const nuevaSesion = await servicioAutenticacion.iniciarSesion(credenciales);
-    setSesion(nuevaSesion);
-    return nuevaSesion;
-  }, [setSesion]);
+  // 🔥 NUEVO: estado de validación real de sesión
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // 🔥 sincroniza sesión con backend (o mock)
+  const refreshSession = useCallback(async () => {
+    try {
+      setIsCheckingAuth(true);
+
+      const sesionBackend = await servicioAutenticacion.obtenerSesion();
+
+      if (sesionBackend) {
+        setSesion(sesionBackend);
+      } else {
+        clearSesion();
+      }
+    } catch {
+      clearSesion();
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }, [setSesion, clearSesion]);
+
+  // 🔥 validar sesión al iniciar app
+  useEffect(() => {
+    if (isHydrated) {
+      refreshSession();
+    }
+  }, [isHydrated, refreshSession]);
+
+  const signIn = useCallback(
+    async (credenciales: CredencialesAutenticacion) => {
+      const nuevaSesion =
+        await servicioAutenticacion.iniciarSesion(credenciales);
+
+      setSesion(nuevaSesion);
+      return nuevaSesion;
+    },
+    [setSesion]
+  );
 
   const signOut = useCallback(async () => {
     await servicioAutenticacion.cerrarSesion();
@@ -27,7 +61,9 @@ export const useAuth = () => {
     user: sesion?.usuario ?? null,
     isAuthenticated: Boolean(sesion),
     isHydrated,
+    isCheckingAuth, // 🔥 CLAVE
     signIn,
     signOut,
+    refreshSession,
   };
 };

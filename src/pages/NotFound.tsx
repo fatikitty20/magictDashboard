@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 
 const NotFound = () => {
   const { t } = useTranslation();

@@ -8,19 +8,34 @@ interface RutaProtegidaProps {
   allowedRoles?: RolUsuario[];
 }
 
-export const RutaProtegida = ({ children, allowedRoles }: RutaProtegidaProps) => {
+export const RutaProtegida = ({
+  children,
+  allowedRoles,
+}: RutaProtegidaProps) => {
   const ubicacion = useLocation();
-  const { isAuthenticated, user, isHydrated } = useAuth();
+  const { isAuthenticated, user, isHydrated, isCheckingAuth } = useAuth();
 
-  // 🔥 CLAVE: esperar hydration
-  if (!isHydrated) {
-    return null; // o loader
+  // 🔥 1. Esperar estado global + validación backend
+  if (!isHydrated || isCheckingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
+        Cargando sesión...
+      </div>
+    );
   }
 
+  // 🔐 2. No autenticado
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: ubicacion.pathname }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: ubicacion.pathname }}
+      />
+    );
   }
 
+  // 🔒 3. Sin permisos
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }

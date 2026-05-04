@@ -81,9 +81,9 @@ src/
 
 ---
 
-## 🎯 Separación de Responsabilidades
+## Separación de Responsabilidades
 
-### 📦 `types/` - Modelos TypeScript
+### `types/` - Modelos TypeScript
 
 **Responsabilidad**: Definir estructuras de datos
 
@@ -99,13 +99,13 @@ export interface Payment {
 export type PaymentStatus = Payment["status"];
 ```
 
-**✅ Qué va aquí**:
+**Qué va aquí**:
 - Interfaces
 - Types
 - Enums
 - Constantes de tipos
 
-**❌ Qué NO va aquí**:
+**Qué NO va aquí**:
 - Lógica
 - Función con cuerpo
 - Llamadas a APIs
@@ -135,20 +135,20 @@ class PaymentsService {
 export const paymentsService = new PaymentsService();
 ```
 
-**✅ Qué va aquí**:
+**Qué va aquí**:
 - Llamadas a APIs
 - Transformación de datos
 - Lógica de persistencia
 - Cachés locales
 
-**❌ Qué NO va aquí**:
+**Qué NO va aquí**:
 - Componentes React
 - Estados con `useState`
 - Lógica de UI
 
 ---
 
-### 🎣 `hooks/` - Lógica de Negocio
+### `hooks/` - Lógica de Negocio
 
 **Responsabilidad**: Lógica reutilizable, estado, efectos
 
@@ -165,21 +165,21 @@ export const usePayments = () => {
 };
 ```
 
-**✅ Qué va aquí**:
+**Qué va aquí**:
 - Custom hooks
 - `useQuery`, `useMutation`
 - Lógica de estado
 - Transformaciones de datos
 - Efectos (`useEffect`)
 
-**❌ Qué NO va aquí**:
+**Qué NO va aquí**:
 - Componentes React
 - Estilos
 - JSX
 
 ---
 
-### 🎨 `components/` - Componentes UI
+### `components/` - Componentes UI
 
 **Responsabilidad**: UI pura, importan hooks y types
 
@@ -208,21 +208,21 @@ export const PaymentsTable = () => {
 };
 ```
 
-**✅ Qué va aquí**:
+**Qué va aquí**:
 - Componentes React
 - JSX
 - Estilos Tailwind
 - Imports de hooks
 - Imports de types
 
-**❌ Qué NO va aquí**:
+**Qué NO va aquí**:
 - Llamadas a APIs directas
 - Lógica compleja de negocio
 - Estados globales sin hook
 
 ---
 
-### 📄 `views/` - Páginas (Composición)
+### `views/` - Páginas (Composición)
 
 **Responsabilidad**: Orquestación de componentes
 
@@ -249,19 +249,19 @@ export const PaymentsView = () => {
 };
 ```
 
-**✅ Qué va aquí**:
+**Qué va aquí**:
 - Composición de componentes
 - Verificación de permisos
 - Layouts
 - Rutas específicas
 
-**❌ Qué NO va aquí**:
+**Qué NO va aquí**:
 - Componentes reutilizables
 - Lógica de negocio compleja
 
 ---
 
-### 🌟 `index.ts` - API Pública del Feature
+### `index.ts` - API Pública del Feature
 
 **Responsabilidad**: Exportar SOLO lo que necesitan otros features
 
@@ -282,7 +282,7 @@ export { usePayments } from "./hooks/usePayments";
 
 ---
 
-## 🔐 Sistema RBAC (Control de Acceso)
+## Sistema RBAC (Control de Acceso)
 
 ### Definición de Roles
 
@@ -348,7 +348,7 @@ export const MiComponente = () => {
 
 ---
 
-## 🛣️ Rutas Centralizadas
+## Rutas Centralizadas
 
 ### Definición de Rutas
 
@@ -396,9 +396,9 @@ export const RutaProtegida = ({ children, allowedRoles }: RutaProtegidaProps) =>
 
 ---
 
-## 📚 Importaciones (Patrón Recomendado)
+## Importaciones (Patrón Recomendado)
 
-### ✅ CORRECTO - Importar desde index.ts
+### CORRECTO - Importar desde index.ts
 
 ```typescript
 // Limpio y escalable
@@ -412,7 +412,7 @@ import {
 import { RutaProtegida, usePermissions } from "@/features/auth";
 ```
 
-### ❌ INCORRECTO - Importar directamente
+### INCORRECTO - Importar directamente
 
 ```typescript
 // Específico y acoplado
@@ -423,7 +423,7 @@ import usePayments from "@/features/payments/hooks/usePayments";
 
 ---
 
-## 🚀 Cómo Crear un Nuevo Feature
+## Cómo Crear un Nuevo Feature
 
 ### Paso 1: Crear estructura de carpetas
 
@@ -490,7 +490,7 @@ import { MyFeatureTable } from "@/features/myfeature";
 
 ---
 
-## ✅ Reglas Importantes
+## Reglas Importantes
 
 ### 1️⃣ Separación de Responsabilidades
 

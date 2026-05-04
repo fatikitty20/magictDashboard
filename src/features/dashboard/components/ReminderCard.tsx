@@ -2,7 +2,7 @@ import { Clock, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { recordatorio } from "../data";
 import type { LlaveTraduccion, RecordatorioDashboard } from "../data";
-import { claseBotonPrimario, claseTarjeta } from "../estilosDashboard";
+import { claseBotonPrimario, claseTarjeta } from "@/shared/ui/estilosDashboard";
 
 interface TarjetaRecordatorioProps {
   recordatorioActual?: RecordatorioDashboard;

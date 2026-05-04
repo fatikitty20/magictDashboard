@@ -1,4 +1,4 @@
-import { claseTarjeta } from "@/features/dashboard/estilosDashboard";
+import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import type { RolUsuario } from "@/features/auth/roles";
 import { useTranslation } from "react-i18next";
 import type { ProductReport } from "../types/report";

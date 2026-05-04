@@ -2,7 +2,7 @@ import { Download, RefreshCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/features/dashboard";
-import { claseBotonPrimario } from "@/features/dashboard/estilosDashboard";
+import { claseBotonPrimario } from "@/shared/ui/estilosDashboard";
 import { ChannelBreakdown } from "../components/ChannelBreakdown";
 import { ReportsChart } from "../components/ReportsChart";
 import { ReportsStats } from "../components/ReportsStats";

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPayments } from "../domain/getPayments";
-import type { PaymentQueryParams } from "../types/payment";
+import type { PaymentListResponse, PaymentQueryParams } from "../types/payment";
 
 type UsePaymentsParams = {
   page: number;
@@ -9,14 +9,13 @@ type UsePaymentsParams = {
 };
 
 export const usePayments = ({ page, limit, params }: UsePaymentsParams) => {
-  return useQuery({
+  return useQuery<PaymentListResponse>({
     queryKey: ["payments", page, limit, params],
     queryFn: () =>
-  getPayments({
+      getPayments({
         page,
         limit,
         ...params,
       }),
-    keepPreviousData: true,
   });
 };

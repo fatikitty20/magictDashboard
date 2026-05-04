@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import type { TonoBarraAnalitica, TonoSemantico, VarianteMetrica } from "./data";
+import { cn } from "../../lib/utils";
+import type { TonoBarraAnalitica, TonoSemantico, VarianteMetrica } from "../../features/dashboard/data";
 
 const clasesTarjeta = {
   base: "rounded-lg border border-border bg-card",

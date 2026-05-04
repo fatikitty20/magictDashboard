@@ -1,8 +1,8 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDashboard } from "@/features/dashboard";
-import { claseBotonPrimario } from "../../dashboard/estilosDashboard";
+import { useDashboard } from "../../dashboard";
+import { claseBotonPrimario } from "../../../shared/ui/estilosDashboard";
 import { PaymentsStats } from "../components/PaymentsStats";
 import { PaymentsTable } from "../components/PaymentsTable";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
@@ -28,6 +28,10 @@ const Payments = () => {
   const [order, setOrder] = useState<SortOrder>(DEFAULT_SORT_ORDER);
 
   const debouncedSearch = useDebouncedValue(search, 350);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter, fromDate, toDate, sortBy, order]);
 
   const { data, isLoading, error, refetch } = usePayments({
     page,
@@ -67,11 +71,13 @@ const Payments = () => {
   const handleSortChange = (nextSortBy: PaymentSortBy) => {
     if (sortBy === nextSortBy) {
       setOrder((current) => (current === "asc" ? "desc" : "asc"));
+      setPage(1);
       return;
     }
 
     setSortBy(nextSortBy);
     setOrder("asc");
+    setPage(1);
   };
 
   const handleRefresh = () => {
