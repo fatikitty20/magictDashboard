@@ -14,7 +14,10 @@ export const usePermissions = () => {
 
   const tienePermiso = useCallback(
     (permiso: Permiso): boolean => {
-      if (!rol) return false;
+      if (!rol) {
+        return false;
+      }
+
       return checkPermiso(rol, permiso);
     },
     [rol],
@@ -22,7 +25,10 @@ export const usePermissions = () => {
 
   const tienePermisos = useCallback(
     (permisos: Permiso[]): boolean => {
-      if (!rol) return false;
+      if (!rol) {
+        return false;
+      }
+
       return checkPermisos(rol, permisos);
     },
     [rol],

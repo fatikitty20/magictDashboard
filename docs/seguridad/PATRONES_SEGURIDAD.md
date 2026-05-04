@@ -1,0 +1,132 @@
+# Patrones de Logica y Seguridad
+
+Este documento explica como la app decide si una persona puede entrar a una pantalla, que archivos participan y que tan completo esta el patron en cada feature.
+
+## Flujo visual de proteccion
+
+```mermaid
+flowchart TD
+  A["Usuario abre una URL"] --> B["src/App.tsx"]
+  B --> C["src/config/routes.tsx"]
+  C --> D["RutaProtegida"]
+  D --> E["useAuth"]
+  E --> F["authService"]
+  E --> G["authStore"]
+  F --> H{"Sesion valida?"}
+  H -- "No" --> I["Redirige a /login"]
+  H -- "Si" --> J{"Rol permitido?"}
+  J -- "No" --> K["Redirige a /dashboard"]
+  J -- "Si" --> L["DashboardLayout"]
+  L --> M["Vista del feature"]
+```
+
+La idea es parecida a un edificio con recepcion: primero revisan si traes gafete, despues revisan si tu gafete permite entrar a esa sala. El menu puede ocultar puertas, pero la recepcion real es `RutaProtegida`.
+
+## Archivos principales
+
+| Archivo | Responsabilidad | Estado |
+| --- | --- | --- |
+| `src/App.tsx` | Renderiza las rutas de `appRoutes`. | Aplica rutas, pero hay doble envoltura de guardias. |
+| `src/config/routes.tsx` | Define rutas publicas, protegidas y roles permitidos. | Si tiene el mapa principal de seguridad. |
+| `src/features/auth/ProtectedRoute.tsx` | Bloquea usuarios no autenticados o sin rol permitido. | Patron principal de seguridad frontend. |
+| `src/features/auth/useAuth.ts` | Sincroniza sesion y expone `signIn`, `signOut`, `isAuthenticated`. | Correcto para frontend. |
+| `src/features/auth/authService.ts` | Decide si se usa mock o API real. | Mock activo; API real preparada. |
+| `src/features/auth/store/authStore.ts` | Guarda sesion en memoria. | Mejor que guardar roles en `localStorage`. |
+| `src/features/auth/permissions.ts` | Define permisos por rol. | Existe, pero se usa poco en las pantallas. |
+| `src/features/auth/usePermissions.ts` | Hook para consultar permisos. | Preparado, no es el patron principal actual. |
+| `src/shared/layouts/Sidebar.tsx` | Muestra menu segun rol. | Es UX, no seguridad real. |
+
+## Rutas actuales
+
+| Ruta | Tipo | Roles permitidos | Comentario |
+| --- | --- | --- | --- |
+| `/` | Publica | Todos | Redirige a login o dashboard segun sesion. |
+| `/login` | Publica | Todos | Login mock. Si ya hay sesion, redirige a dashboard. |
+| `/dashboard` | Protegida | Usuario autenticado | Vista principal por rol. |
+| `/payments` | Protegida | `admin`, `client` | Consume backend para pagos. |
+| `/orders` | Protegida | `admin`, `client` | Datos mock filtrados por rol en frontend. |
+| `/reports` | Protegida | `admin`, `client` | Datos mock adaptados por rol en frontend. |
+| `/clients` | Protegida | `admin`, `client` | Datos mock filtrados por rol en frontend. |
+| `/transactions` | Protegida | `admin` | Solo admin por ruta. |
+| `*` | Publica/fallback | Todos | Pantalla 404. |
+
+## Hallazgos importantes
+
+### 1. Si hay patron para no dejar pasar entre pantallas
+
+Si existe. El patron es:
+
+1. `routes.tsx` declara que rutas necesitan proteccion.
+2. `RutaProtegida` revisa si hay sesion.
+3. Si no hay sesion, manda a `/login`.
+4. Si hay sesion pero el rol no esta permitido, manda a `/dashboard`.
+5. Si todo esta bien, muestra la pantalla.
+
+### 2. El patron esta duplicado
+
+Actualmente hay proteccion en `routes.tsx` y tambien en `App.tsx`, porque `App.tsx` vuelve a envolver rutas con `RutaProtegida` si detecta `allowedRoles`.
+
+Esto no rompe la seguridad, pero es deuda tecnica: el codigo queda mas dificil de explicar y mantener. Lo ideal a futuro es dejar una sola fuente de verdad para permisos, preferentemente en `routes.tsx`, y que `App.tsx` solo renderice el mapa.
+
+### 3. El menu no es seguridad
+
+`Sidebar.tsx` muestra opciones segun `useDashboard()`, que depende del rol. Eso ayuda a que un cliente no vea opciones que no le corresponden, pero ocultar un boton no es suficiente. La proteccion real debe estar en ruta y backend.
+
+### 4. La autenticacion real aun no esta activa
+
+`authService.ts` tiene `USE_REAL_API = false`. Eso significa que hoy el login funciona con mock:
+
+- cualquier correo valido entra;
+- si el correo contiene `admin`, toma rol admin;
+- si no contiene `admin`, toma rol cliente;
+- la sesion vive en memoria.
+
+Esto esta bien para demo frontend, pero para produccion debe conectarse a backend real con cookie segura o token manejado correctamente.
+
+### 5. La seguridad de datos debe vivir tambien en backend
+
+En frontend se puede filtrar informacion para mostrar menos datos, pero un usuario avanzado podria inspeccionar respuestas de red. Por eso, para datos sensibles, el backend debe validar:
+
+- usuario autenticado;
+- rol;
+- `company_id` o alcance del cliente;
+- permisos por endpoint;
+- filtros autorizados.
+
+## Revision por feature
+
+| Feature | Aplica guardia de ruta | Cambia logica por rol | Riesgo actual |
+| --- | --- | --- | --- |
+| `auth` | Si | Si | Mock activo; no es auth productiva. |
+| `dashboard` | Si | Si | Correcto para vista, depende de sesion mock. |
+| `payments` | Si | Parcial | Usa backend, pero no se ve alcance por empresa/rol desde frontend. |
+| `orders` | Si | Si | Filtrado mock en frontend; backend pendiente. |
+| `clients` | Si | Si | Filtrado mock en frontend; backend pendiente. |
+| `reports` | Si | Si | Escala datos para cliente; es demo, no seguridad real. |
+| `transactions` | Si | Si, por ruta admin | La vista depende solo del guard de ruta. |
+| `theme` | No aplica | No | Guarda tema, no informacion sensible. |
+| `i18n` | No aplica | No | Guarda idioma, no informacion sensible. |
+
+## Checklist de seguridad por pantalla
+
+| Pantalla | Login requerido | Rol validado | Datos filtrados en frontend | Backend debe validar |
+| --- | --- | --- | --- | --- |
+| Dashboard | Si | Basico | Si | Si |
+| Pagos | Si | Basico | No por empresa | Si |
+| Pedidos | Si | Basico | Si, mock | Si |
+| Reportes | Si | Basico | Si, mock | Si |
+| Clientes | Si | Basico | Si, mock | Si |
+| Transacciones | Si | Admin | No aplica | Si |
+
+## Recomendaciones futuras
+
+1. Unificar el guard de rutas para no envolver dos veces.
+2. Activar autenticacion real cuando backend tenga `/auth/login`, `/auth/me` y `/auth/logout`.
+3. Hacer que backend sea quien filtre datos por usuario, rol y empresa.
+4. Usar `usePermissions()` dentro de componentes sensibles como botones de exportar, crear o administrar.
+5. Completar manejo de `401` en `apiClient.ts` para cerrar sesion y redirigir a `/login`.
+6. Corregir comentarios con codificacion rota en algunos archivos para que toda la documentacion interna se lea limpio.
+
+## Conclusion
+
+La app si tiene una base de seguridad frontend: rutas protegidas, roles y sesion en memoria. Lo que falta para que sea seguridad real de produccion es conectar autenticacion backend y asegurar que cada endpoint filtre datos por usuario y empresa.

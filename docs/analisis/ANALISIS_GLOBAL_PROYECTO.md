@@ -20,7 +20,7 @@ Diagnostico rapido:
 
 ## 2) Evidencia Revisada (archivos clave)
 
-- Estructura y stack: `ARCHITECTURE.md`
+- Estructura y stack: `docs/arquitectura/ARCHITECTURE.md`
 - Entrypoint y providers: `src/main.tsx`
 - Rutas activas en runtime: `src/App.tsx`
 - Config de rutas centralizada (no completamente usada): `src/config/routes.tsx`

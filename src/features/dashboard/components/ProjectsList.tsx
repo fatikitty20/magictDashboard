@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { proyectos } from "../data";
-import type { LlaveTraduccion, ProyectoDashboard } from "../data";
+import { proyectos, type LlaveTraduccion, type ProyectoDashboard } from "../data";
 import { claseTarjeta, claseTonoSuave } from "@/shared/ui/estilosDashboard";
 
 interface ListaProyectosProps {

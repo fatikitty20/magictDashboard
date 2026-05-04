@@ -3,8 +3,7 @@
  * Define qué acciones puede realizar cada rol
  */
 
-import type { RolUsuario } from "./roles";
-import { ROLES } from "./roles";
+import { ROLES, type RolUsuario } from "./roles";
 
 export type Permiso =
   | "ver_dashboard_admin"

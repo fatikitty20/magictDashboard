@@ -1,5 +1,5 @@
 import "i18next";
-import enCommon from "./locales/en/common.json";
+import type enCommon from "./locales/en/common.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {

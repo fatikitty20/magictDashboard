@@ -1,5 +1,4 @@
-import { progresoPagos } from "../data";
-import type { LlaveTraduccion } from "../data";
+import { progresoPagos, type LlaveTraduccion } from "../data";
 import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 import { useTranslation } from "react-i18next";
 

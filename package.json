@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "lint": "eslint .",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" vite.config.ts",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" vite.config.ts --fix",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

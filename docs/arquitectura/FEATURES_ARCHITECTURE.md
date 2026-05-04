@@ -63,7 +63,7 @@ src/
 │   ├── clients/                  # Feature: Clientes
 │   ├── reports/                  # Feature: Reportes
 │   ├── theme/                    # Feature: Tema (claro/oscuro)
-│   └── ARCHITECTURE.md           # Este archivo
+│   └── docs/arquitectura/FEATURES_ARCHITECTURE.md
 ├── lib/
 │   ├── utils.ts                  # Funciones auxiliares globales
 │   └── mockService.ts            # Servicios mock compartidos

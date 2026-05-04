@@ -16,7 +16,7 @@ describe("servicioAutenticacion", () => {
     expect(sesion.correo).toBe("demo@magictronic.com");
     expect(sesion.proveedor).toBe("mock");
     expect(window.localStorage.getItem("__auth_session")).toBeNull();
-    expect(servicioAutenticacion.estaAutenticado()).toBe(true);
+    await expect(servicioAutenticacion.estaAutenticado()).resolves.toBe(true);
   });
 
   it("rechaza correos invalidos", async () => {
@@ -34,8 +34,8 @@ describe("servicioAutenticacion", () => {
 
     mockDateNow.mockReturnValue(base + 8 * 60 * 60 * 1000 + 1);
 
-    expect(servicioAutenticacion.obtenerSesion()).toBeNull();
-    expect(servicioAutenticacion.estaAutenticado()).toBe(false);
+    await expect(servicioAutenticacion.obtenerSesion()).resolves.toBeNull();
+    await expect(servicioAutenticacion.estaAutenticado()).resolves.toBe(false);
 
     mockDateNow.mockRestore();
   });

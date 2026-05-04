@@ -59,11 +59,26 @@ export const getSingleBackendStatus = (status?: PaymentStatus): BackendStatus | 
 };
 
 export const resolveTransactions = (payload: PaymentsApiResponse): RoxTransaction[] => {
-  if (Array.isArray(payload.data)) return payload.data;
-  if (payload.data) return [payload.data];
-  if (Array.isArray(payload.items)) return payload.items;
-  if (Array.isArray(payload.rows)) return payload.rows;
-  if (Array.isArray(payload.payments)) return payload.payments;
+  if (Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  if (payload.data) {
+    return [payload.data];
+  }
+
+  if (Array.isArray(payload.items)) {
+    return payload.items;
+  }
+
+  if (Array.isArray(payload.rows)) {
+    return payload.rows;
+  }
+
+  if (Array.isArray(payload.payments)) {
+    return payload.payments;
+  }
+
   return [];
 };
 
@@ -94,15 +109,34 @@ const buildPaginatedParams = (
   searchParams.set("sortBy", sortFieldMap[params.sortBy ?? "createdAt"]);
   searchParams.set("order", (params.order ?? "desc").toUpperCase() as BackendOrder);
 
-  if (status) searchParams.set("status", status);
-  if (params.search?.trim()) searchParams.set("search", params.search.trim());
-  if (params.from) searchParams.set("from", toStartOfDay(params.from));
-  if (params.to) searchParams.set("to", toEndOfDay(params.to));
+  if (status) {
+    searchParams.set("status", status);
+  }
+
+  if (params.search?.trim()) {
+    searchParams.set("search", params.search.trim());
+  }
+
+  if (params.from) {
+    searchParams.set("from", toStartOfDay(params.from));
+  }
+
+  if (params.to) {
+    searchParams.set("to", toEndOfDay(params.to));
+  }
 
   return searchParams;
 };
 
 // 🔥 USANDO apiClient (IMPORTANTE)
+const getErrorMessage = (error: unknown): string =>
+  typeof error === "object" &&
+  error !== null &&
+  "message" in error &&
+  typeof error.message === "string"
+    ? error.message
+    : "";
+
 export const fetchPaginatedTransactions = async (
   params: PaymentQueryParams,
   page: number,
@@ -113,9 +147,9 @@ export const fetchPaginatedTransactions = async (
 
   try {
     return await apiClient<PaymentsApiResponse>(url);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 🔥 Manejo especial para búsquedas sin resultados
-    if (error?.message?.includes("404")) {
+    if (getErrorMessage(error).includes("404")) {
       return { data: [] };
     }
 

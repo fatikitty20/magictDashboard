@@ -3,8 +3,7 @@
  * Fuente unica de verdad para menu y widgets.
  */
 
-import type { RolUsuario } from "@/features/auth/roles";
-import { ROLES } from "@/features/auth/roles";
+import { ROLES, type RolUsuario } from "@/features/auth/roles";
 
 export type DashboardWidget =
   | "metrics"

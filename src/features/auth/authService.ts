@@ -51,6 +51,18 @@ const guardarSesionSegura = (sesion: SesionAutenticacion): void => {
   sesionActual = sesion;
 };
 
+const obtenerSesionSegura = (): SesionAutenticacion | null => {
+  if (!sesionActual) {
+    return null;
+  }
+
+  if (Date.now() > sesionActual.expiraEn) {
+    limpiarSesionSegura();
+    return null;
+  }
+
+  return sesionActual;
+};
 
 
 // ================= MOCK =================
@@ -90,7 +102,7 @@ const adaptadorAutenticacionMock: AdaptadorAutenticacion = {
   },
 
   async obtenerSesion() {
-    return sesionActual;
+    return obtenerSesionSegura();
   },
 };
 

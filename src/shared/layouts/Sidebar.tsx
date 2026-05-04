@@ -9,8 +9,8 @@ import {
   ShoppingBag,
   Smartphone,
   Store,
-  X,
   Users,
+  X,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -69,10 +69,14 @@ export const BarraLateral = ({
   ];
 
   useEffect(() => {
-    if (mode !== "mobile" || !isOpen) return;
+    if (mode !== "mobile" || !isOpen) {
+      return;
+    }
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose?.();
+      if (event.key === "Escape") {
+        onClose?.();
+      }
     };
 
     window.addEventListener("keydown", handleEscape);
@@ -87,7 +91,10 @@ export const BarraLateral = ({
   };
 
   const manejarNavegacion = (path?: string) => {
-    if (!path) return;
+    if (!path) {
+      return;
+    }
+
     navigate(path);
     onNavigate?.();
   };

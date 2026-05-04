@@ -3,6 +3,9 @@ type ApiError = {
   status: number;
 };
 
+const esAbortError = (error: unknown): boolean =>
+  error instanceof DOMException && error.name === "AbortError";
+
 export const apiClient = async <T>(
   url: string,
   options?: RequestInit
@@ -54,9 +57,9 @@ export const apiClient = async <T>(
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error: unknown) {
     // ⏱️ Timeout error
-    if (error.name === "AbortError") {
+    if (esAbortError(error)) {
       throw {
         message: "Request timeout",
         status: 408,

@@ -38,9 +38,22 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # Mantiene el codigo legible y evita deuda tecnica basica.
+      - name: Run lint
+        run: npm run lint
+
+      # Revisa tipos de TypeScript; Vite puede compilar aunque existan
+      # errores que el compilador detecta mejor.
+      - name: Run typecheck
+        run: npm run typecheck
+
       # Ejecuta pruebas unitarias (Vitest). Si falla, el workflow falla.
       - name: Run unit tests
         run: npm run test
+
+      # Falla el pipeline si aparece una vulnerabilidad alta o critica.
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
 
       # Genera el build de produccion con Vite.
       # Este paso valida que la app compila correctamente.

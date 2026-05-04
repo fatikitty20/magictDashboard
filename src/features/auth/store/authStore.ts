@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type { SesionAutenticacion } from "../authService";
 
 type AuthState = {
@@ -11,21 +10,14 @@ type AuthState = {
   setHydrated: (v: boolean) => void;
 };
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      sesion: null,
-      isHydrated: false,
+export const useAuthStore = create<AuthState>()((set) => ({
+  sesion: null,
 
-      setSesion: (sesion) => set({ sesion }),
-      clearSesion: () => set({ sesion: null }),
-      setHydrated: (v) => set({ isHydrated: v }),
-    }),
-    {
-      name: "auth-storage",
-      onRehydrateStorage: () => (state) => {
-        state?.setHydrated(true);
-      },
-    }
-  )
-);
+  // La sesion mock vive solo en memoria.
+  // Asi evitamos guardar roles editables en localStorage.
+  isHydrated: true,
+
+  setSesion: (sesion) => set({ sesion }),
+  clearSesion: () => set({ sesion: null }),
+  setHydrated: (v) => set({ isHydrated: v }),
+}));

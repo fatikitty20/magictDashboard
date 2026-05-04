@@ -75,8 +75,9 @@ Vista para explorar clientes, filtrar por estado o segmento, buscar por datos pr
 
 ## Caracteristicas del sistema
 
-- Login mock con persistencia local segura.
+- Login mock con sesion en memoria para evitar guardar roles en `localStorage`.
 - Rutas protegidas para vistas privadas.
+- Permisos por rol para separar vistas de administrador y cliente.
 - Tema claro y oscuro.
 - Componentes reutilizables con TailwindCSS.
 - Datos simulados mediante servicios async.
@@ -90,6 +91,13 @@ Vista para explorar clientes, filtrar por estado o segmento, buscar por datos pr
 ## Estructura del proyecto
 
 ```text
+docs/
+  analisis/
+  arquitectura/
+  calidad/
+  features/
+  seguridad/
+  tickets/
 src/
   App.tsx
   main.tsx
@@ -104,8 +112,22 @@ src/
     payments/
     reports/
     theme/
+    transactions/
   pages/
 ```
+
+---
+
+## Documentacion tecnica
+
+- [Indice de documentacion](docs/README.md)
+- [Arquitectura general](docs/arquitectura/ARCHITECTURE.md)
+- [Arquitectura por features](docs/arquitectura/FEATURES_ARCHITECTURE.md)
+- [Analisis global del proyecto](docs/analisis/ANALISIS_GLOBAL_PROYECTO.md)
+- [Tickets accionables](docs/tickets/TICKETS_ACCIONABLES.md)
+- [ESLint y calidad de codigo](docs/calidad/ESLINT.md)
+- [Patrones de seguridad](docs/seguridad/PATRONES_SEGURIDAD.md)
+- [Revision por features](docs/features/REVISION_FEATURES.md)
 
 ---
 
@@ -158,6 +180,22 @@ Puedes iniciar sesion con cualquier correo valido y una contrasena no vacia.
 demo@magictronic.com
 demo1234
 ```
+
+Para probar el rol administrador, usa un correo que contenga la palabra `admin`.
+
+```text
+admin@magictronic.com
+demo1234
+```
+
+## Seguridad
+
+- Las rutas privadas redirigen a `/login` si no existe sesion activa.
+- La vista de transacciones queda limitada al rol administrador.
+- La sesion mock no se persiste en `localStorage`; al recargar, se debe iniciar sesion otra vez.
+- El repositorio incluye CI con lint, pruebas, build y auditoria de vulnerabilidades altas o criticas.
+- Dependabot revisa dependencias de npm y GitHub Actions semanalmente.
+- Los headers de seguridad base estan definidos en `public/_headers` para hosts que soportan ese archivo.
 
 ---
 

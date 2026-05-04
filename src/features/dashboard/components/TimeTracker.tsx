@@ -1,7 +1,6 @@
 import { Pause, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { tiempoSesion } from "../data";
-import type { LlaveTraduccion } from "../data";
+import { tiempoSesion, type LlaveTraduccion } from "../data";
 import { claseBotonIcono, claseTarjetaInvertida } from "@/shared/ui/estilosDashboard";
 
 interface ControlTiempoProps {

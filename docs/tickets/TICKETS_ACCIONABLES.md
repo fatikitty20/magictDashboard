@@ -1,6 +1,6 @@
 # Tickets Ejecutables - Magict Dashboard
 
-Generado desde: ANALISIS_GLOBAL_PROYECTO.md
+Generado desde: `docs/analisis/ANALISIS_GLOBAL_PROYECTO.md`
 Fecha: 2026-05-03
 Formato: Markdown (compatible con GitHub Issues / Jira import)
 

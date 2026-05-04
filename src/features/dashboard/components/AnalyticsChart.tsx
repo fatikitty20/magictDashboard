@@ -1,5 +1,4 @@
-import { barrasAnaliticas } from "../data";
-import type { BarraAnalitica, LlaveTraduccion } from "../data";
+import { barrasAnaliticas, type BarraAnalitica, type LlaveTraduccion } from "../data";
 import { claseBarraAnalitica, claseTarjeta } from "@/shared/ui/estilosDashboard";
 import { useTranslation } from "react-i18next";
 
