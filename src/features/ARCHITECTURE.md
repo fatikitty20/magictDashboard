@@ -360,11 +360,22 @@ export const publicRoutes: RouteConfig[] = [
 ];
 
 export const protectedRoutes: RouteConfig[] = [
-  { path: "/dashboard", element: <Dashboard /> },
-  { path: "/payments", element: <Payments />, allowedRoles: ["client", "admin"] },
-  { path: "/orders", element: <Orders /> },
-  { path: "/reports", element: <Reports /> },
-  { path: "/clients", element: <Clients /> },
+  { path: "dashboard", element: <Dashboard />, requiresAuth: true },
+  { path: "payments", element: <Payments />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "orders", element: <Orders />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "reports", element: <Reports />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "clients", element: <Clients />, requiresAuth: true, allowedRoles: [ROLES.CLIENT, ROLES.ADMIN] },
+  { path: "transactions", element: <Transactions />, requiresAuth: true, allowedRoles: [ROLES.ADMIN] },
+];
+
+export const appRoutes: RouteConfig[] = [
+  ...publicRoutes,
+  {
+    path: "/",
+    element: <DashboardLayout />,
+    requiresAuth: true,
+    children: protectedRoutes,
+  },
 ];
 ```
 
@@ -393,6 +404,10 @@ export const RutaProtegida = ({ children, allowedRoles }: RutaProtegidaProps) =>
   return <>{children}</>;
 };
 ```
+
+### Renderizado En App
+
+`src/App.tsx` recorre `appRoutes` y envuelve cada ruta protegida con `RutaProtegida` de forma dinámica. Eso deja la definición de acceso junto a la ruta y evita duplicar JSX del router en el entrypoint.
 
 ---
 

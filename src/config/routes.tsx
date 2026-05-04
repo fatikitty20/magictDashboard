@@ -3,9 +3,10 @@
  * Mantiene todas las rutas en un único lugar para fácil mantenimiento
  */
 
+import React from "react";
 import type { ReactNode } from "react";
+import type { RolUsuario } from "../features/auth/roles";
 import { ROLES } from "../features/auth/roles";
-import { RutaProtegida } from "../features/auth";
 import { DashboardLayout } from "../shared/layouts/DashboardLayout";
 import { Transactions } from "../features/transactions";
 import Index from "../pages/Index";
@@ -21,7 +22,8 @@ export interface RouteConfig {
   path: string;
   element: ReactNode;
   children?: RouteConfig[];
-  allowedRoles?: typeof ROLES[keyof typeof ROLES][];
+  requiresAuth?: boolean;
+  allowedRoles?: RolUsuario[];
 }
 
 /**
@@ -44,51 +46,38 @@ export const publicRoutes: RouteConfig[] = [
 export const protectedRoutes: RouteConfig[] = [
   {
     path: "dashboard",
-    element: (
-      <RutaProtegida>
-        <Dashboard />
-      </RutaProtegida>
-    ),
+    element: <Dashboard />,
+    requiresAuth: true,
   },
   {
     path: "payments",
-    element: (
-      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
-        <Payments />
-      </RutaProtegida>
-    ),
+    element: <Payments />,
+    requiresAuth: true,
+    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
     path: "orders",
-    element: (
-      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
-        <Orders />
-      </RutaProtegida>
-    ),
+    element: <Orders />,
+    requiresAuth: true,
+    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
     path: "reports",
-    element: (
-      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
-        <Reports />
-      </RutaProtegida>
-    ),
+    element: <Reports />,
+    requiresAuth: true,
+    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
     path: "clients",
-    element: (
-      <RutaProtegida allowedRoles={[ROLES.CLIENT, ROLES.ADMIN]}>
-        <Clients />
-      </RutaProtegida>
-    ),
+    element: <Clients />,
+    requiresAuth: true,
+    allowedRoles: [ROLES.CLIENT, ROLES.ADMIN],
   },
   {
     path: "transactions",
-    element: (
-      <RutaProtegida allowedRoles={[ROLES.ADMIN]}>
-        <Transactions />
-      </RutaProtegida>
-    ),
+    element: <Transactions />,
+    requiresAuth: true,
+    allowedRoles: [ROLES.ADMIN],
   },
 ];
 
@@ -109,11 +98,8 @@ export const appRoutes: RouteConfig[] = [
   ...publicRoutes,
   {
     path: "/",
-    element: (
-      <RutaProtegida>
-        <DashboardLayout />
-      </RutaProtegida>
-    ),
+    element: <DashboardLayout />,
+    requiresAuth: true,
     children: protectedRoutes,
   },
   ...errorRoutes,

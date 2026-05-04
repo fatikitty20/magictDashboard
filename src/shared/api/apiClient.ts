@@ -8,7 +8,7 @@ export const apiClient = async <T>(
   options?: RequestInit
 ): Promise<T> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000); // ⏱️ timeout 10s
+  const timeout = setTimeout(() => controller.abort(), 10000); // timeout 10s
 
   try {
     const response = await fetch(url, {
@@ -16,16 +16,16 @@ export const apiClient = async <T>(
         "Content-Type": "application/json",
         ...(options?.headers || {}),
       },
-      credentials: "include", // 🔥 listo para cookies httpOnly
+      credentials: "include", //listo para cookies httpOnly
       signal: controller.signal,
       ...options,
     });
 
-    // 🔐 Manejo futuro de auth
+    // Manejo futuro de auth
     if (response.status === 401) {
       console.warn("Unauthorized - session expired");
 
-      // 👉 futuro:
+      // futuro:
       // clearSesion();
       // window.location.href = "/login";
     }
@@ -48,14 +48,14 @@ export const apiClient = async <T>(
       throw error;
     }
 
-    // ⚠️ evita error si no hay body (ej: 204)
+    // evita error si no hay body (ej: 204)
     if (response.status === 204) {
       return {} as T;
     }
 
     return await response.json();
   } catch (error: any) {
-    // ⏱️ Timeout error
+    // Timeout error
     if (error.name === "AbortError") {
       throw {
         message: "Request timeout",

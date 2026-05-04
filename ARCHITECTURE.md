@@ -139,13 +139,13 @@ src/
 ## Que Hace Cada Capa
 
 ### `src/App.tsx`
-Orquesta la aplicacion completa. Define providers globales, router, layout protegido y rutas publicas/protegidas.
+Orquesta la aplicacion completa. Define providers globales y renderiza el router leyendo `appRoutes` desde `src/config/routes.tsx`.
 
 ### `src/main.tsx`
 Arranca React en el DOM. Aqui se montan los providers globales de alto nivel.
 
 ### `src/config/routes.tsx`
-Es la fuente central de rutas. Facilita auditar que ruta existe, que pagina la renderiza y que roles la pueden usar.
+Es la fuente central de rutas. Facilita auditar que ruta existe, que pagina la renderiza y que roles la pueden usar. Tambien declara si una ruta requiere autenticacion (`requiresAuth`) o roles especificos (`allowedRoles`).
 
 ### `src/components/ui/`
 Componentes globales reutilizables por cualquier feature. No deben contener logica de negocio de un dominio especifico.

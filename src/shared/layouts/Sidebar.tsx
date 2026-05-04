@@ -55,7 +55,7 @@ export const BarraLateral = ({
   menuItems,
   generalItems,
 }: BarraLateralProps) => {
-  const { signOut } = useAuth(); // ✅ correcto
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -79,10 +79,9 @@ export const BarraLateral = ({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, mode, onClose]);
 
-  // 🔥 FIX AQUÍ
   const manejarCierreSesion = async () => {
-    await signOut(); // ✅ usar Zustand
-    navigate("/login", { replace: true }); // ✅ redirigir
+    await signOut();
+    navigate("/login", { replace: true });
     onClose?.();
   };
 
@@ -161,7 +160,7 @@ export const BarraLateral = ({
           </button>
         ))}
 
-        {/* 🔥 BOTÓN LOGOUT */}
+        {/* BOTÓN LOGOUT */}
         <button
           type="button"
           onClick={manejarCierreSesion}

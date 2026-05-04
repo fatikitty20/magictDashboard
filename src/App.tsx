@@ -1,46 +1,32 @@
+import React from "react";
+import type { ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProveedorModoTema } from "@/features/theme";
 import { RutaProtegida } from "@/features/auth";
-import { DashboardLayout } from "@/features/dashboard";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
-import Payments from "./features/payments/views/Payments";
-import Orders from "./features/orders/views/Orders";
-import Reports from "./features/reports/views/Reports";
-import Clients from "./features/clients/views/Clients";
-import { Transactions } from "./features/transactions";
+import { appRoutes, type RouteConfig } from "@/config/routes";
+
+const renderRoute = (route: RouteConfig, index: number): ReactNode => {
+  const routeElement = route.requiresAuth || route.allowedRoles ? (
+    <RutaProtegida allowedRoles={route.allowedRoles}>
+      {route.element}
+    </RutaProtegida>
+  ) : (
+    route.element
+  );
+
+  return (
+    <Route key={`${route.path}-${index}`} path={route.path} element={routeElement}>
+      {route.children?.map((childRoute, childIndex) => renderRoute(childRoute, childIndex))}
+    </Route>
+  );
+};
 
 const App = () => (
   <ProveedorModoTema>
     <TooltipProvider>
       <BrowserRouter>
-        <Routes>
-          {/* Rutas públicas */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-
-          {/* Rutas protegidas */}
-          <Route
-            element={
-              <RutaProtegida>
-                <DashboardLayout />
-              </RutaProtegida>
-            }
-          >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/clients" element={<Clients />} />
-          </Route>
-
-          {/* Ruta de error */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Routes>{appRoutes.map((route, index) => renderRoute(route, index))}</Routes>
       </BrowserRouter>
     </TooltipProvider>
   </ProveedorModoTema>
