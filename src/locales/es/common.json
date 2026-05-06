@@ -46,7 +46,16 @@
       "loading": "Ingresando..."
     },
     "errors": {
-      "default": "No pudimos iniciar sesión"
+      "default": "No pudimos iniciar sesión",
+      "invalidData": "Datos inválidos. Verifica email y contraseña.",
+      "unauthorized": "Email o contraseña incorrectos.",
+      "forbidden": "No tienes permiso para iniciar sesión con estas credenciales.",
+      "tooManyAttempts": "Demasiados intentos. Intenta en unos minutos.",
+      "serverError": "Error del servidor. Intenta más tarde.",
+      "backendOffline": "El backend de autenticación está offline. Revisa que el túnel de ngrok esté activo.",
+      "connectionFailed": "No pudimos conectar con el backend de autenticación. Revisa que el túnel de ngrok esté activo.",
+      "generic": "Error al iniciar sesión. Intenta de nuevo.",
+      "missingToken": "El backend no devolvió el token de acceso."
     },
     "footer": "© 2026 Magictronic. Payment Service Platform."
   },

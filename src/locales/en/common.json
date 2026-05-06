@@ -46,7 +46,16 @@
       "loading": "Signing in..."
     },
     "errors": {
-      "default": "We could not sign you in"
+      "default": "We could not sign you in",
+      "invalidData": "Invalid credentials. Check your email and password.",
+      "unauthorized": "Email or password is incorrect.",
+      "forbidden": "You don't have permission to sign in with these credentials.",
+      "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+      "serverError": "Server error. Please try again later.",
+      "backendOffline": "Authentication backend is offline. Check that the ngrok tunnel is active.",
+      "connectionFailed": "Could not connect to the authentication backend. Check that the ngrok tunnel is active.",
+      "generic": "Sign in error. Please try again.",
+      "missingToken": "Backend did not return an access token."
     },
     "footer": "© 2026 Magictronic. Payment Service Platform."
   },

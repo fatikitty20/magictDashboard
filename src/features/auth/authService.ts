@@ -45,7 +45,8 @@ export interface SesionAutenticacion {
 
 interface AdaptadorAutenticacion {
   iniciarSesion(
-    credenciales: CredencialesAutenticacion
+    credenciales: CredencialesAutenticacion,
+    t: TranslationFunction
   ): Promise<SesionAutenticacion>;
 
   refrescarToken(): Promise<SesionAutenticacion>;
@@ -223,10 +224,14 @@ const esErrorApi = (
 |--------------------------------------------------------------------------
 | Se implementa control de errores HTTP alineado
 | con buenas prácticas de seguridad.
+| Ahora acepta la función de traducción (t) para mensajes i18n.
 */
 
+type TranslationFunction = (key: string, defaultValue?: string) => string;
+
 const manejarErrorLogin = (
-  error: unknown
+  error: unknown,
+  t: TranslationFunction
 ): never => {
 
   if (esErrorApi(error)) {
@@ -238,44 +243,32 @@ const manejarErrorLogin = (
       error.message.toLowerCase().includes("failed to fetch");
 
     if (backendOffline) {
-      throw new Error(
-        "El backend de autenticacion esta offline. Revisa que el tunel de ngrok este activo."
-      );
+      throw new Error(t("login.errors.backendOffline"));
     }
 
     // Credenciales inválidas
     if (error.status === 400) {
-      throw new Error(
-        "Datos invalidos. Verifica email y contrasena."
-      );
+      throw new Error(t("login.errors.invalidData"));
     }
 
     // Usuario no autenticado
     if (error.status === 401) {
-      throw new Error(
-        "Email o contrasena invalidos."
-      );
+      throw new Error(t("login.errors.unauthorized"));
     }
 
     // Usuario sin permisos
     if (error.status === 403) {
-      throw new Error(
-        "No tienes permiso para iniciar sesion con estas credenciales."
-      );
+      throw new Error(t("login.errors.forbidden"));
     }
 
     // Demasiados intentos
     if (error.status === 429) {
-      throw new Error(
-        "Demasiados intentos. Intenta en unos minutos."
-      );
+      throw new Error(t("login.errors.tooManyAttempts"));
     }
 
     // Error interno del servidor
     if (error.status >= 500) {
-      throw new Error(
-        "Error del servidor. Intenta mas tarde."
-      );
+      throw new Error(t("login.errors.serverError"));
     }
   }
 
@@ -287,17 +280,13 @@ const manejarErrorLogin = (
         .toLowerCase()
         .includes("failed to fetch")
     ) {
-      throw new Error(
-        "No pudimos conectar con el backend de autenticacion. Revisa que el tunel de ngrok este activo."
-      );
+      throw new Error(t("login.errors.connectionFailed"));
     }
 
     throw new Error(error.message);
   }
 
-  throw new Error(
-    "Error al iniciar sesion. Intenta de nuevo."
-  );
+  throw new Error(t("login.errors.generic"));
 };
 
 /*
@@ -308,13 +297,12 @@ const manejarErrorLogin = (
 */
 
 const validarRespuestaLogin = (
-  respuesta: RespuestaLoginApi
+  respuesta: RespuestaLoginApi,
+  t: TranslationFunction
 ): void => {
 
   if (!respuesta.accessToken) {
-    throw new Error(
-      "El backend no devolvio accessToken."
-    );
+    throw new Error(t("login.errors.missingToken"));
   }
 };
 
@@ -335,7 +323,7 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
   | Envía credenciales al backend y guarda tokens.
   */
 
-  async iniciarSesion(credenciales) {
+  async iniciarSesion(credenciales, t) {
 
     try {
 
@@ -356,7 +344,7 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
         );
 
       // Valida respuesta del backend
-      validarRespuestaLogin(respuesta);
+      validarRespuestaLogin(respuesta, t);
 
       /*
       |--------------------------------------------------------------------------
@@ -380,7 +368,7 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
     } catch (error) {
 
       // Manejo seguro de errores
-      return manejarErrorLogin(error);
+      return manejarErrorLogin(error, t);
     }
   },
 
@@ -552,10 +540,11 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
 export const servicioAutenticacion = {
 
   iniciarSesion(
-    credenciales: CredencialesAutenticacion
+    credenciales: CredencialesAutenticacion,
+    t: TranslationFunction
   ) {
     return adaptadorAutenticacionApi
-      .iniciarSesion(credenciales);
+      .iniciarSesion(credenciales, t);
   },
 
   refrescarToken() {
