@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import currency from "currency.js";
 
 import { TarjetaMetrica } from "@/features/dashboard/components/MetricCard";
 
@@ -42,24 +41,12 @@ const formatearFechaDashboard = (
 
 const formatearMoneda = (
   amount: number,
-  currencyCode: string,
 ): string => {
-  const monedaNormalizada = currencyCode.toUpperCase();
-  const montoNormalizado = currency(amount).divide(100).value;
-
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: monedaNormalizada,
-      maximumFractionDigits: 2,
-    }).format(montoNormalizado);
-  } catch {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 2,
-    }).format(montoNormalizado);
-  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(amount / 100);
 };
 
 const formatearNumero = (value: number, locale: string): string =>
@@ -109,8 +96,8 @@ const PanelDashboard = () => {
           id: "gmv-total",
           etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.gmv.title",
           valor:
-            kpisDashboard.gmvTotal !== null && kpisDashboard.currency
-              ? formatearMoneda(kpisDashboard.gmvTotal, kpisDashboard.currency)
+            kpisDashboard.gmvTotal !== null
+              ? formatearMoneda(kpisDashboard.gmvTotal)
               : "—",
           ayudaKey: "dashboard.roleContent.admin.metrics.kpis.gmv.helper",
           variante: "invertida",
@@ -149,8 +136,8 @@ const PanelDashboard = () => {
           id: "ticket-promedio",
           etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.ticketPromedio.title",
           valor:
-            kpisDashboard.ticketPromedio !== null && kpisDashboard.currency
-              ? formatearMoneda(kpisDashboard.ticketPromedio, kpisDashboard.currency)
+            kpisDashboard.ticketPromedio !== null
+              ? formatearMoneda(kpisDashboard.ticketPromedio)
               : "—",
           ayudaKey: "dashboard.roleContent.admin.metrics.kpis.ticketPromedio.helper",
           variante: "suave",

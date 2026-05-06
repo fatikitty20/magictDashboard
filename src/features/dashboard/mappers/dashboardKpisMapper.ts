@@ -2,6 +2,7 @@ import type {
   DashboardKpis,
   DashboardKpisApiResponse,
 } from "../types/dashboardKpis";
+import { normalizeMinorUnitsToUsd } from "../utils/currencyNormalization";
 
 type KpisSource = {
   fecha?: string;
@@ -129,16 +130,41 @@ export const mapDashboardKpis = (
   const data = extraerData(payload);
 
   const fuente = normalizarFuente(data);
+  const sourceCurrency = fuente.currency?.trim().toUpperCase() ?? "USD";
+
+  const gmvTotalUsd =
+    fuente.gmvTotal !== undefined && fuente.gmvTotal !== null
+      ? obtenerNumero(fuente.gmvTotal)
+      : null;
+
+  const ticketPromedioUsd =
+    fuente.ticketPromedio !== undefined && fuente.ticketPromedio !== null
+      ? obtenerNumero(fuente.ticketPromedio)
+      : null;
+
+  const gmvTotalNormalizado =
+    gmvTotalUsd !== null
+      ? sourceCurrency === "USD"
+        ? gmvTotalUsd
+        : normalizeMinorUnitsToUsd(gmvTotalUsd, sourceCurrency)
+      : null;
+
+  const ticketPromedioNormalizado =
+    ticketPromedioUsd !== null
+      ? sourceCurrency === "USD"
+        ? ticketPromedioUsd
+        : normalizeMinorUnitsToUsd(ticketPromedioUsd, sourceCurrency)
+      : null;
 
   return {
     fecha: fuente.fecha ?? null,
     totalIntentos: obtenerNumero(fuente.totalIntentos),
     ventasExitosas: obtenerNumero(fuente.ventasExitosas),
     conversionRate: obtenerNumero(fuente.conversionRate),
-    gmvTotal: obtenerNumero(fuente.gmvTotal),
-    ticketPromedio: obtenerNumero(fuente.ticketPromedio),
-    currency: typeof fuente.currency === "string" && fuente.currency.trim()
-      ? fuente.currency.trim().toUpperCase()
+    gmvTotal: gmvTotalNormalizado,
+    ticketPromedio: ticketPromedioNormalizado,
+    currency: gmvTotalNormalizado !== null || ticketPromedioNormalizado !== null
+      ? "USD"
       : null,
   };
 };
