@@ -128,6 +128,7 @@ Nota: `payments` ya usa capas completas `api`, `domain`, `hooks` y `mappers` por
 - [Analisis global del proyecto](docs/analisis/ANALISIS_GLOBAL_PROYECTO.md)
 - [Tickets accionables](docs/tickets/TICKETS_ACCIONABLES.md)
 - [ESLint y calidad de codigo](docs/calidad/ESLINT.md)
+- [Endpoints backend](docs/api/ENDPOINTS_BACKEND.md)
 - [Patrones de seguridad](docs/seguridad/PATRONES_SEGURIDAD.md)
 - [Revision por features](docs/features/REVISION_FEATURES.md)
 

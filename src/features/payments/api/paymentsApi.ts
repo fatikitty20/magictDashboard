@@ -34,10 +34,6 @@ export const DEFAULT_LIMIT = 20;
 export const BACKEND_MAX_LIMIT = 100;
 export const MAX_CLIENT_SIDE_PAGES = 80;
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api/v1"
-  : (import.meta.env.VITE_API_URL ?? "/api/v1").replace(/\/$/, "");
-
 const sortFieldMap: Record<PaymentSortBy, BackendSortBy> = {
   createdAt: "created_at",
   total: "amount",
@@ -82,11 +78,10 @@ export const resolveTransactions = (payload: PaymentsApiResponse): RoxTransactio
   return [];
 };
 
-const buildApiUrl = (path = "", searchParams?: URLSearchParams) => {
+const buildApiEndpoint = (path = "", searchParams?: URLSearchParams) => {
   const normalizedPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
   const queryString = searchParams?.toString();
-  const url = `${API_BASE_URL}${normalizedPath}`;
-  return queryString ? `${url}?${queryString}` : url;
+  return queryString ? `${normalizedPath}?${queryString}` : normalizedPath || "/";
 };
 
 const toStartOfDay = (date: string): string =>
@@ -143,7 +138,7 @@ export const fetchPaginatedTransactions = async (
   limit: number,
   backendStatus?: BackendStatus,
 ): Promise<PaymentsApiResponse> => {
-  const url = buildApiUrl("", buildPaginatedParams(params, page, limit, backendStatus));
+  const url = buildApiEndpoint("", buildPaginatedParams(params, page, limit, backendStatus));
 
   try {
     return await apiClient<PaymentsApiResponse>(url);

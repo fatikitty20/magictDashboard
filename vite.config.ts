@@ -1,13 +1,14 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { defineConfig, type ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react";
 
 // Plugin para manejar CORS preflight requests
 const corsPlugin = () => ({
   name: "cors-preflight",
-  configureServer(server: any) {
+  configureServer(server: ViteDevServer) {
     return () => {
-      server.middlewares.use((req: any, res: any, next: any) => {
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
         if (req.url?.startsWith("/api") && req.method === "OPTIONS") {
           res.writeHead(200, {
             "Access-Control-Allow-Origin": "*",

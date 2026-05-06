@@ -26,12 +26,9 @@ const Login = () => {
     setError(null);
 
     try {
-      console.log("[LoginView] Iniciando login con:", { email, password: "***" });
       await signIn({ email, password });
-      console.log("[LoginView] Login exitoso");
       navigate("/dashboard", { replace: true });
     } catch (errorCapturado) {
-      console.error("[LoginView] Error de login:", errorCapturado);
       const mensaje = errorCapturado instanceof Error ? errorCapturado.message : t("login.errors.default");
       setError(mensaje);
       setEstaCargando(false);

@@ -39,14 +39,16 @@ Los demas features todavia usan mock, pero ya se agregaron carpetas equivalentes
 | `permissions.ts` | Define permisos por rol. |
 | `usePermissions.ts` | Permite preguntar si el usuario tiene permisos. |
 | `authService.ts` | Maneja login, logout y sesion mock/API. |
+| `shared/api/apiConfig.ts` | Define URL base y endpoints conocidos del backend. |
+| `shared/api/tokenManager.ts` | Guarda access token y refresh token solo en memoria. |
 | `store/authStore.ts` | Guarda la sesion en memoria usando Zustand. |
 | `useAuth.ts` | Hook principal para leer sesion y acciones auth. |
 | `ProtectedRoute.tsx` | Guardia que bloquea rutas privadas. |
 | `views/LoginView.tsx` | Pantalla de inicio de sesion. |
 
-Patron de seguridad: si aplica. Es la base del control de acceso.
+Patron de seguridad: si aplica. Es la base del control de acceso y ya consume `POST /api/v1/auth/login`.
 
-Pendiente: el mock debe cambiar a API real para produccion. Los permisos existen, pero todavia no se aplican de forma profunda dentro de cada componente.
+Pendiente: conectar endpoints protegidos del dashboard y definir si backend agregara refresh token real.
 
 ## `src/features/dashboard`
 

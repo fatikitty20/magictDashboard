@@ -1,43 +1,98 @@
+import { apiClient } from "@/shared/api/apiClient";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { servicioAutenticacion } from "./authService";
 
+vi.mock("@/shared/api/apiClient", () => ({
+  apiClient: vi.fn(),
+}));
+
+const mockApiClient = vi.mocked(apiClient);
+const PASSWORD_DE_PRUEBA = "password-de-prueba-no-real";
+
+const crearJwt = (payload: Record<string, unknown>): string => {
+  const toBase64Url = (value: unknown) =>
+    Buffer.from(JSON.stringify(value))
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
+
+  return `${toBase64Url({ alg: "none", typ: "JWT" })}.${toBase64Url(payload)}.firma`;
+};
+
 describe("servicioAutenticacion", () => {
-  beforeEach(() => {
-    servicioAutenticacion.cerrarSesion();
-    window.localStorage.clear();
+  beforeEach(async () => {
+    await servicioAutenticacion.cerrarSesion();
+    mockApiClient.mockReset();
   });
 
-  it("crea una sesion mock solo en memoria", async () => {
-    const sesion = await servicioAutenticacion.iniciarSesion({
-      correo: " Demo@Magictronic.com ",
-      contrasena: " demo1234 ",
+  it("inicia sesion con el endpoint real y guarda el token solo en memoria", async () => {
+    const token = crearJwt({
+      sub: "dashboard.user@example.com",
+      roles: ["ROLE_ANALYTICS"],
+      iat: 1,
+      exp: 9_999_999_999,
     });
 
-    expect(sesion.correo).toBe("demo@magictronic.com");
-    expect(sesion.proveedor).toBe("mock");
+    mockApiClient.mockResolvedValueOnce({
+      accessToken: token,
+      tokenType: "Bearer",
+      expiresIn: 3600,
+    });
+
+    const sesion = await servicioAutenticacion.iniciarSesion({
+      email: " dashboard.user@example.com ",
+      password: PASSWORD_DE_PRUEBA,
+    });
+
+    expect(mockApiClient).toHaveBeenCalledWith("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "dashboard.user@example.com",
+        password: PASSWORD_DE_PRUEBA,
+      }),
+      skipAuthHeader: true,
+    });
+    expect(sesion.correo).toBe("dashboard.user@example.com");
+    expect(sesion.usuario.role).toBe("admin");
     expect(window.localStorage.getItem("__auth_session")).toBeNull();
     await expect(servicioAutenticacion.estaAutenticado()).resolves.toBe(true);
   });
 
-  it("rechaza correos invalidos", async () => {
-    await expect(servicioAutenticacion.iniciarSesion({ correo: "demo", contrasena: "demo1234" })).rejects.toThrow(
-      "email valido",
-    );
+  it("muestra un mensaje claro cuando backend responde 403", async () => {
+    mockApiClient.mockRejectedValueOnce({
+      status: 403,
+      message: "Forbidden",
+    });
+
+    await expect(
+      servicioAutenticacion.iniciarSesion({
+        email: "dashboard.user@example.com",
+        password: "bad-password",
+      }),
+    ).rejects.toThrow("No tienes permiso");
   });
 
-  it("expira la sesion al pasar el tiempo configurado", async () => {
-    const base = Date.now();
-    const mockDateNow = vi.spyOn(Date, "now");
+  it("limpia la sesion si el token expiro y no hay refresh token", async () => {
+    const token = crearJwt({
+      sub: "dashboard.user@example.com",
+      roles: ["ROLE_USER"],
+      iat: 1,
+      exp: 2,
+    });
 
-    mockDateNow.mockReturnValue(base);
-    await servicioAutenticacion.iniciarSesion({ correo: "demo@Magictronic.com", contrasena: "demo1234" });
+    mockApiClient.mockResolvedValueOnce({
+      accessToken: token,
+      tokenType: "Bearer",
+      expiresIn: -1,
+    });
 
-    mockDateNow.mockReturnValue(base + 8 * 60 * 60 * 1000 + 1);
+    await servicioAutenticacion.iniciarSesion({
+      email: "dashboard.user@example.com",
+      password: PASSWORD_DE_PRUEBA,
+    });
 
     await expect(servicioAutenticacion.obtenerSesion()).resolves.toBeNull();
     await expect(servicioAutenticacion.estaAutenticado()).resolves.toBe(false);
-
-    mockDateNow.mockRestore();
   });
 });
-

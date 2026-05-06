@@ -18,6 +18,17 @@ Cuando se trabaje un ticket de conexion backend, no se debe llamar `fetch` desde
 View -> hook -> domain -> api -> apiClient -> backend
 ```
 
+### Nota de autenticacion actualizada
+
+El login real ya usa `POST /api/v1/auth/login` con `email` y `password`. El backend responde `accessToken`, `tokenType` y `expiresIn`.
+
+Siguientes tickets recomendados:
+
+- conectar `GET /api/v1/dashboard/kpis`;
+- conectar `GET /api/v1/dashboard/hourly`;
+- conectar `GET /api/v1/dashboard/pulse`;
+- definir si existira `refreshToken` real o si solo se renovara iniciando sesion otra vez.
+
 ***ATENDIDO**
 ### P0-001 | Unificar Rutas - Usar src/config/routes.tsx como Fuente Única
 - **Prioridad**: P0 (crítica)

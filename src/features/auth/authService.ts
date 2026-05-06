@@ -1,24 +1,23 @@
 import { apiClient } from "@/shared/api/apiClient";
+import { API_ENDPOINTS } from "@/shared/api/apiConfig";
 import { tokenManager } from "@/shared/api/tokenManager";
+import type { RolUsuario } from "./roles";
 
 export interface CredencialesAutenticacion {
   email: string;
   password: string;
 }
 
-export type RolUsuario = "admin" | "client" | "ROLE_ANALYTICS" | "ROLE_USER";
-
 export interface UsuarioAutenticado {
   correo: string;
   role: RolUsuario;
 }
 
-// Respuesta del backend
 export interface RespuestaLoginApi {
   accessToken: string;
   refreshToken?: string;
-  tokenType: "Bearer";
-  expiresIn: number;
+  tokenType?: "Bearer" | string;
+  expiresIn?: number;
 }
 
 export interface SesionAutenticacion {
@@ -37,128 +36,152 @@ interface AdaptadorAutenticacion {
   obtenerSesion(): Promise<SesionAutenticacion | null>;
 }
 
-// ================= UTILIDADES PARA JWT =================
-
-const extraerRolDelToken = (token: string): RolUsuario => {
-  try {
-    const partes = token.split(".");
-    if (partes.length !== 3) throw new Error("Token inválido");
-    
-    const payload = JSON.parse(atob(partes[1]));
-    const roles = payload.roles as string[];
-    
-    // Mapear roles del JWT a roles del sistema
-    if (roles?.includes("ROLE_ADMIN")) return "admin";
-    if (roles?.includes("ROLE_ANALYTICS")) return "admin"; // ANALYTICS acceso admin
-    if (roles?.includes("ROLE_USER")) return "client";
-    return "client"; // Por defecto
-  } catch {
-    return "client";
-  }
+type JwtPayload = {
+  sub?: string;
+  roles?: string[];
+  authorities?: string[];
+  scope?: string;
+  role?: string;
+  iat?: number;
+  exp?: number;
 };
 
-const extraerEmailDelToken = (token: string): string => {
-  try {
-    const partes = token.split(".");
-    if (partes.length !== 3) throw new Error("Token inválido");
-    const payload = JSON.parse(atob(partes[1]));
-    return payload.sub || "";
-  } catch {
-    return "";
+type ErrorApi = {
+  message: string;
+  status: number;
+};
+
+const normalizarBase64Url = (value: string): string => {
+  const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = base64.length % 4;
+  return padding ? `${base64}${"=".repeat(4 - padding)}` : base64;
+};
+
+const decodificarJwtPayload = (token: string): JwtPayload => {
+  const partes = token.split(".");
+
+  if (partes.length !== 3) {
+    throw new Error("Token invalido");
   }
+
+  return JSON.parse(atob(normalizarBase64Url(partes[1]))) as JwtPayload;
+};
+
+const extraerRolesDelPayload = (payload: JwtPayload): string[] => [
+  ...(payload.roles ?? []),
+  ...(payload.authorities ?? []),
+  ...(payload.scope?.split(" ") ?? []),
+  ...(payload.role ? [payload.role] : []),
+];
+
+const extraerRolDelPayload = (payload: JwtPayload): RolUsuario => {
+  const roles = extraerRolesDelPayload(payload);
+
+  if (roles.includes("ROLE_ADMIN") || roles.includes("ROLE_ANALYTICS")) {
+    return "admin";
+  }
+
+  return "client";
 };
 
 const construirSesionDesdeToken = (token: string): SesionAutenticacion => {
-  const email = extraerEmailDelToken(token);
-  const rol = extraerRolDelToken(token);
-  const partes = token.split(".");
-  const payload = JSON.parse(atob(partes[1]));
-  
+  const payload = decodificarJwtPayload(token);
+  const correo = payload.sub ?? "";
+
   return {
-    correo: email,
-    emitidaEn: (payload.iat || 0) * 1000,
-    expiraEn: (payload.exp || 0) * 1000,
+    correo,
+    emitidaEn: (payload.iat ?? 0) * 1000,
+    expiraEn: (payload.exp ?? 0) * 1000,
     token,
     proveedor: "api",
     usuario: {
-      correo: email,
-      role: rol,
+      correo,
+      role: extraerRolDelPayload(payload),
     },
   };
 };
 
+const esErrorApi = (error: unknown): error is ErrorApi =>
+  typeof error === "object" &&
+  error !== null &&
+  "message" in error &&
+  "status" in error &&
+  typeof error.message === "string" &&
+  typeof error.status === "number";
+
 const manejarErrorLogin = (error: unknown): never => {
-  console.error("[Auth Error]", error);
-  
-  if (error instanceof Object && "message" in error && "status" in error) {
-    const err = error as { message: string; status: number };
-    
-    // OWASP: No revelar si el usuario existe
-    if (err.status === 401) {
-      throw new Error("Email o contraseña inválidos");
+  if (esErrorApi(error)) {
+    if (error.status === 400) {
+      throw new Error("Datos invalidos. Verifica email y contrasena.");
     }
-    if (err.status === 429) {
+
+    if (error.status === 401) {
+      throw new Error("Email o contrasena invalidos.");
+    }
+
+    if (error.status === 403) {
+      throw new Error("No tienes permiso para iniciar sesion con estas credenciales.");
+    }
+
+    if (error.status === 429) {
       throw new Error("Demasiados intentos. Intenta en unos minutos.");
     }
-    if (err.status === 400) {
-      throw new Error("Datos inválidos. Verifica email y contraseña.");
-    }
-    if (err.status >= 500) {
-      throw new Error("Error del servidor. Intenta más tarde.");
+
+    if (error.status >= 500) {
+      throw new Error("Error del servidor. Intenta mas tarde.");
     }
   }
-  
-  // Si es un Error normal, propagar su mensaje
+
   if (error instanceof Error) {
     throw new Error(error.message);
   }
-  
-  throw new Error("Error al iniciar sesión. Intenta de nuevo.");
+
+  throw new Error("Error al iniciar sesion. Intenta de nuevo.");
 };
 
-// ================= ADAPTADOR API REAL =================
+const validarRespuestaLogin = (respuesta: RespuestaLoginApi): void => {
+  if (!respuesta.accessToken) {
+    throw new Error("El backend no devolvio accessToken.");
+  }
+};
 
 const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
   async iniciarSesion(credenciales) {
     try {
-      const respuesta = await apiClient<RespuestaLoginApi>("/auth/login", {
+      const respuesta = await apiClient<RespuestaLoginApi>(API_ENDPOINTS.auth.login, {
         method: "POST",
-        body: JSON.stringify(credenciales),
+        body: JSON.stringify({
+          email: credenciales.email.trim(),
+          password: credenciales.password,
+        }),
         skipAuthHeader: true,
       });
 
-      // Guardar tokens en token manager
-      tokenManager.setTokens(
-        respuesta.accessToken,
-        respuesta.refreshToken,
-        respuesta.expiresIn
-      );
+      validarRespuestaLogin(respuesta);
+      tokenManager.setTokens(respuesta.accessToken, respuesta.refreshToken, respuesta.expiresIn);
 
       return construirSesionDesdeToken(respuesta.accessToken);
     } catch (error) {
-      manejarErrorLogin(error);
+      return manejarErrorLogin(error);
     }
   },
 
   async refrescarToken() {
-    try {
-      const refreshToken = tokenManager.getRefreshToken();
-      if (!refreshToken) {
-        throw new Error("No refresh token available");
-      }
+    const refreshToken = tokenManager.getRefreshToken();
 
-      const respuesta = await apiClient<RespuestaLoginApi>("/auth/refresh", {
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    try {
+      const respuesta = await apiClient<RespuestaLoginApi>(API_ENDPOINTS.auth.refresh, {
         method: "POST",
         body: JSON.stringify({ refreshToken }),
         skipAuthHeader: true,
       });
 
-      // Guardar nuevo access token
-      tokenManager.setTokens(
-        respuesta.accessToken,
-        respuesta.refreshToken || refreshToken,
-        respuesta.expiresIn
-      );
+      validarRespuestaLogin(respuesta);
+      tokenManager.setTokens(respuesta.accessToken, respuesta.refreshToken ?? refreshToken, respuesta.expiresIn);
 
       return construirSesionDesdeToken(respuesta.accessToken);
     } catch (error) {
@@ -169,11 +192,11 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
 
   async cerrarSesion() {
     try {
-      await apiClient("/auth/logout", {
+      await apiClient(API_ENDPOINTS.auth.logout, {
         method: "POST",
       });
     } catch {
-      // Ignorar errores al cerrar sesión
+      // El cierre de sesion local debe completarse aunque backend no responda.
     } finally {
       tokenManager.clearTokens();
     }
@@ -181,15 +204,13 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
 
   async obtenerSesion() {
     const token = tokenManager.getToken();
-    
+
     if (!token) {
       return null;
     }
 
     try {
-      // Verificar si token expiró
       if (tokenManager.isTokenExpired()) {
-        // Intentar refresh
         return await this.refrescarToken();
       }
 
@@ -200,8 +221,6 @@ const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
     }
   },
 };
-
-// ================= API PUBLICA =================
 
 export const servicioAutenticacion = {
   iniciarSesion(credenciales: CredencialesAutenticacion) {
@@ -225,5 +244,3 @@ export const servicioAutenticacion = {
     return sesion !== null;
   },
 };
-
-

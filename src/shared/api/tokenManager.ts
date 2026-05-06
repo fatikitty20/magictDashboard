@@ -1,48 +1,54 @@
 /**
- * Token Manager - Maneja JWT y Refresh Token de forma centralizada
- * Almacenamiento: Solo en memoria (NO en localStorage) para seguridad
+ * Token Manager
+ *
+ * Guarda JWT y refresh token solo en memoria. Esto evita dejarlos en
+ * localStorage, donde cualquier script del navegador podria leerlos.
  */
 
 interface TokenPair {
-  accessToken: string;
-  refreshToken?: string;
-  expiresIn?: number;
+  accessToken: string | null;
+  refreshToken: string | null;
+  expiresAt: number | null;
 }
 
 let tokens: TokenPair = {
-  accessToken: null as any,
-  refreshToken: null as any,
-  expiresIn: 0,
+  accessToken: null,
+  refreshToken: null,
+  expiresAt: null,
 };
+
+const REFRESH_SKEW_MS = 30_000;
 
 export const tokenManager = {
   setTokens(accessToken: string, refreshToken?: string, expiresIn?: number): void {
     tokens = {
       accessToken,
-      refreshToken,
-      expiresIn: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
+      refreshToken: refreshToken ?? null,
+      expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : null,
     };
   },
 
   getToken(): string | null {
-    return tokens.accessToken || null;
+    return tokens.accessToken;
   },
 
   getRefreshToken(): string | null {
-    return tokens.refreshToken || null;
+    return tokens.refreshToken;
   },
 
   isTokenExpired(): boolean {
-    if (!tokens.expiresIn) return false;
-    return Date.now() > tokens.expiresIn;
+    if (!tokens.expiresAt) {
+      return false;
+    }
+
+    return Date.now() >= tokens.expiresAt - REFRESH_SKEW_MS;
   },
 
   clearTokens(): void {
     tokens = {
-      accessToken: null as any,
-      refreshToken: null as any,
-      expiresIn: 0,
+      accessToken: null,
+      refreshToken: null,
+      expiresAt: null,
     };
   },
 };
-

@@ -30,7 +30,7 @@ La idea es parecida a un edificio con recepcion: primero revisan si traes gafete
 | `src/config/routes.tsx` | Define rutas publicas, protegidas y roles permitidos. | Si tiene el mapa principal de seguridad. |
 | `src/features/auth/ProtectedRoute.tsx` | Bloquea usuarios no autenticados o sin rol permitido. | Patron principal de seguridad frontend. |
 | `src/features/auth/useAuth.ts` | Sincroniza sesion y expone `signIn`, `signOut`, `isAuthenticated`. | Correcto para frontend. |
-| `src/features/auth/authService.ts` | Decide si se usa mock o API real. | Mock activo; API real preparada. |
+| `src/features/auth/authService.ts` | Consume login real, decodifica JWT y crea sesion frontend. | API real activa para login. |
 | `src/features/auth/store/authStore.ts` | Guarda sesion en memoria. | Mejor que guardar roles en `localStorage`. |
 | `src/features/auth/permissions.ts` | Define permisos por rol. | Existe, pero se usa poco en las pantallas. |
 | `src/features/auth/usePermissions.ts` | Hook para consultar permisos. | Preparado, no es el patron principal actual. |
@@ -41,7 +41,7 @@ La idea es parecida a un edificio con recepcion: primero revisan si traes gafete
 | Ruta | Tipo | Roles permitidos | Comentario |
 | --- | --- | --- | --- |
 | `/` | Publica | Todos | Redirige a login o dashboard segun sesion. |
-| `/login` | Publica | Todos | Login mock. Si ya hay sesion, redirige a dashboard. |
+| `/login` | Publica | Todos | Login real contra `/api/v1/auth/login`. Si ya hay sesion, redirige a dashboard. |
 | `/dashboard` | Protegida | Usuario autenticado | Vista principal por rol. |
 | `/payments` | Protegida | `admin`, `client` | Consume backend para pagos. |
 | `/orders` | Protegida | `admin`, `client` | Datos mock filtrados por rol en frontend. |
@@ -74,14 +74,15 @@ Esto no rompe la seguridad, pero es deuda tecnica: el codigo queda mas dificil d
 
 ### 4. La autenticacion real aun no esta activa
 
-`authService.ts` tiene `USE_REAL_API = false`. Eso significa que hoy el login funciona con mock:
+El login ya fue migrado a API real:
 
-- cualquier correo valido entra;
-- si el correo contiene `admin`, toma rol admin;
-- si no contiene `admin`, toma rol cliente;
-- la sesion vive en memoria.
+- endpoint: `POST /api/v1/auth/login`;
+- body: `email` y `password`;
+- respuesta: `accessToken`, `tokenType`, `expiresIn`;
+- token: guardado solo en memoria con `tokenManager`;
+- rol: se obtiene desde el JWT. `ROLE_ANALYTICS` y `ROLE_ADMIN` se mapean como `admin`.
 
-Esto esta bien para demo frontend, pero para produccion debe conectarse a backend real con cookie segura o token manejado correctamente.
+Ya no entra cualquier correo y contrasena. El backend decide si las credenciales son validas.
 
 ### 5. La seguridad de datos debe vivir tambien en backend
 
@@ -97,8 +98,8 @@ En frontend se puede filtrar informacion para mostrar menos datos, pero un usuar
 
 | Feature | Aplica guardia de ruta | Cambia logica por rol | Riesgo actual |
 | --- | --- | --- | --- |
-| `auth` | Si | Si | Mock activo; no es auth productiva. |
-| `dashboard` | Si | Si | Correcto para vista, depende de sesion mock. |
+| `auth` | Si | Si | Login real activo; falta confirmar refresh token productivo. |
+| `dashboard` | Si | Si | Correcto para vista; falta conectar KPIs reales. |
 | `payments` | Si | Parcial | Usa backend y arquitectura por capas, pero el alcance por empresa/rol debe validarlo backend. |
 | `orders` | Si | Si | Tiene capas API preparadas, pero sigue con filtrado mock en frontend. |
 | `clients` | Si | Si | Tiene capas API preparadas, pero sigue con filtrado mock en frontend. |
@@ -120,12 +121,11 @@ En frontend se puede filtrar informacion para mostrar menos datos, pero un usuar
 
 ## Recomendaciones futuras
 
-1. Unificar el guard de rutas para no envolver dos veces.
-2. Activar autenticacion real cuando backend tenga `/auth/login`, `/auth/me` y `/auth/logout`.
+1. Confirmar si backend entregara `refreshToken` o si el usuario debe iniciar sesion de nuevo al vencer el access token.
+2. Conectar `dashboard/kpis`, `dashboard/hourly` y `dashboard/pulse` usando el token actual.
 3. Hacer que backend sea quien filtre datos por usuario, rol y empresa.
 4. Usar `usePermissions()` dentro de componentes sensibles como botones de exportar, crear o administrar.
 5. Completar manejo de `401` en `apiClient.ts` para cerrar sesion y redirigir a `/login`.
-6. Corregir comentarios con codificacion rota en algunos archivos para que toda la documentacion interna se lea limpio.
 
 ## Nota sobre las nuevas capas preparadas
 

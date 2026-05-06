@@ -12,6 +12,7 @@ Esta carpeta concentra los documentos tecnicos del proyecto. El `README.md` prin
 | Seguridad | [seguridad/PATRONES_SEGURIDAD.md](seguridad/PATRONES_SEGURIDAD.md) | Explica rutas protegidas, roles y pendientes de seguridad. |
 | Features | [features/REVISION_FEATURES.md](features/REVISION_FEATURES.md) | Revisa modulo por modulo que hace cada feature. |
 | Calidad | [calidad/ESLINT.md](calidad/ESLINT.md) | Explica ESLint, scripts y archivos modificados. |
+| API backend | [api/ENDPOINTS_BACKEND.md](api/ENDPOINTS_BACKEND.md) | Registra login implementado y endpoints pendientes del dashboard. |
 | Tickets | [tickets/TICKETS_ACCIONABLES.md](tickets/TICKETS_ACCIONABLES.md) | Lista tareas recomendadas para continuar el proyecto. |
 
 ## Regla de organizacion

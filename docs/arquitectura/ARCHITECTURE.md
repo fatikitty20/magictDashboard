@@ -232,7 +232,7 @@ Es la fuente central de rutas. Facilita auditar que ruta existe, que pagina la r
 Componentes globales reutilizables por cualquier feature. No deben contener logica de negocio de un dominio especifico.
 
 ### `src/features/auth/`
-Gestiona autenticacion, sesion, roles y permisos. Esta carpeta decide quien puede entrar y que puede ver.
+Gestiona autenticacion, sesion, roles y permisos. Actualmente el login consume `POST /api/v1/auth/login`, decodifica el JWT y guarda el token solo en memoria mediante `tokenManager`.
 
 ### `src/features/dashboard/`
 Define la experiencia principal del panel. `useDashboard()` elige que widgets y menu mostrar segun el rol.
@@ -248,6 +248,13 @@ Contiene piezas de layout reutilizables que no pertenecen a un feature de negoci
 
 ### `src/shared/ui/`
 Helpers visuales y estilos compartidos para componentes de toda la app.
+
+### `src/shared/api/`
+Centraliza comunicacion con backend:
+
+- `apiConfig.ts`: URL base y endpoints conocidos.
+- `apiClient.ts`: wrapper de `fetch`, headers JSON, ngrok y `Authorization: Bearer`.
+- `tokenManager.ts`: almacenamiento seguro en memoria para access token y refresh token.
 
 ### `src/lib/`
 Funciones base compartidas. Aqui van utilidades puras, no logica de features.
@@ -322,6 +329,16 @@ Cuando backend tenga endpoints para Pedidos, Clientes, Reportes o Transacciones,
 7. Mantener `services/` solo como fallback temporal o eliminarlo cuando ya no se use.
 
 La regla de oro: la vista no debe saber como se arma un endpoint. La vista solo debe pedir datos mediante un hook.
+
+## Endpoints Nuevos del Dashboard
+
+El backend ya tiene endpoints protegidos con Bearer token:
+
+- `GET /api/v1/dashboard/kpis`
+- `GET /api/v1/dashboard/hourly`
+- `GET /api/v1/dashboard/pulse`
+
+Todavia no estan conectados a la UI. Primero se implemento login real; despues se deben crear `dashboardApi`, hooks y mappers para estos endpoints.
 
 ## Convenciones Importantes
 

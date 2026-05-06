@@ -24,6 +24,8 @@ Una analogia sencilla: TypeScript revisa que las piezas encajen, Vitest prueba q
 | `tsconfig.json` | Se convirtio en archivo indice con referencias. | VS Code deja de leer la app sin configuracion JSX. |
 | `tsconfig.app.json` | Se dejo la configuracion real de React/Vite y se quito `baseUrl`. | Evita el error rojo de JSX y el aviso de deprecacion de TypeScript. |
 | `src/features/*/api|domain|hooks|mappers` | Se agregaron archivos preparados en features con mock. | Documentan donde entrara la API sin romper la funcionalidad actual. |
+| `src/shared/api/apiConfig.ts` | Se centralizaron URL base y endpoints. | Evita URLs productivas dispersas en componentes. |
+| `src/shared/api/tokenManager.ts` | Se elimino `any` y se tiparon tokens nullable. | Mantiene el token en memoria sin romper ESLint. |
 
 ## Reglas importantes
 
