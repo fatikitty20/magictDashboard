@@ -53,6 +53,12 @@
   "dashboard": {
     "title": "Panel de control",
     "description": "Gestiona tus pagos, pedidos y el rendimiento de tu tienda.",
+    "kpis": {
+      "dateLabel": "Fecha",
+      "dateUnavailable": "Fecha no disponible",
+      "loading": "Cargando KPIs del dashboard...",
+      "error": "No se pudieron cargar los KPIs del dashboard."
+    },
     "admin": {
       "title": "Panel de Administración PSP",
       "description": "Resumen de todas las transacciones, liquidaciones y actividad de comercios."
@@ -161,6 +167,28 @@
           "alerts": {
             "title": "Alertas pendientes",
             "helper": "Requieren revision"
+          },
+          "kpis": {
+            "gmv": {
+              "title": "GMV total",
+              "helper": "Monto bruto procesado"
+            },
+            "totalIntentos": {
+              "title": "Intentos totales",
+              "helper": "Operaciones recibidas del backend"
+            },
+            "ventasExitosas": {
+              "title": "Ventas exitosas",
+              "helper": "Cobros aprobados"
+            },
+            "conversionRate": {
+              "title": "Tasa de conversión",
+              "helper": "Porcentaje de aprobación"
+            },
+            "ticketPromedio": {
+              "title": "Ticket promedio",
+              "helper": "Valor medio por operación"
+            }
           }
         },
         "projects": {

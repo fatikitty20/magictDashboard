@@ -3,11 +3,11 @@ import { useTranslation } from "react-i18next";
 import type { Metrica } from "../data";
 import { claseTarjeta } from "@/shared/ui/estilosDashboard";
 
-export const TarjetaMetrica = ({ etiquetaKey, valor, ayudaKey, variante }: Metrica) => {
+export const TarjetaMetrica = ({ etiquetaKey, etiqueta: etiquetaTexto, valor, ayudaKey, ayuda: ayudaTexto, variante }: Metrica) => {
   const { t } = useTranslation();
   const esInvertida = variante === "invertida";
-  const etiqueta = t(etiquetaKey);
-  const ayuda = t(ayudaKey);
+  const etiqueta = etiquetaTexto ?? (etiquetaKey ? t(etiquetaKey) : "");
+  const ayuda = ayudaTexto ?? (ayudaKey ? t(ayudaKey) : "");
 
   return (
     <div className={claseTarjeta(variante, "relative p-5 h-full")}>

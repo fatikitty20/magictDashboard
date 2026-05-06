@@ -53,6 +53,12 @@
   "dashboard": {
     "title": "Control panel",
     "description": "Manage your payments, orders, and store performance.",
+    "kpis": {
+      "dateLabel": "Date",
+      "dateUnavailable": "Date unavailable",
+      "loading": "Loading dashboard KPIs...",
+      "error": "We could not load the dashboard KPIs."
+    },
     "admin": {
       "title": "PSP Administration Dashboard",
       "description": "Overview of all transactions, settlements, and merchant activity."
@@ -161,6 +167,28 @@
           "alerts": {
             "title": "Pending alerts",
             "helper": "Need review"
+          },
+          "kpis": {
+            "gmv": {
+              "title": "Total GMV",
+              "helper": "Gross processed amount"
+            },
+            "totalIntentos": {
+              "title": "Total attempts",
+              "helper": "Operations received from the backend"
+            },
+            "ventasExitosas": {
+              "title": "Successful sales",
+              "helper": "Approved charges"
+            },
+            "conversionRate": {
+              "title": "Conversion rate",
+              "helper": "Approval percentage"
+            },
+            "ticketPromedio": {
+              "title": "Average ticket",
+              "helper": "Average value per operation"
+            }
           }
         },
         "projects": {
@@ -589,6 +617,7 @@
           "title": "My top products",
           "description": "Product ranking for my business"
         }
+        
       }
     }
   }

@@ -27,9 +27,11 @@ export interface BarraAnalitica {
 
 export interface Metrica {
   id: string;
-  etiquetaKey: LlaveTraduccion;
+  etiquetaKey?: LlaveTraduccion;
+  etiqueta?: string;
   valor: string;
-  ayudaKey: LlaveTraduccion;
+  ayudaKey?: LlaveTraduccion;
+  ayuda?: string;
   variante: VarianteMetrica;
 }
 
