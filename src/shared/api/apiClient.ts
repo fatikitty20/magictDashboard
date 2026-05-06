@@ -53,14 +53,15 @@ export const apiClient = async <T>(
 ): Promise<T> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
+  const { skipAuthHeader, headers: optionHeaders, ...fetchOptions } = options ?? {};
 
   try {
     const headers: Record<string, string> = {
       ...DEFAULT_API_HEADERS,
-      ...((options?.headers as Record<string, string> | undefined) ?? {}),
+      ...((optionHeaders as Record<string, string> | undefined) ?? {}),
     };
 
-    if (!options?.skipAuthHeader) {
+    if (!skipAuthHeader) {
       const token = tokenManager.getToken();
 
       if (token) {
@@ -69,10 +70,10 @@ export const apiClient = async <T>(
     }
 
     const response = await fetch(construirUrl(url), {
+      ...fetchOptions,
       headers,
-      credentials: "include",
+      credentials: fetchOptions.credentials ?? "omit",
       signal: controller.signal,
-      ...options,
     });
 
     if (!response.ok) {

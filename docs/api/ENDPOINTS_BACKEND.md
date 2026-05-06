@@ -24,6 +24,20 @@ VITE_API_URL=https://unsupervised-davin-pardonless.ngrok-free.dev/api/v1
 
 Asi evitamos dejar URLs productivas hardcodeadas en los componentes.
 
+### Proxy local y CORS
+
+El backend productivo valida CORS. En desarrollo, el navegador no llama directo
+al backend: llama a Vite (`localhost:8081`) y Vite reenvia a ngrok. Por eso el
+proxy limpia las cabeceras `Origin` y `Referer` antes de reenviar la peticion.
+
+Esto esta en:
+
+- `vite.config.ts`
+
+Motivo: si el backend recibe `Origin: http://localhost:8081`, puede contestar
+`Invalid CORS request` o bloquear el login, aunque las credenciales sean
+correctas. El proxy hace que la peticion llegue como llamada servidor-a-servidor.
+
 ## Endpoint implementado ahora
 
 ### Login
