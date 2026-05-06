@@ -7,9 +7,7 @@ import {
   LogOut,
   Mail,
   type LucideIcon,
-  Settings,
   ShoppingBag,
-  Smartphone,
   Store,
   Users,
   X,
@@ -47,6 +45,7 @@ const iconByKey: Record<string, LucideIcon> = {
   orders: ShoppingBag,
   reports: BarChart3,
   clients: Users,
+  transactions: CreditCard,
 };
 
 export const BarraLateral = ({
@@ -67,7 +66,6 @@ export const BarraLateral = ({
   const elementosMenu: MenuItem[] = menuItems ?? dashboardConfig.menuItems;
 
   const elementosGenerales: GeneralItem[] = generalItems ?? [
-    { key: "settings", icon: Settings, label: t("sidebar.general.settings") },
     { key: "help", icon: HelpCircle, label: t("sidebar.general.helpCenter") },
   ];
 
@@ -103,6 +101,11 @@ export const BarraLateral = ({
 
   const toggleHelpCenter = () => {
     setIsHelpOpen((current) => !current);
+  };
+
+  const abrirTransacciones = () => {
+    navigate("/transactions");
+    onNavigate?.();
   };
 
   const contenidoSidebar = (
@@ -247,19 +250,21 @@ export const BarraLateral = ({
       </nav>
 
       <div className={claseTarjetaInvertida("relative mt-4 overflow-hidden p-4")}>
-        <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-success/20" />
-        <Smartphone className="mb-2 h-6 w-6 text-success" />
+        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-dashboard-inverted-foreground/10 text-dashboard-inverted-foreground">
+          <CreditCard className="h-4.5 w-4.5" />
+        </div>
         <p className="mb-1 text-sm font-semibold text-dashboard-inverted-foreground">
-          {t("sidebar.mobileCard.title")}
+          {t("sidebar.transactionsCard.title")}
         </p>
-        <p className="mb-3 text-[10px] text-dashboard-inverted-foreground/60">
-          {t("sidebar.mobileCard.description")}
+        <p className="mb-3 text-[10px] leading-4 text-dashboard-inverted-foreground/60">
+          {t("sidebar.transactionsCard.description")}
         </p>
         <button
           type="button"
+          onClick={abrirTransacciones}
           className={claseBotonPrimario("h-8 w-full rounded-md text-xs hover:brightness-95")}
         >
-          {t("sidebar.mobileCard.download")}
+          {t("sidebar.transactionsCard.action")}
         </button>
       </div>
     </>

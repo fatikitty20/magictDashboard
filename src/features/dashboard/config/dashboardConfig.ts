@@ -16,11 +16,7 @@ export type DashboardWidget =
 
 export type DashboardMenuLabel =
   | "sidebar.menu.dashboard"
-  | "sidebar.menu.orders"
-  | "sidebar.menu.payments"
-  | "sidebar.menu.reports"
-  | "sidebar.menu.clients"
-  | "sidebar.menu.transactions"; // 🔥 NUEVO
+  | "sidebar.menu.transactions";
 
 export interface DashboardMenuItem {
   key: string;
@@ -53,10 +49,6 @@ const widgetsBase: DashboardWidget[] = [
  */
 const menuCliente: DashboardMenuItem[] = [
   { key: "dashboard", label: "sidebar.menu.dashboard", path: "/dashboard" },
-  { key: "orders", label: "sidebar.menu.orders", path: "/orders" },
-  { key: "payments", label: "sidebar.menu.payments", path: "/payments", badge: "10" },
-  { key: "reports", label: "sidebar.menu.reports", path: "/reports" },
-  { key: "clients", label: "sidebar.menu.clients", path: "/clients" },
 ];
 
 /**
@@ -64,14 +56,7 @@ const menuCliente: DashboardMenuItem[] = [
  */
 const menuAdmin: DashboardMenuItem[] = [
   { key: "dashboard", label: "sidebar.menu.dashboard", path: "/dashboard" },
-
-  // 🔥 CORE PSP
   { key: "transactions", label: "sidebar.menu.transactions", path: "/transactions" },
-
-  { key: "payments", label: "sidebar.menu.payments", path: "/payments" },
-  { key: "orders", label: "sidebar.menu.orders", path: "/orders" },
-  { key: "clients", label: "sidebar.menu.clients", path: "/clients" },
-  { key: "reports", label: "sidebar.menu.reports", path: "/reports" },
 ];
 
 /**

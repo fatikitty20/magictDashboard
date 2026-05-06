@@ -300,7 +300,6 @@
       "clients": "Clients"
     },
     "general": {
-      "settings": "Settings",
       "help": "Help",
       "helpCenter": "Help Center"
     },
@@ -323,10 +322,10 @@
       }
     },
     "logout": "Log out",
-    "mobileCard": {
-      "title": "Mobile PSP app",
-      "description": "Manage from your phone",
-      "download": "Download"
+    "transactionsCard": {
+      "title": "Transaction summary",
+      "description": "Monitor payment activity, approvals, and transaction flow in real time.",
+      "action": "Open transactions"
     }
   },
   "payments": {
