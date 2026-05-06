@@ -1,4 +1,4 @@
-import { Bell, Mail, Menu, Search, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { BotonTema } from "../../features/theme";
 import { SelectorIdioma } from "../../features/i18n/components/SelectorIdioma";
@@ -44,21 +44,6 @@ export const BarraSuperior = ({ isSidebarOpen, onMenuClick }: BarraSuperiorProps
 
       <SelectorIdioma />
       <BotonTema />
-
-      <button
-        type="button"
-        aria-label={t("topbar.actions.messages")}
-        className={claseBotonIcono("h-10 w-10 bg-muted")}
-      >
-        <Mail className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
-        aria-label={t("topbar.actions.notifications")}
-        className={claseBotonIcono("h-10 w-10 bg-muted")}
-      >
-        <Bell className="h-4 w-4" />
-      </button>
 
       <div className="flex items-center gap-3 border-l border-border pl-4">
         <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${

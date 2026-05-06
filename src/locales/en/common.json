@@ -301,7 +301,26 @@
     },
     "general": {
       "settings": "Settings",
-      "help": "Help"
+      "help": "Help",
+      "helpCenter": "Help Center"
+    },
+    "helpCenter": {
+      "title": "Help Center",
+      "description": "Get support, product guidance, and operational documentation in one place.",
+      "support": {
+        "title": "Need assistance?",
+        "description": "Reach the support team for account, workflow, or dashboard questions. We respond with priority during business hours."
+      },
+      "actions": {
+        "email": "Email support",
+        "docs": "Open documentation"
+      },
+      "meta": {
+        "hoursLabel": "Support hours",
+        "hours": "Mon-Fri, 9:00 AM - 6:00 PM",
+        "responseLabel": "Response time",
+        "responseTime": "Within 4 business hours"
+      }
     },
     "logout": "Log out",
     "mobileCard": {

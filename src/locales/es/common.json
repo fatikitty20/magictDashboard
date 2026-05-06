@@ -301,7 +301,26 @@
     },
     "general": {
       "settings": "Configuración",
-      "help": "Ayuda"
+      "help": "Ayuda",
+      "helpCenter": "Centro de ayuda"
+    },
+    "helpCenter": {
+      "title": "Centro de ayuda",
+      "description": "Obtén soporte, guía de producto y documentación operativa en un solo lugar.",
+      "support": {
+        "title": "¿Necesitas ayuda?",
+        "description": "Contacta al equipo de soporte para dudas de cuenta, flujo o dashboard. Respondemos con prioridad en horario laboral."
+      },
+      "actions": {
+        "email": "Enviar correo a soporte",
+        "docs": "Abrir documentación"
+      },
+      "meta": {
+        "hoursLabel": "Horario de soporte",
+        "hours": "Lun-Vie, 9:00 AM - 6:00 PM",
+        "responseLabel": "Tiempo de respuesta",
+        "responseTime": "Dentro de 4 horas hábiles"
+      }
     },
     "logout": "Cerrar sesión",
     "mobileCard": {

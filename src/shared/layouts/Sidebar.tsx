@@ -1,9 +1,11 @@
 import {
   BarChart3,
+  BookOpen,
   CreditCard,
   HelpCircle,
   LayoutDashboard,
   LogOut,
+  Mail,
   type LucideIcon,
   Settings,
   ShoppingBag,
@@ -12,7 +14,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth";
@@ -60,12 +62,13 @@ export const BarraLateral = ({
   const location = useLocation();
   const { t } = useTranslation();
   const dashboardConfig = useDashboard();
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const elementosMenu: MenuItem[] = menuItems ?? dashboardConfig.menuItems;
 
   const elementosGenerales: GeneralItem[] = generalItems ?? [
     { key: "settings", icon: Settings, label: t("sidebar.general.settings") },
-    { key: "help", icon: HelpCircle, label: t("sidebar.general.help") },
+    { key: "help", icon: HelpCircle, label: t("sidebar.general.helpCenter") },
   ];
 
   useEffect(() => {
@@ -98,6 +101,10 @@ export const BarraLateral = ({
     onNavigate?.();
   };
 
+  const toggleHelpCenter = () => {
+    setIsHelpOpen((current) => !current);
+  };
+
   const contenidoSidebar = (
     <>
       <div className="mb-8 flex items-center justify-between gap-2">
@@ -105,7 +112,7 @@ export const BarraLateral = ({
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
             <Store className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold text-foreground">PSP</span>
+          <span className="text-lg font-semibold text-foreground">Magictronic PSP</span>
         </div>
         {mode === "mobile" && (
           <button
@@ -160,12 +167,73 @@ export const BarraLateral = ({
           <button
             key={elemento.key}
             type="button"
+            onClick={elemento.key === "help" ? toggleHelpCenter : undefined}
+            aria-expanded={elemento.key === "help" ? isHelpOpen : undefined}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted"
           >
             <elemento.icon className="h-4 w-4" />
             <span>{elemento.label}</span>
           </button>
         ))}
+
+        {isHelpOpen && (
+          <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  {t("sidebar.helpCenter.title")}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {t("sidebar.helpCenter.description")}
+                </p>
+              </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-foreground">
+                <BookOpen className="h-4 w-4" />
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs text-muted-foreground">
+              <div className="rounded-lg bg-muted/70 p-3">
+                <p className="font-medium text-foreground">{t("sidebar.helpCenter.support.title")}</p>
+                <p className="mt-1 leading-5">{t("sidebar.helpCenter.support.description")}</p>
+              </div>
+
+              <div className="grid gap-2">
+                <a
+                  href="mailto:support@magictronic.com"
+                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-foreground transition hover:bg-muted"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span>{t("sidebar.helpCenter.actions.email")}</span>
+                </a>
+                <a
+                  href="https://magictronic.com/docs"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-foreground transition hover:bg-muted"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span>{t("sidebar.helpCenter.actions.docs")}</span>
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-lg bg-muted/70 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {t("sidebar.helpCenter.meta.hoursLabel")}
+                  </p>
+                  <p className="mt-1 text-foreground">{t("sidebar.helpCenter.meta.hours")}</p>
+                </div>
+                <div className="rounded-lg bg-muted/70 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {t("sidebar.helpCenter.meta.responseLabel")}
+                  </p>
+                  <p className="mt-1 text-foreground">{t("sidebar.helpCenter.meta.responseTime")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* BOTÓN LOGOUT */}
         <button
