@@ -8,17 +8,17 @@ import { claseBotonPrimario, claseTarjeta } from "@/shared/ui/estilosDashboard";
 const Login = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { signIn, isAuthenticated } = useAuth();
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
+  const { signIn, sesion } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [estaCargando, setEstaCargando] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (sesion) {
       navigate("/dashboard", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [sesion, navigate]);
 
   const manejarEnvio = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,10 +26,14 @@ const Login = () => {
     setError(null);
 
     try {
-      await signIn({ correo, contrasena });
+      console.log("[LoginView] Iniciando login con:", { email, password: "***" });
+      await signIn({ email, password });
+      console.log("[LoginView] Login exitoso");
       navigate("/dashboard", { replace: true });
     } catch (errorCapturado) {
-      setError(errorCapturado instanceof Error ? errorCapturado.message : t("login.errors.default"));
+      console.error("[LoginView] Error de login:", errorCapturado);
+      const mensaje = errorCapturado instanceof Error ? errorCapturado.message : t("login.errors.default");
+      setError(mensaje);
       setEstaCargando(false);
     }
   };
@@ -57,8 +61,8 @@ const Login = () => {
                   id="email"
                   type="email"
                   required
-                  value={correo}
-                  onChange={(event) => setCorreo(event.target.value)}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   placeholder={t("login.placeholders.email")}
                   className="h-12 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-foreground transition placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30"
                   autoComplete="email"
@@ -76,8 +80,8 @@ const Login = () => {
                   id="password"
                   type="password"
                   required
-                  value={contrasena}
-                  onChange={(event) => setContrasena(event.target.value)}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder={t("login.placeholders.password")}
                   className="h-12 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-foreground transition placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30"
                   autoComplete="current-password"

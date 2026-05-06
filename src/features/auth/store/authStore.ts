@@ -12,9 +12,6 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>()((set) => ({
   sesion: null,
-
-  // La sesion mock vive solo en memoria.
-  // Asi evitamos guardar roles editables en localStorage.
   isHydrated: true,
 
   setSesion: (sesion) => set({ sesion }),

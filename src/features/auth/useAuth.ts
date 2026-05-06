@@ -11,10 +11,8 @@ export const useAuth = () => {
   const setSesion = useAuthStore((s) => s.setSesion);
   const clearSesion = useAuthStore((s) => s.clearSesion);
 
-  //  NUEVO: estado de validación real de sesión
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  //  sincroniza sesión con backend (o mock)
   const refreshSession = useCallback(async () => {
     try {
       setIsCheckingAuth(true);
@@ -33,7 +31,6 @@ export const useAuth = () => {
     }
   }, [setSesion, clearSesion]);
 
-  //  validar sesión al iniciar app
   useEffect(() => {
     if (isHydrated) {
       refreshSession();
