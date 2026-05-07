@@ -1,238 +1,108 @@
 import { useTranslation } from "react-i18next";
-
-import { TarjetaMetrica } from "@/features/dashboard/components/MetricCard";
-
+import { TarjetaMetrica, type Metrica } from "@/features/dashboard/components/MetricCard";
 import { useDashboard } from "@/features/dashboard";
 import { useDashboardKpis } from "@/features/dashboard/hooks/useDashboardKpis";
-
-import {
-  obtenerDatosDashboard,
-  type LlaveTraduccion,
-  type Metrica,
-} from "@/features/dashboard/data";
-
 import type { DashboardWidget } from "@/features/dashboard/config/dashboardConfig";
+import { formatUsdMinorUnits } from "../utils/currencyNormalization";
 
-const formatearFechaDashboard = (
-  fecha: string,
-  locale: string,
-): string => {
+const formatearFechaDashboard = (fecha: string, locale: string): string => {
   const date = new Date(fecha);
 
   if (Number.isNaN(date.getTime())) {
     return fecha;
   }
 
-  const incluyeHora = fecha.includes("T") || fecha.includes(":");
-
   return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "long",
     year: "numeric",
-    ...(incluyeHora
-      ? {
-          hour: "2-digit" as const,
-          minute: "2-digit" as const,
-        }
-      : {}),
     timeZone: "UTC",
   }).format(date);
-};
-
-const formatearMoneda = (
-  amount: number,
-): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(amount / 100);
 };
 
 const formatearNumero = (value: number, locale: string): string =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
 
 const formatearPorcentaje = (value: number, locale: string): string =>
-  new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(value);
+  new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
 
 const PanelDashboard = () => {
   const { t, i18n } = useTranslation();
-  const locale = i18n.resolvedLanguage === "es" ? "es-MX" : "en-US";
-
   const dashboardConfig = useDashboard();
+  const locale = i18n.resolvedLanguage === "es" ? "es-MX" : "en-US";
+  const { data, isLoading, isError, error } = useDashboardKpis(true);
 
-  const datosDashboard = obtenerDatosDashboard(
-    dashboardConfig.role
-  );
+  const sinDato = "-";
+  const metricas: Metrica[] = [
+    {
+      id: "gmv-total",
+      etiqueta: t("dashboard.roleContent.admin.metrics.kpis.gmv.title"),
+      valor: data?.gmvTotal !== null && data?.gmvTotal !== undefined ? formatUsdMinorUnits(data.gmvTotal) : sinDato,
+      ayuda: t("dashboard.roleContent.admin.metrics.kpis.gmv.helper"),
+      variante: "invertida",
+    },
+    {
+      id: "total-intentos",
+      etiqueta: t("dashboard.roleContent.admin.metrics.kpis.totalIntentos.title"),
+      valor: data?.totalIntentos !== null && data?.totalIntentos !== undefined ? formatearNumero(data.totalIntentos, locale) : sinDato,
+      ayuda: t("dashboard.roleContent.admin.metrics.kpis.totalIntentos.helper"),
+      variante: "suave",
+    },
+    {
+      id: "ventas-exitosas",
+      etiqueta: t("dashboard.roleContent.admin.metrics.kpis.ventasExitosas.title"),
+      valor: data?.ventasExitosas !== null && data?.ventasExitosas !== undefined ? formatearNumero(data.ventasExitosas, locale) : sinDato,
+      ayuda: t("dashboard.roleContent.admin.metrics.kpis.ventasExitosas.helper"),
+      variante: "suave",
+    },
+    {
+      id: "conversion-rate",
+      etiqueta: t("dashboard.roleContent.admin.metrics.kpis.conversionRate.title"),
+      valor: data?.conversionRate !== null && data?.conversionRate !== undefined ? `${formatearPorcentaje(data.conversionRate, locale)}%` : sinDato,
+      ayuda: t("dashboard.roleContent.admin.metrics.kpis.conversionRate.helper"),
+      variante: "suave",
+    },
+    {
+      id: "ticket-promedio",
+      etiqueta: t("dashboard.roleContent.admin.metrics.kpis.ticketPromedio.title"),
+      valor: data?.ticketPromedio !== null && data?.ticketPromedio !== undefined ? formatUsdMinorUnits(data.ticketPromedio) : sinDato,
+      ayuda: t("dashboard.roleContent.admin.metrics.kpis.ticketPromedio.helper"),
+      variante: "suave",
+    },
+  ];
 
-  const esAdmin = dashboardConfig.role === "admin";
-
-  const titleKey: LlaveTraduccion = esAdmin
-    ? "dashboard.admin.title"
-    : "dashboard.client.title";
-
-  const {
-    data: kpisDashboard,
-    isLoading: cargandoKpis,
-    isError: errorKpis,
-    error: errorDashboard,
-  } = useDashboardKpis(esAdmin);
-
-  // ======================================================
-  // MÉTRICAS DASHBOARD
-  // ======================================================
-
-  const metricasDashboard =
-    esAdmin
-      ? []
-      : datosDashboard.metricas;
-
-  const metricasBackend: Metrica[] = esAdmin && kpisDashboard
-    ? [
-        {
-          id: "gmv-total",
-          etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.gmv.title",
-          valor:
-            kpisDashboard.gmvTotal !== null
-              ? formatearMoneda(kpisDashboard.gmvTotal)
-              : "—",
-          ayudaKey: "dashboard.roleContent.admin.metrics.kpis.gmv.helper",
-          variante: "invertida",
-        },
-        {
-          id: "total-intentos",
-          etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.totalIntentos.title",
-          valor:
-            kpisDashboard.totalIntentos !== null
-              ? formatearNumero(kpisDashboard.totalIntentos, locale)
-              : "—",
-          ayudaKey: "dashboard.roleContent.admin.metrics.kpis.totalIntentos.helper",
-          variante: "suave",
-        },
-        {
-          id: "ventas-exitosas",
-          etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.ventasExitosas.title",
-          valor:
-            kpisDashboard.ventasExitosas !== null
-              ? formatearNumero(kpisDashboard.ventasExitosas, locale)
-              : "—",
-          ayudaKey: "dashboard.roleContent.admin.metrics.kpis.ventasExitosas.helper",
-          variante: "suave",
-        },
-        {
-          id: "conversion-rate",
-          etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.conversionRate.title",
-          valor:
-            kpisDashboard.conversionRate !== null
-              ? `${formatearPorcentaje(kpisDashboard.conversionRate, locale)}%`
-              : "—",
-          ayudaKey: "dashboard.roleContent.admin.metrics.kpis.conversionRate.helper",
-          variante: "suave",
-        },
-        {
-          id: "ticket-promedio",
-          etiquetaKey: "dashboard.roleContent.admin.metrics.kpis.ticketPromedio.title",
-          valor:
-            kpisDashboard.ticketPromedio !== null
-              ? formatearMoneda(kpisDashboard.ticketPromedio)
-              : "—",
-          ayudaKey: "dashboard.roleContent.admin.metrics.kpis.ticketPromedio.helper",
-          variante: "suave",
-        },
-      ]
-    : [];
-
-  const metricasFinales =
-    esAdmin
-      ? metricasBackend
-      : metricasDashboard;
-
-  const tieneWidget = (widget: DashboardWidget) =>
-    dashboardConfig.widgets.includes(widget);
-
-  const mensajeErrorKpis =
-    errorDashboard instanceof Error
-      ? errorDashboard.message
-      : t("dashboard.kpis.error");
+  const tieneWidget = (widget: DashboardWidget) => dashboardConfig.widgets.includes(widget);
+  const mensajeError = error instanceof Error ? error.message : t("dashboard.kpis.error");
+  const titulo = dashboardConfig.role === "admin" ? "dashboard.admin.title" : "dashboard.client.title";
 
   return (
     <div className="space-y-6">
-
-      {/* ======================================================
-          HEADER + MÉTRICAS
-      ====================================================== */}
-
-      {tieneWidget("metrics") && (
+      {tieneWidget("metrics") ? (
         <>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-
-            {/* TITULOS */}
-            <div>
-
-              {/* Título dashboard */}
-              <h1 className="mb-1 text-3xl font-bold text-foreground">
-                {t(titleKey)}
-              </h1>
-
-              {/* Fecha backend */}
-              <p className="text-sm text-muted-foreground">
-                {kpisDashboard?.fecha
-                  ? `${t("dashboard.kpis.dateLabel")}: ${formatearFechaDashboard(kpisDashboard.fecha, locale)}`
-                  : t("dashboard.kpis.dateUnavailable")}
-              </p>
-
-            </div>
+          <div>
+            <h1 className="mb-1 text-3xl font-bold text-foreground">{t(titulo)}</h1>
+            <p className="text-sm text-muted-foreground">
+              {data?.fecha
+                ? `${t("dashboard.kpis.dateLabel")}: ${formatearFechaDashboard(data.fecha, locale)}`
+                : t("dashboard.kpis.dateUnavailable")}
+            </p>
           </div>
 
-          {/* ======================================================
-              GRID MÉTRICAS KPI
-          ====================================================== */}
-
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-
-            {/* Tarjetas métricas */}
-            {metricasFinales.map((metrica) => (
-              <TarjetaMetrica
-                key={metrica.id}
-                {...metrica}
-              />
+            {metricas.map((metrica) => (
+              <TarjetaMetrica key={metrica.id} {...metrica} />
             ))}
-
-            {/* Skeleton loading */}
-            {esAdmin &&
-            cargandoKpis &&
-            metricasFinales.length === 0
-              ? Array.from({ length: 5 }, (_, index) => (
-                  <div
-                    key={`kpi-loading-${index}`}
-                    className="h-40 animate-pulse rounded-lg border border-border bg-dashboard-soft"
-                  />
-                ))
-              : null}
           </section>
 
-          {/* Loading KPIs */}
-          {cargandoKpis ? (
-            <p className="text-xs text-muted-foreground">
-              {t("dashboard.kpis.loading")}
-            </p>
-          ) : null}
+          {isLoading ? <p className="text-xs text-muted-foreground">{t("dashboard.kpis.loading")}</p> : null}
 
-          {/* Error backend */}
-          {errorKpis ? (
+          {isError ? (
             <div className="rounded-lg border border-destructive/25 bg-destructive/10 px-4 py-3">
-              <p className="text-sm text-destructive">
-                {mensajeErrorKpis}
-              </p>
+              <p className="text-sm text-destructive">{mensajeError}</p>
             </div>
           ) : null}
-
         </>
-      )}
-
+      ) : null}
     </div>
   );
 };

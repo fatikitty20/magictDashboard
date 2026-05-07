@@ -16,8 +16,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth";
-import { useDashboard } from "../../features/dashboard/hooks/useDashboard";
-import type { DashboardMenuItem } from "../../features/dashboard/config/dashboardConfig";
+import type { DashboardMenuItem } from "@/features/dashboard/config/dashboardConfig";
+import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
 import { claseBotonPrimario, claseTarjetaInvertida } from "@/shared/ui/estilosDashboard";
 
 type MenuItem = DashboardMenuItem & {
@@ -28,6 +28,7 @@ type GeneralItem = {
   icon: LucideIcon;
   key: string;
   label: string;
+  visibleInSidebar?: boolean;
 };
 
 type BarraLateralProps = {
@@ -48,6 +49,8 @@ const iconByKey: Record<string, LucideIcon> = {
   transactions: CreditCard,
 };
 
+const isVisibleInSidebar = (item: { visibleInSidebar?: boolean }) => item.visibleInSidebar !== false;
+
 export const BarraLateral = ({
   mode,
   isOpen = false,
@@ -62,12 +65,12 @@ export const BarraLateral = ({
   const { t } = useTranslation();
   const dashboardConfig = useDashboard();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const canOpenTransactions = dashboardConfig.role === "admin";
 
-  const elementosMenu: MenuItem[] = menuItems ?? dashboardConfig.menuItems;
-
-  const elementosGenerales: GeneralItem[] = generalItems ?? [
+  const elementosMenu: MenuItem[] = (menuItems ?? dashboardConfig.menuItems).filter(isVisibleInSidebar);
+  const elementosGenerales: GeneralItem[] = (generalItems ?? [
     { key: "help", icon: HelpCircle, label: t("sidebar.general.helpCenter") },
-  ];
+  ]).filter(isVisibleInSidebar);
 
   useEffect(() => {
     if (mode !== "mobile" || !isOpen) {
@@ -99,15 +102,6 @@ export const BarraLateral = ({
     onNavigate?.();
   };
 
-  const toggleHelpCenter = () => {
-    setIsHelpOpen((current) => !current);
-  };
-
-  const abrirTransacciones = () => {
-    navigate("/transactions");
-    onNavigate?.();
-  };
-
   const contenidoSidebar = (
     <>
       <div className="mb-8 flex items-center justify-between gap-2">
@@ -117,7 +111,7 @@ export const BarraLateral = ({
           </div>
           <span className="text-lg font-semibold text-foreground">Magictronic PSP</span>
         </div>
-        {mode === "mobile" && (
+        {mode === "mobile" ? (
           <button
             type="button"
             onClick={onClose}
@@ -126,7 +120,7 @@ export const BarraLateral = ({
           >
             <X className="h-4 w-4" />
           </button>
-        )}
+        ) : null}
       </div>
 
       <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -134,31 +128,30 @@ export const BarraLateral = ({
       </p>
 
       <nav className="mb-6 space-y-1">
-        {elementosMenu.map((elemento) => (
-          <button
-            key={elemento.key}
-            type="button"
-            onClick={() => manejarNavegacion(elemento.path)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-              elemento.path && location.pathname.startsWith(elemento.path)
-                ? "border-l-2 border-primary bg-secondary font-medium text-primary"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <span className="flex h-4 w-4 items-center justify-center">
-              {(() => {
-                const Icon = elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard;
-                return <Icon className="h-4 w-4" />;
-              })()}
-            </span>
-            <span className="flex-1 text-left">{t(elemento.label)}</span>
-            {elemento.badge && (
-              <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] text-info">
-                {elemento.badge}
-              </span>
-            )}
-          </button>
-        ))}
+        {elementosMenu.map((elemento) => {
+          const Icon = elemento.icon ?? iconByKey[elemento.key] ?? LayoutDashboard;
+
+          return (
+            <button
+              key={elemento.key}
+              type="button"
+              onClick={() => manejarNavegacion(elemento.path)}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
+                elemento.path && location.pathname.startsWith(elemento.path)
+                  ? "border-l-2 border-primary bg-secondary font-medium text-primary"
+                  : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="flex-1 text-left">{t(elemento.label)}</span>
+              {elemento.badge ? (
+                <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] text-info">
+                  {elemento.badge}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
       </nav>
 
       <p className="mb-3 px-2 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -170,7 +163,7 @@ export const BarraLateral = ({
           <button
             key={elemento.key}
             type="button"
-            onClick={elemento.key === "help" ? toggleHelpCenter : undefined}
+            onClick={elemento.key === "help" ? () => setIsHelpOpen((current) => !current) : undefined}
             aria-expanded={elemento.key === "help" ? isHelpOpen : undefined}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted"
           >
@@ -179,16 +172,12 @@ export const BarraLateral = ({
           </button>
         ))}
 
-        {isHelpOpen && (
+        {isHelpOpen ? (
           <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {t("sidebar.helpCenter.title")}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {t("sidebar.helpCenter.description")}
-                </p>
+                <p className="text-sm font-semibold text-foreground">{t("sidebar.helpCenter.title")}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("sidebar.helpCenter.description")}</p>
               </div>
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-foreground">
                 <BookOpen className="h-4 w-4" />
@@ -219,26 +208,10 @@ export const BarraLateral = ({
                   <span>{t("sidebar.helpCenter.actions.docs")}</span>
                 </a>
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-muted/70 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {t("sidebar.helpCenter.meta.hoursLabel")}
-                  </p>
-                  <p className="mt-1 text-foreground">{t("sidebar.helpCenter.meta.hours")}</p>
-                </div>
-                <div className="rounded-lg bg-muted/70 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {t("sidebar.helpCenter.meta.responseLabel")}
-                  </p>
-                  <p className="mt-1 text-foreground">{t("sidebar.helpCenter.meta.responseTime")}</p>
-                </div>
-              </div>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* BOTÓN LOGOUT */}
         <button
           type="button"
           onClick={manejarCierreSesion}
@@ -261,8 +234,9 @@ export const BarraLateral = ({
         </p>
         <button
           type="button"
-          onClick={abrirTransacciones}
-          className={claseBotonPrimario("h-8 w-full rounded-md text-xs hover:brightness-95")}
+          disabled={!canOpenTransactions}
+          onClick={() => manejarNavegacion("/transactions")}
+          className={claseBotonPrimario("h-8 w-full rounded-md text-xs hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60")}
         >
           {t("sidebar.transactionsCard.action")}
         </button>

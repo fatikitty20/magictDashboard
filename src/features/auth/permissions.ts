@@ -11,6 +11,7 @@ export type Permiso =
   | "ver_orders"
   | "ver_reports"
   | "ver_clients"
+  | "ver_transactions"
   | "gestionar_usuarios"
   | "exportar_datos";
 
@@ -21,6 +22,7 @@ export const PERMISOS_POR_ROL: Record<RolUsuario, Permiso[]> = {
     "ver_orders",
     "ver_reports",
     "ver_clients",
+    "ver_transactions",
     "gestionar_usuarios",
     "exportar_datos",
   ],

@@ -1,25 +1,10 @@
-import { useEffect, useState } from "react";
-import { transactionsService } from "../services/transactionsService";
-import type { Transaction } from "../types/transaction";
+import { EndpointPendingView } from "@/shared/components/EndpointPendingView";
 
-const Transactions = () => {
-  const [data, setData] = useState<Transaction[]>([]);
-
-  useEffect(() => {
-    transactionsService.getTransactions().then(setData);
-  }, []);
-
-  return (
-    <div>
-      <h1 className="text-2xl font-bold">Transactions</h1>
-
-      {data.map((tx) => (
-        <div key={tx.id}>
-          {tx.id} - {tx.merchant} - {tx.amount}
-        </div>
-      ))}
-    </div>
-  );
-};
+const Transactions = () => (
+  <EndpointPendingView
+    title="Transacciones"
+    description="Esta seccion queda reservada para endpoints reales de transacciones. No se muestran montos, comercios ni estados de prueba."
+  />
+);
 
 export default Transactions;

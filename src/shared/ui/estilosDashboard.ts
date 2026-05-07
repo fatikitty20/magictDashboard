@@ -1,5 +1,8 @@
 import { cn } from "../../lib/utils";
-import type { TonoBarraAnalitica, TonoSemantico, VarianteMetrica } from "../../features/dashboard/data";
+
+export type VarianteMetrica = "suave" | "invertida";
+export type TonoSemantico = "info" | "success" | "destructive" | "muted";
+export type TonoBarraAnalitica = "rayado" | "success" | "invertida" | "suave";
 
 const clasesTarjeta = {
   base: "rounded-lg border border-border bg-card",

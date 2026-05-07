@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import type { TonoSemantico } from "@/features/dashboard/data";
-import { claseTonoSuave } from "@/shared/ui/estilosDashboard";
+import { claseTonoSuave, type TonoSemantico } from "@/shared/ui/estilosDashboard";
 import { cn } from "@/lib/utils";
 
 type StatusPillTone = TonoSemantico | "warning";

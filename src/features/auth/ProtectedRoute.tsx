@@ -36,7 +36,7 @@ export const RutaProtegida = ({
   }
 
   //  3. Sin permisos
-  if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && (!user?.role || !allowedRoles.includes(user.role))) {
     return <Navigate to="/dashboard" replace />;
   }
 

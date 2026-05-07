@@ -73,6 +73,27 @@ describe("servicioAutenticacion", () => {
     ).rejects.toThrow("No tienes permiso");
   });
 
+  it("rechaza login si backend no entrega rol en token ni respuesta", async () => {
+    const token = crearJwt({
+      sub: "dashboard.user@example.com",
+      iat: 1,
+      exp: 9_999_999_999,
+    });
+
+    mockApiClient.mockResolvedValueOnce({
+      accessToken: token,
+      tokenType: "Bearer",
+      expiresIn: 3600,
+    });
+
+    await expect(
+      servicioAutenticacion.iniciarSesion({
+        email: "dashboard.user@example.com",
+        password: PASSWORD_DE_PRUEBA,
+      }),
+    ).rejects.toThrow("rol valido");
+  });
+
   it("limpia la sesion si el token expiro y no hay refresh token", async () => {
     const token = crearJwt({
       sub: "dashboard.user@example.com",

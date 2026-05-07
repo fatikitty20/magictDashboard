@@ -1,13 +1,18 @@
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Metrica } from "../data";
-import { claseTarjeta } from "@/shared/ui/estilosDashboard";
+import { claseTarjeta, type VarianteMetrica } from "@/shared/ui/estilosDashboard";
 
-export const TarjetaMetrica = ({ etiquetaKey, etiqueta: etiquetaTexto, valor, ayudaKey, ayuda: ayudaTexto, variante }: Metrica) => {
+export type Metrica = {
+  id: string;
+  etiqueta: string;
+  valor: string;
+  ayuda: string;
+  variante?: VarianteMetrica;
+};
+
+export const TarjetaMetrica = ({ etiqueta, valor, ayuda, variante }: Metrica) => {
   const { t } = useTranslation();
   const esInvertida = variante === "invertida";
-  const etiqueta = etiquetaTexto ?? (etiquetaKey ? t(etiquetaKey) : "");
-  const ayuda = ayudaTexto ?? (ayudaKey ? t(ayudaKey) : "");
 
   return (
     <div className={claseTarjeta(variante, "relative p-5 h-full")}>

@@ -1,9 +1,2 @@
-/**
- * Exports públicos del feature de Reports
- * Esta es la interfaz para consumidores externos
- */
-
+export { default as Reports } from "./views/Reports";
 export * from "./types/report";
-export { reportsService } from "./services/reportsService";
-export { ReportsChart } from "./components/ReportsChart";
-export { ReportsStats } from "./components/ReportsStats";

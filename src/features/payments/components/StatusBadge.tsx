@@ -1,7 +1,7 @@
 import { StatusPill } from "@/components/ui/StatusPill";
 import type { PaymentStatus } from "../types/payment";
 import { useTranslation } from "react-i18next";
-import type { TonoSemantico } from "@/features/dashboard/data";
+import type { TonoSemantico } from "@/shared/ui/estilosDashboard";
 
 type StatusBadgeProps = {
   status: PaymentStatus;

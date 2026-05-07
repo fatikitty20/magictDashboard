@@ -3,13 +3,6 @@ import { API_ENDPOINTS } from "@/shared/api/apiConfig";
 import { tokenManager } from "@/shared/api/tokenManager";
 import type { RolUsuario } from "./roles";
 
-/*
-|--------------------------------------------------------------------------
-| Interfaces de autenticación
-|--------------------------------------------------------------------------
-| Definen la estructura de datos utilizada en login y sesión.
-*/
-
 export interface CredencialesAutenticacion {
   email: string;
   password: string;
@@ -18,13 +11,31 @@ export interface CredencialesAutenticacion {
 export interface UsuarioAutenticado {
   correo: string;
   role: RolUsuario;
+  permisos?: string[];
 }
+
+type BackendUser = {
+  email?: string;
+  correo?: string;
+  role?: string;
+  roles?: string[];
+  permissions?: string[];
+  permisos?: string[];
+};
 
 export interface RespuestaLoginApi {
   accessToken: string;
   refreshToken?: string;
   tokenType?: "Bearer" | string;
   expiresIn?: number;
+  role?: string;
+  roles?: string[];
+  authorities?: string[];
+  scope?: string;
+  permissions?: string[];
+  permisos?: string[];
+  user?: BackendUser;
+  usuario?: BackendUser;
 }
 
 export interface SesionAutenticacion {
@@ -36,181 +47,142 @@ export interface SesionAutenticacion {
   usuario: UsuarioAutenticado;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Contrato del adaptador de autenticación
-|--------------------------------------------------------------------------
-| Define las operaciones principales del sistema auth.
-*/
-
-interface AdaptadorAutenticacion {
-  iniciarSesion(
-    credenciales: CredencialesAutenticacion,
-    t: TranslationFunction
-  ): Promise<SesionAutenticacion>;
-
-  refrescarToken(): Promise<SesionAutenticacion>;
-
-  cerrarSesion(): Promise<void>;
-
-  obtenerSesion(): Promise<SesionAutenticacion | null>;
-}
-
-/*
-|--------------------------------------------------------------------------
-| Payload esperado del JWT
-|--------------------------------------------------------------------------
-| Información obtenida desde el token.
-*/
-
 type JwtPayload = {
   sub?: string;
   roles?: string[];
   authorities?: string[];
   scope?: string;
   role?: string;
+  permissions?: string[];
+  permisos?: string[];
   iat?: number;
   exp?: number;
 };
-
-/*
-|--------------------------------------------------------------------------
-| Estructura de errores del backend
-|--------------------------------------------------------------------------
-*/
 
 type ErrorApi = {
   message: string;
   status: number;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Normalización Base64 URL
-|--------------------------------------------------------------------------
-| Convierte el formato Base64URL del JWT a Base64 estándar
-| para poder decodificarlo correctamente.
-*/
+type LoginErrorKey =
+  | "login.errors.backendOffline"
+  | "login.errors.invalidData"
+  | "login.errors.unauthorized"
+  | "login.errors.forbidden"
+  | "login.errors.tooManyAttempts"
+  | "login.errors.serverError"
+  | "login.errors.connectionFailed"
+  | "login.errors.generic"
+  | "login.errors.missingToken";
+
+type TranslationFunction = (key: LoginErrorKey) => string;
+
+const ROLES_ADMIN = new Set(["ADMIN", "ANALYTICS", "ROLE_ADMIN", "ROLE_ANALYTICS"]);
+const ROLES_CLIENTE = new Set(["CLIENT", "USER", "MERCHANT", "ROLE_CLIENT", "ROLE_USER", "ROLE_MERCHANT"]);
+
+const mensajesLogin: Record<LoginErrorKey, string> = {
+  "login.errors.backendOffline": "El backend de autenticacion esta offline. Revisa que el tunel de ngrok este activo.",
+  "login.errors.invalidData": "Datos invalidos. Verifica email y contrasena.",
+  "login.errors.unauthorized": "Email o contrasena invalidos.",
+  "login.errors.forbidden": "No tienes permiso para iniciar sesion con estas credenciales.",
+  "login.errors.tooManyAttempts": "Demasiados intentos. Intenta en unos minutos.",
+  "login.errors.serverError": "Error del servidor. Intenta mas tarde.",
+  "login.errors.connectionFailed": "No pudimos conectar con el backend de autenticacion. Revisa que el tunel de ngrok este activo.",
+  "login.errors.generic": "Error al iniciar sesion. Intenta de nuevo.",
+  "login.errors.missingToken": "El backend no devolvio accessToken.",
+};
+
+const tFallback: TranslationFunction = (key) => mensajesLogin[key];
 
 const normalizarBase64Url = (value: string): string => {
   const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
-
   const padding = base64.length % 4;
-
-  return padding
-    ? `${base64}${"=".repeat(4 - padding)}`
-    : base64;
+  return padding ? `${base64}${"=".repeat(4 - padding)}` : base64;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Decodificación del JWT
-|--------------------------------------------------------------------------
-| Obtiene el payload del token JWT.
-*/
-
-const decodificarJwtPayload = (
-  token: string
-): JwtPayload => {
-
+const decodificarJwtPayload = (token: string): JwtPayload => {
   const partes = token.split(".");
 
-  // Valida estructura correcta del JWT
   if (partes.length !== 3) {
     throw new Error("Token invalido");
   }
 
-  return JSON.parse(
-    atob(normalizarBase64Url(partes[1]))
-  ) as JwtPayload;
+  return JSON.parse(atob(normalizarBase64Url(partes[1]))) as JwtPayload;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Extracción de roles y permisos
-|--------------------------------------------------------------------------
-| Obtiene roles desde diferentes propiedades del JWT.
-*/
+const normalizarRol = (role: string): string => role.trim().toUpperCase();
+const dividirScope = (scope?: string): string[] => scope?.split(" ").filter(Boolean) ?? [];
 
-const extraerRolesDelPayload = (
-  payload: JwtPayload
-): string[] => [
+const rolesDesdeJwt = (payload: JwtPayload): string[] => [
   ...(payload.roles ?? []),
   ...(payload.authorities ?? []),
-  ...(payload.scope?.split(" ") ?? []),
+  ...dividirScope(payload.scope),
   ...(payload.role ? [payload.role] : []),
 ];
 
-/*
-|--------------------------------------------------------------------------
-| Determinar rol del usuario
-|--------------------------------------------------------------------------
-| Define si el usuario es admin o client.
-*/
+const rolesDesdeRespuesta = (respuesta?: RespuestaLoginApi): string[] => [
+  ...(respuesta?.roles ?? []),
+  ...(respuesta?.authorities ?? []),
+  ...dividirScope(respuesta?.scope),
+  ...(respuesta?.role ? [respuesta.role] : []),
+  ...(respuesta?.user?.roles ?? []),
+  ...(respuesta?.usuario?.roles ?? []),
+  ...(respuesta?.user?.role ? [respuesta.user.role] : []),
+  ...(respuesta?.usuario?.role ? [respuesta.usuario.role] : []),
+];
 
-const extraerRolDelPayload = (
-  payload: JwtPayload
-): RolUsuario => {
+const permisosDesde = (payload: JwtPayload, respuesta?: RespuestaLoginApi): string[] => [
+  ...(payload.permissions ?? []),
+  ...(payload.permisos ?? []),
+  ...(respuesta?.permissions ?? []),
+  ...(respuesta?.permisos ?? []),
+  ...(respuesta?.user?.permissions ?? []),
+  ...(respuesta?.user?.permisos ?? []),
+  ...(respuesta?.usuario?.permissions ?? []),
+  ...(respuesta?.usuario?.permisos ?? []),
+];
 
-  const roles = extraerRolesDelPayload(payload);
+const resolverRol = (roles: string[]): RolUsuario => {
+  const rolesNormalizados = roles.map(normalizarRol);
 
-  // Validación de permisos administrativos
-  if (
-    roles.includes("ROLE_ADMIN") ||
-    roles.includes("ROLE_ANALYTICS")
-  ) {
+  if (rolesNormalizados.some((role) => ROLES_ADMIN.has(role))) {
     return "admin";
   }
 
-  return "client";
+  if (rolesNormalizados.some((role) => ROLES_CLIENTE.has(role))) {
+    return "client";
+  }
+
+  throw new Error("El backend no devolvio un rol valido en el token o la respuesta de login.");
 };
 
-/*
-|--------------------------------------------------------------------------
-| Construcción de sesión desde JWT
-|--------------------------------------------------------------------------
-| Genera la sesión usando la información del token.
-*/
+const resolverCorreo = (payload: JwtPayload, respuesta?: RespuestaLoginApi): string =>
+  respuesta?.user?.email ??
+  respuesta?.user?.correo ??
+  respuesta?.usuario?.email ??
+  respuesta?.usuario?.correo ??
+  payload.sub ??
+  "";
 
-const construirSesionDesdeToken = (
-  token: string
-): SesionAutenticacion => {
-
+const construirSesionDesdeToken = (token: string, respuesta?: RespuestaLoginApi): SesionAutenticacion => {
   const payload = decodificarJwtPayload(token);
-
-  const correo = payload.sub ?? "";
+  const correo = resolverCorreo(payload, respuesta);
 
   return {
     correo,
-
-    // Fecha de emisión del token
     emitidaEn: (payload.iat ?? 0) * 1000,
-
-    // Fecha de expiración del token
     expiraEn: (payload.exp ?? 0) * 1000,
-
     token,
-
     proveedor: "api",
-
     usuario: {
       correo,
-
-      // Rol obtenido desde JWT
-      role: extraerRolDelPayload(payload),
+      role: resolverRol([...rolesDesdeJwt(payload), ...rolesDesdeRespuesta(respuesta)]),
+      permisos: permisosDesde(payload, respuesta),
     },
   };
 };
 
-/*
-|--------------------------------------------------------------------------
-| Validación de errores del backend
-|--------------------------------------------------------------------------
-*/
-
-const esErrorApi = (
-  error: unknown
-): error is ErrorApi =>
+const esErrorApi = (error: unknown): error is ErrorApi =>
   typeof error === "object" &&
   error !== null &&
   "message" in error &&
@@ -218,363 +190,122 @@ const esErrorApi = (
   typeof error.message === "string" &&
   typeof error.status === "number";
 
-/*
-|--------------------------------------------------------------------------
-| Manejo seguro de errores de login
-|--------------------------------------------------------------------------
-| Se implementa control de errores HTTP alineado
-| con buenas prácticas de seguridad.
-| Ahora acepta la función de traducción (t) para mensajes i18n.
-*/
-
-type TranslationFunction = (key: string, defaultValue?: string) => string;
-
-const manejarErrorLogin = (
-  error: unknown,
-  t: TranslationFunction
-): never => {
-
+const manejarErrorLogin = (error: unknown, t: TranslationFunction = tFallback): never => {
   if (esErrorApi(error)) {
+    const mensaje = error.message.toLowerCase();
 
-    // Detecta si el backend o túnel ngrok están offline
-    const backendOffline =
-      error.message.includes("ERR_NGROK_3200") ||
-      error.message.toLowerCase().includes("offline") ||
-      error.message.toLowerCase().includes("failed to fetch");
-
-    if (backendOffline) {
+    if (mensaje.includes("err_ngrok_3200") || mensaje.includes("offline") || mensaje.includes("failed to fetch")) {
       throw new Error(t("login.errors.backendOffline"));
     }
 
-    // Credenciales inválidas
     if (error.status === 400) {
       throw new Error(t("login.errors.invalidData"));
     }
 
-    // Usuario no autenticado
     if (error.status === 401) {
       throw new Error(t("login.errors.unauthorized"));
     }
 
-    // Usuario sin permisos
     if (error.status === 403) {
       throw new Error(t("login.errors.forbidden"));
     }
 
-    // Demasiados intentos
     if (error.status === 429) {
       throw new Error(t("login.errors.tooManyAttempts"));
     }
 
-    // Error interno del servidor
     if (error.status >= 500) {
       throw new Error(t("login.errors.serverError"));
     }
   }
 
-  // Error de conexión con backend
   if (error instanceof Error) {
-
-    if (
-      error.message
-        .toLowerCase()
-        .includes("failed to fetch")
-    ) {
-      throw new Error(t("login.errors.connectionFailed"));
-    }
-
-    throw new Error(error.message);
+    throw new Error(error.message.toLowerCase().includes("failed to fetch") ? t("login.errors.connectionFailed") : error.message);
   }
 
   throw new Error(t("login.errors.generic"));
 };
 
-/*
-|--------------------------------------------------------------------------
-| Validación de respuesta del login
-|--------------------------------------------------------------------------
-| Verifica que el backend haya devuelto accessToken.
-*/
-
-const validarRespuestaLogin = (
-  respuesta: RespuestaLoginApi,
-  t: TranslationFunction
-): void => {
-
+const validarRespuestaLogin = (respuesta: RespuestaLoginApi, t: TranslationFunction = tFallback): void => {
   if (!respuesta.accessToken) {
     throw new Error(t("login.errors.missingToken"));
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| Adaptador principal de autenticación
-|--------------------------------------------------------------------------
-| Contiene toda la lógica de login, refresh,
-| persistencia de sesión y logout.
-*/
-
-const adaptadorAutenticacionApi: AdaptadorAutenticacion = {
-
-  /*
-  |--------------------------------------------------------------------------
-  | Iniciar sesión
-  |--------------------------------------------------------------------------
-  | Envía credenciales al backend y guarda tokens.
-  */
-
-  async iniciarSesion(credenciales, t) {
-
+export const servicioAutenticacion = {
+  async iniciarSesion(
+    credenciales: CredencialesAutenticacion,
+    t: TranslationFunction = tFallback,
+  ): Promise<SesionAutenticacion> {
     try {
+      const respuesta = await apiClient<RespuestaLoginApi>(API_ENDPOINTS.auth.login, {
+        method: "POST",
+        body: JSON.stringify({
+          email: credenciales.email.trim(),
+          password: credenciales.password,
+        }),
+        skipAuthHeader: true,
+      });
 
-      const respuesta =
-        await apiClient<RespuestaLoginApi>(
-          API_ENDPOINTS.auth.login,
-          {
-            method: "POST",
-
-            body: JSON.stringify({
-              email: credenciales.email.trim(),
-              password: credenciales.password,
-            }),
-
-            // Login no requiere token previo
-            skipAuthHeader: true,
-          }
-        );
-
-      // Valida respuesta del backend
       validarRespuestaLogin(respuesta, t);
-
-      /*
-      |--------------------------------------------------------------------------
-      | Persistencia de sesión
-      |--------------------------------------------------------------------------
-      | Guarda accessToken y refreshToken para mantener
-      | autenticado al usuario.
-      */
-
-      tokenManager.setTokens(
-        respuesta.accessToken,
-        respuesta.refreshToken,
-        respuesta.expiresIn
-      );
-
-      // Construye la sesión desde el JWT
-      return construirSesionDesdeToken(
-        respuesta.accessToken
-      );
-
+      tokenManager.setTokens(respuesta.accessToken, respuesta.refreshToken, respuesta.expiresIn);
+      return construirSesionDesdeToken(respuesta.accessToken, respuesta);
     } catch (error) {
-
-      // Manejo seguro de errores
       return manejarErrorLogin(error, t);
     }
   },
 
-  /*
-  |--------------------------------------------------------------------------
-  | Refrescar token
-  |--------------------------------------------------------------------------
-  | Renueva automáticamente la sesión usando refreshToken.
-  */
+  async refrescarToken(): Promise<SesionAutenticacion> {
+    const refreshToken = tokenManager.getRefreshToken();
 
-  async refrescarToken() {
-
-    // Obtiene refreshToken almacenado
-    const refreshToken =
-      tokenManager.getRefreshToken();
-
-    // Si no existe refreshToken, no puede renovarse
     if (!refreshToken) {
-      throw new Error(
-        "No refresh token available"
-      );
+      throw new Error("No refresh token available");
     }
 
     try {
+      const respuesta = await apiClient<RespuestaLoginApi>(API_ENDPOINTS.auth.refresh, {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+        skipAuthHeader: true,
+      });
 
-      // Solicita nuevo accessToken al backend
-      const respuesta =
-        await apiClient<RespuestaLoginApi>(
-          API_ENDPOINTS.auth.refresh,
-          {
-            method: "POST",
-
-            body: JSON.stringify({
-              refreshToken,
-            }),
-
-            skipAuthHeader: true,
-          }
-        );
-
-      // Valida respuesta
       validarRespuestaLogin(respuesta);
-
-      /*
-      |--------------------------------------------------------------------------
-      | Actualización de tokens
-      |--------------------------------------------------------------------------
-      | Reemplaza tokens expirados por nuevos tokens válidos.
-      */
-
-      tokenManager.setTokens(
-        respuesta.accessToken,
-        respuesta.refreshToken ?? refreshToken,
-        respuesta.expiresIn
-      );
-
-      // Devuelve nueva sesión actualizada
-      return construirSesionDesdeToken(
-        respuesta.accessToken
-      );
-
+      tokenManager.setTokens(respuesta.accessToken, respuesta.refreshToken ?? refreshToken, respuesta.expiresIn);
+      return construirSesionDesdeToken(respuesta.accessToken, respuesta);
     } catch (error) {
-
-      /*
-      |--------------------------------------------------------------------------
-      | Seguridad
-      |--------------------------------------------------------------------------
-      | Si el refresh falla, elimina tokens para evitar
-      | sesiones inválidas o comprometidas.
-      */
-
       tokenManager.clearTokens();
-
       throw error;
     }
   },
 
-  /*
-  |--------------------------------------------------------------------------
-  | Logout
-  |--------------------------------------------------------------------------
-  | Cierra sesión y elimina tokens almacenados.
-  */
-
-  async cerrarSesion() {
-
+  async cerrarSesion(): Promise<void> {
     try {
-
-      await apiClient(
-        API_ENDPOINTS.auth.logout,
-        {
-          method: "POST",
-        }
-      );
-
+      await apiClient(API_ENDPOINTS.auth.logout, { method: "POST" });
     } catch {
-
-      // El logout local debe completarse
-      // aunque el backend falle.
+      // El cierre local debe completarse aunque backend no responda.
     } finally {
-
-      /*
-      |--------------------------------------------------------------------------
-      | Limpieza segura de sesión
-      |--------------------------------------------------------------------------
-      */
-
       tokenManager.clearTokens();
     }
   },
 
-  /*
-  |--------------------------------------------------------------------------
-  | Obtener sesión actual
-  |--------------------------------------------------------------------------
-  | Verifica si el usuario sigue autenticado.
-  */
-
-  async obtenerSesion() {
-
-    // Obtiene token almacenado
+  async obtenerSesion(): Promise<SesionAutenticacion | null> {
     const token = tokenManager.getToken();
 
-    // Si no existe token, no hay sesión
     if (!token) {
       return null;
     }
 
     try {
-
-      /*
-      |--------------------------------------------------------------------------
-      | Validación de expiración
-      |--------------------------------------------------------------------------
-      | Si el token expiró, intenta renovarlo automáticamente.
-      */
-
-      if (tokenManager.isTokenExpired()) {
-
-        return await this.refrescarToken();
-      }
-
-      // Si el token sigue válido, reconstruye sesión
-      return construirSesionDesdeToken(token);
-
+      return tokenManager.isTokenExpired()
+        ? await this.refrescarToken()
+        : construirSesionDesdeToken(token);
     } catch {
-
-      /*
-      |--------------------------------------------------------------------------
-      | Seguridad de sesión
-      |--------------------------------------------------------------------------
-      | Si ocurre un error, elimina tokens inválidos.
-      */
-
       tokenManager.clearTokens();
-
       return null;
     }
   },
-};
 
-/*
-|--------------------------------------------------------------------------
-| Servicio público de autenticación
-|--------------------------------------------------------------------------
-| Expone métodos reutilizables para toda la app.
-*/
-
-export const servicioAutenticacion = {
-
-  iniciarSesion(
-    credenciales: CredencialesAutenticacion,
-    t: TranslationFunction
-  ) {
-    return adaptadorAutenticacionApi
-      .iniciarSesion(credenciales, t);
-  },
-
-  refrescarToken() {
-    return adaptadorAutenticacionApi
-      .refrescarToken();
-  },
-
-  cerrarSesion() {
-    return adaptadorAutenticacionApi
-      .cerrarSesion();
-  },
-
-  obtenerSesion() {
-    return adaptadorAutenticacionApi
-      .obtenerSesion();
-  },
-
-  /*
-  |--------------------------------------------------------------------------
-  | Validar autenticación
-  |--------------------------------------------------------------------------
-  | Retorna true si existe sesión válida.
-  */
-
-  async estaAutenticado() {
-
-    const sesion =
-      await adaptadorAutenticacionApi
-        .obtenerSesion();
-
-    return sesion !== null;
+  async estaAutenticado(): Promise<boolean> {
+    return (await this.obtenerSesion()) !== null;
   },
 };

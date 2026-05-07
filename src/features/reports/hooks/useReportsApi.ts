@@ -1,11 +1,4 @@
 /**
- * Hook futuro para conectar Reportes con backend.
- *
- * Deberia parecerse a `usePayments()`:
- *
- * - recibe rango, canal o metrica;
- * - usa TanStack Query;
- * - entrega data, loading, error y refetch;
- * - mantiene la vista enfocada en pintar la pantalla.
+ * Hook reservado para conectar Reportes con TanStack Query cuando haya endpoint real.
  */
 export {};
